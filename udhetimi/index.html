@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Udhëtimi">
-<meta name="theme-color" content="#13233A">
+<meta name="theme-color" content="#0E1A2C">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Udhëtimi — plani yt i qytetit</title>
@@ -197,6 +197,55 @@
   .note a,.note button.link,.by a{color:#7C5F26}
   .toast{background:var(--ink)}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01s!important}}
+
+  /* ===== Night layer ===== */
+  :root{--night:#0E1A2C;--ivory:#EEE9DD;--fog:#9AA6B4;--glass:rgba(255,255,255,.045);--edge:rgba(201,169,98,.18);
+    --bg:var(--night);--card:var(--glass);--txt:var(--ivory);--mut:var(--fog);--line:rgba(238,233,221,.13);--acc:var(--brass2);--acc2:rgba(201,169,98,.12)}
+  html{background:var(--night)}
+  body{background:radial-gradient(1100px 700px at 85% -10%,rgba(201,169,98,.16),transparent 60%),radial-gradient(900px 600px at -10% 110%,rgba(31,95,102,.35),transparent 60%),linear-gradient(180deg,#13233A 0%,var(--night) 55%);background-attachment:fixed;min-height:100vh;color:var(--ivory)}
+  body::after{content:"";position:fixed;right:-34vmin;top:8vh;width:100vmin;height:100vmin;pointer-events:none;z-index:0;opacity:.32;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23C9A962' stroke-width='.22'%3E%3Ccircle cx='50' cy='50' r='49.5' stroke-width='.4'/%3E%3Cellipse cx='50' cy='50' rx='9' ry='49.5'/%3E%3Cellipse cx='50' cy='50' rx='20' ry='49.5'/%3E%3Cellipse cx='50' cy='50' rx='31' ry='49.5'/%3E%3Cellipse cx='50' cy='50' rx='41' ry='49.5'/%3E%3Cpath d='M50 .5v99M16.0 14H84.0M6.7 26H93.3M2.0 38H98.0M0.5 50H99.5M2.0 62H98.0M6.7 74H93.3M16.0 86H84.0'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat}
+  .wrap,.top{position:relative;z-index:1}
+  .top{background:rgba(14,26,44,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--edge)}
+  .hero{background:none;margin:0 0 8px;padding:34px 2px 26px;border-radius:0}
+  .hero .meridians{display:none}
+  .hero h1{color:var(--ivory)}
+  .hero .lead{color:var(--fog)}
+  h1,.rhead h2,.dayhead h3,.sbody .nm,.pcard .t b,.pfmain h2,#loadMsg,.stepper b{color:var(--ivory)}
+  .lead,.empty,.foot,.travel,.sbody .time,.dayhead .area{color:var(--fog)}
+  .card,.pcard{background:var(--glass);border:1px solid var(--edge);box-shadow:0 30px 60px -40px rgba(0,0,0,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  label{color:#D9D2C1}
+  input,select,textarea{background:rgba(255,255,255,.06);border-color:var(--line);color:var(--ivory);color-scheme:dark}
+  input:focus,textarea:focus{background:rgba(255,255,255,.09);border-color:var(--brass2)}
+  input::placeholder,textarea::placeholder,#city::placeholder{color:rgba(238,233,221,.38)}
+  .stepper button,.btn2,.gm,.tabsm button,.go.sec{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ivory);box-shadow:none}
+  .chip{background:transparent;border-color:rgba(238,233,221,.2);color:var(--ivory)}
+  .chip.on{background:var(--brass2);border-color:var(--brass2);color:var(--night);font-weight:600}
+  .seg{background:rgba(255,255,255,.06)}
+  .seg button{color:var(--fog)}
+  .seg button.on{background:rgba(238,233,221,.92);color:var(--night)}
+  .go{background:linear-gradient(180deg,#D6B977,#B8954A);color:var(--night);box-shadow:0 14px 30px -14px rgba(201,169,98,.7),inset 0 1px 0 rgba(255,255,255,.35)}
+  .go:hover{background:linear-gradient(180deg,#E0C487,#C09D52)}
+  .btn2.pri,.tabsm button.on{background:var(--brass2);border-color:var(--brass2);color:var(--night)}
+  .daytabs button{border-color:var(--line);color:var(--ivory)}
+  .daytabs button:not(.on){background:rgba(255,255,255,.05)!important}
+  .num{box-shadow:0 0 0 3px var(--night)}
+  .stop:not(:last-child)::before{border-left-color:rgba(238,233,221,.18)}
+  .sbody .tip{color:var(--brass2)}
+  .pcard .badge{background:rgba(201,169,98,.14);color:var(--brass2)}
+  .pill{background:rgba(255,255,255,.08);color:var(--fog)}
+  .note{background:rgba(201,169,98,.1);color:#E6D9B8;border:1px solid var(--edge)}
+  .note a,.note button.link,.by a{color:var(--brass2)}
+  .err{background:rgba(180,35,24,.16);color:#F4B7AE}
+  .spin{border-color:rgba(238,233,221,.12);border-top-color:var(--brass2)}
+  .langsw{background:rgba(255,255,255,.06)}
+  .switch{background:rgba(255,255,255,.05)}
+  #map{border:1px solid var(--edge)}
+  .modal{--txt:#1A2433;--mut:#5E6B78;--line:#E2E2DB;--acc:#1F5F66;color:#1A2433}
+  .modal input,.modal textarea{background:#FBFBF9;color:#1A2433;color-scheme:light}
+  .modal .btn2,.modal .go.sec,.modal .tabsm button{background:#fff;color:#13233A;border-color:#E2E2DB}
+  .modal .switch{background:#F3F3EE}
+  .modal h3{color:#13233A}
 </style>
 </head>
 <body>
@@ -957,7 +1006,7 @@ function renderActions() {
 function selectDay(i) {
   document.querySelectorAll("#dayTabs button").forEach(b => {
     const on = +b.dataset.i === i; b.classList.toggle("on", on);
-    b.style.background = on ? (i < 0 ? "#13233A" : COLORS[i % COLORS.length]) : "#fff";
+    b.style.background = on ? (i < 0 ? "#C9A962" : COLORS[i % COLORS.length]) : "";
     b.style.borderColor = on ? b.style.background : "";
   });
   layer.clearLayers();
