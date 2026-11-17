@@ -1,0 +1,26 @@
+{
+  "appId": "tips.vianto.app",
+  "appName": "Vianto",
+  "webDir": "www",
+  "backgroundColor": "#EBDCC2",
+  "android": {
+    "backgroundColor": "#EBDCC2"
+  },
+  "ios": {
+    "backgroundColor": "#EBDCC2",
+    "contentInset": "never"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#EBDCC2",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#EBDCC2",
+      "overlaysWebView": false
+    }
+  }
+}
