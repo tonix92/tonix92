@@ -324,6 +324,58 @@
   h1,.rhead h2,.dayhead h3,.sbody .nm,.pcard .t b,.modal h3,.pfmain h2,#loadMsg,.stepper b,.brand,.num,.pcard .badge{font-weight:400!important}
   h1{letter-spacing:-.6px}
   .hero h1{letter-spacing:-1px}
+  /* ---- v18: zile njoftimesh, qytete të shpejta, plane në faqen e parë, PDF ---- */
+  .bell{position:relative;flex:none;width:36px;height:34px;border-radius:999px;border:1px solid rgba(227,194,90,.7);background:transparent;color:var(--lemon);display:grid;place-items:center;cursor:pointer;padding:0}
+  .bell .bdg{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#C2412D;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center;display:none}
+  .bell .bdg.on{display:block}
+  .quick{display:flex;gap:6px;align-items:center;overflow-x:auto;margin:10px -2px 0;padding:0 2px 4px;scrollbar-width:none}
+  .quick::-webkit-scrollbar{display:none}
+  .quick .ql{flex:none;color:var(--mut);font-size:13px;margin-right:2px}
+  .quick button{flex:none;border:1px solid #E2D3BA;background:#FFFDF8;color:var(--sea);border-radius:999px;padding:6px 12px;font:inherit;font-size:13.5px;cursor:pointer}
+  .quick button:active{background:var(--sea);color:var(--plaster)}
+  .hfeed{margin:26px 0 8px}
+  .hfh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .hfh h2{margin:0;font-family:var(--serif);font-weight:500;color:var(--sea);font-size:22px}
+  .hfh .link{border:0;background:none;color:var(--terra);font:inherit;font-weight:700;font-size:14px;cursor:pointer;padding:0}
+  .hrow{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 16px;margin:0 -2px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .hrow::-webkit-scrollbar{display:none}
+  .hcard{flex:none;width:196px;scroll-snap-align:start;background:var(--plaster);border:1px solid #E6D6BA;border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit;box-shadow:0 14px 28px -22px rgba(110,80,30,.55)}
+  .hcard .hc{height:128px;background:var(--sea);display:grid;place-items:center;overflow:hidden}
+  .hcard .hc img{width:100%;height:100%;object-fit:cover;display:block}
+  .hcard .hc span{font-family:var(--serif);color:var(--plaster);font-size:24px;padding:0 12px;text-align:center;line-height:1.1}
+  .hcard .hb{padding:10px 12px 12px}
+  .hcard b{display:block;font-family:var(--serif);font-weight:500;color:var(--sea);font-size:16.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hcard small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  @keyframes flash{0%{box-shadow:0 0 0 3px rgba(227,194,90,.9)}100%{box-shadow:0 0 0 0 rgba(227,194,90,0)}}
+  #city.flash{animation:flash .9s ease-out}
+  .tbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .nitem{display:flex;gap:10px;align-items:flex-start;padding:11px 8px;border-bottom:1px solid #EEE3CF;cursor:pointer}
+  .nitem:last-child{border-bottom:0}
+  .nitem.unread{background:#FBF1DC;border-radius:12px;border-bottom-color:transparent}
+  .nitem .nt{flex:1;min-width:0;font-size:14.5px;line-height:1.35}
+  .nitem .nq{display:block;color:var(--mut);font-size:13.5px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nitem small{display:block;color:var(--mut);font-size:12px;margin-top:3px}
+  #printArea{display:none}
+  @media print{
+    @page{margin:14mm}
+    body>*:not(#printArea){display:none!important}
+    html,body{background:#fff!important}
+    body::before,body::after{display:none!important}
+    #printArea{display:block;color:#1c1c1c;font-family:Figtree,system-ui,sans-serif;font-size:11pt}
+    #printArea .pr-wm{height:24px;width:auto}
+    #printArea h1{font-family:"Young Serif",Georgia,serif;font-weight:400;color:#1F4E79;font-size:24pt;margin:14px 0 4px}
+    #printArea .pr-sum{color:#444;margin:0 0 10px}
+    #printArea .pr-day{margin-top:16px}
+    #printArea h2{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:15pt;margin:0 0 2px;break-after:avoid}
+    #printArea .pr-area{color:#666;font-size:10pt;margin-bottom:6px}
+    #printArea table{width:100%;border-collapse:collapse}
+    #printArea td{vertical-align:top;padding:6px 0;border-top:1px solid #e3e3e3}
+    #printArea tr{break-inside:avoid}
+    #printArea .pr-t{width:100px;padding-right:12px;color:#1F4E79;font-weight:700;white-space:nowrap}
+    #printArea .pr-tip{color:#7a5a1e;font-size:10pt}
+    #printArea .pr-tips{margin-top:16px;break-inside:avoid}
+    #printArea .pr-foot{margin-top:18px;color:#888;font-size:9pt;border-top:1px solid #e3e3e3;padding-top:8px}
+  }
 </style>
 </head>
 <body>
@@ -332,6 +384,7 @@
   <div class="topin">
     <div class="brand" onclick="go('create')" role="link" aria-label="Vianto"><svg class="wm" viewBox="-10 -98.0 362 120" aria-hidden="true"><g fill="#FBF5EA"><path d="M76.4 -75.0Q77.9 -75.0 77.9 -73.5V-70.5Q77.9 -69.0 76.4 -69.0Q73.60000000000001 -69.0 71.95 -66.25Q70.3 -63.5 68.9 -59.7L47.400000000000006 -1.2000000000000002Q47.0 0.0 45.7 0.0H33.6Q32.4 0.0 31.900000000000002 -1.2000000000000002L9.4 -59.7Q7.9 -63.6 6.3500000000000005 -66.3Q4.800000000000001 -69.0 2.0 -69.0Q0.5 -69.0 0.5 -70.5V-73.5Q0.5 -75.0 2.0 -75.0H32.7Q34.2 -75.0 34.2 -73.5V-70.5Q34.2 -69.0 32.7 -69.0Q29.6 -69.0 27.25 -67.05000000000001Q24.900000000000002 -65.10000000000001 24.900000000000002 -62.1Q24.900000000000002 -61.0 25.8 -58.7L42.800000000000004 -14.100000000000001L58.900000000000006 -59.7Q59.300000000000004 -60.900000000000006 59.300000000000004 -62.2Q59.300000000000004 -65.10000000000001 56.95 -67.05000000000001Q54.6 -69.0 51.5 -69.0Q50.0 -69.0 50.0 -70.5V-73.5Q50.0 -75.0 51.5 -75.0Z"/><path d="M110.10000000000001 -6.0Q111.60000000000001 -6.0 111.60000000000001 -4.5V-1.5Q111.60000000000001 0.0 109.9 0.0H81.60000000000001Q79.9 0.0 79.9 -1.5V-4.5Q79.9 -6.0 81.4 -6.0H81.60000000000001Q85.30000000000001 -6.0 87.05000000000001 -8.75Q88.80000000000001 -11.5 88.80000000000001 -15.5V-26.1Q88.80000000000001 -28.400000000000002 88.45000000000002 -30.700000000000003Q88.10000000000001 -33.0 86.9 -34.7Q85.7 -36.4 82.9 -36.7Q81.7 -36.800000000000004 81.7 -38.0V-41.400000000000006Q81.7 -42.0 82.1 -42.25Q82.5 -42.5 83.2 -42.7Q91.10000000000001 -45.300000000000004 95.35000000000001 -48.050000000000004Q99.60000000000001 -50.800000000000004 101.60000000000001 -52.900000000000006Q101.80000000000001 -53.1 102.0 -53.1H102.30000000000001Q102.5 -53.1 102.5 -52.900000000000006V-15.600000000000001Q102.5 -11.600000000000001 104.30000000000001 -8.8Q106.10000000000001 -6.0 109.80000000000001 -6.0Z"/><path d="M166.4 -18.5Q166.4 -14.9 167.5 -12.05Q168.60000000000002 -9.200000000000001 172.3 -8.700000000000001Q173.5 -8.6 173.5 -7.4V-4.1000000000000005Q173.5 -2.7 172.0 -2.7Q167.10000000000002 -2.7 163.85000000000002 -2.1500000000000004Q160.60000000000002 -1.6 158.25 -0.75Q155.9 0.1 153.60000000000002 1.1Q153.20000000000002 1.3 152.9 1.3H152.60000000000002Q152.4 1.3 152.4 0.9Q152.4 0.5 152.60000000000002 -1.05Q152.8 -2.6 153.05 -4.55Q153.3 -6.5 153.5 -7.9Q153.0 -6.6000000000000005 151.35000000000002 -4.4Q149.70000000000002 -2.2 146.55 -0.45000000000000007Q143.4 1.3 138.3 1.3Q134.9 1.3 131.05 -0.09999999999999998Q127.20000000000002 -1.5 123.80000000000001 -4.6Q120.4 -7.7 118.25 -12.75Q116.10000000000001 -17.8 116.10000000000001 -25.1Q116.10000000000001 -34.4 119.45000000000002 -40.150000000000006Q122.80000000000001 -45.900000000000006 128.15 -48.60000000000001Q133.5 -51.300000000000004 139.5 -51.300000000000004Q144.4 -51.300000000000004 148.5 -49.800000000000004Q152.60000000000002 -48.300000000000004 155.70000000000002 -45.5Q158.3 -46.6 160.15 -47.55Q162.0 -48.5 163.3 -49.5Q163.8 -49.900000000000006 164.35000000000002 -50.300000000000004Q164.9 -50.7 165.60000000000002 -51.1Q165.9 -51.300000000000004 166.10000000000002 -51.300000000000004H166.20000000000002Q166.4 -51.300000000000004 166.4 -51.1ZM152.4 -34.2Q152.10000000000002 -36.2 150.95000000000002 -38.650000000000006Q149.8 -41.1 147.5 -42.85Q145.20000000000002 -44.6 141.3 -44.6Q136.5 -44.6 133.8 -42.25Q131.10000000000002 -39.900000000000006 130.05 -36.2Q129.0 -32.5 129.0 -28.3Q129.0 -18.7 132.85000000000002 -13.1Q136.70000000000002 -7.5 142.8 -7.5Q146.4 -7.5 148.45 -9.05Q150.5 -10.600000000000001 151.4 -12.200000000000001Q152.3 -13.8 152.4 -14.100000000000001Z"/><path d="M232.9 -32.6V-15.5Q232.9 -10.0 234.65 -8.0Q236.4 -6.0 239.3 -6.0H240.10000000000002Q241.60000000000002 -6.0 241.60000000000002 -4.5V-1.5Q241.60000000000002 0.0 240.10000000000002 0.0H213.5Q212.0 0.0 212.0 -1.5V-4.5Q212.0 -6.0 213.5 -6.0H214.2Q216.3 -6.0 217.60000000000002 -8.0Q218.9 -10.0 218.9 -15.5V-32.6Q218.9 -37.4 217.4 -39.95Q215.9 -42.5 211.7 -42.5Q209.2 -42.5 206.7 -41.25Q204.2 -40.0 202.3 -38.05Q200.4 -36.1 199.5 -33.9V-15.5Q199.5 -11.5 201.25 -8.75Q203.0 -6.0 205.9 -6.0H206.1Q207.6 -6.0 207.6 -4.5V-1.5Q207.6 0.0 206.1 0.0H178.0Q176.5 0.0 176.5 -1.5V-4.5Q176.5 -6.0 178.0 -6.0H178.2Q181.9 -6.0 183.7 -8.75Q185.5 -11.5 185.5 -15.5V-28.1Q185.5 -30.8 185.15 -33.300000000000004Q184.8 -35.800000000000004 183.55 -37.550000000000004Q182.3 -39.300000000000004 179.5 -39.6Q178.4 -39.7 178.4 -40.900000000000006V-44.300000000000004Q178.4 -45.300000000000004 179.8 -45.6Q187.0 -46.7 192.15 -49.0Q197.3 -51.300000000000004 199.3 -52.7Q199.8 -53.1 200.1 -53.1H200.2Q200.4 -53.1 200.4 -52.900000000000006Q200.4 -52.7 200.3 -52.1L198.6 -39.800000000000004Q200.0 -42.1 202.3 -44.75Q204.6 -47.400000000000006 208.0 -49.35000000000001Q211.4 -51.300000000000004 215.9 -51.300000000000004Q221.3 -51.300000000000004 224.7 -49.7Q228.1 -48.1 229.85 -45.400000000000006Q231.6 -42.7 232.25 -39.400000000000006Q232.9 -36.1 232.9 -32.6Z"/><path d="M282.8 -7.2Q283.1 -6.800000000000001 283.1 -6.300000000000001Q283.1 -5.7 282.3 -5.2L279.3 -3.3000000000000003Q276.6 -1.6 272.8 -0.15000000000000002Q269.0 1.3 265.20000000000005 1.3Q262.20000000000005 1.3 259.55000000000007 -0.09999999999999998Q256.90000000000003 -1.5 255.3 -4.8500000000000005Q253.70000000000002 -8.200000000000001 253.70000000000002 -14.100000000000001V-32.6Q253.70000000000002 -35.300000000000004 253.40000000000003 -37.95Q253.10000000000002 -40.6 251.55 -42.3Q250.00000000000003 -44.0 246.40000000000003 -44.0Q244.90000000000003 -44.0 244.90000000000003 -45.5V-48.5Q244.90000000000003 -50.0 246.40000000000003 -50.0H253.70000000000002V-56.7Q253.70000000000002 -58.0 254.60000000000002 -58.5Q256.8 -59.7 260.4 -61.85Q264.0 -64.0 266.8 -66.8Q267.0 -67.0 267.3 -67.0H267.5Q267.70000000000005 -67.0 267.70000000000005 -66.7V-50.0H281.1Q282.6 -50.0 282.6 -48.5V-44.2Q282.6 -42.7 281.1 -42.7H267.70000000000005V-14.100000000000001Q267.70000000000005 -10.200000000000001 268.90000000000003 -8.75Q270.1 -7.300000000000001 271.90000000000003 -7.300000000000001Q273.6 -7.300000000000001 275.5 -8.25Q277.40000000000003 -9.200000000000001 279.0 -10.200000000000001Q279.70000000000005 -10.600000000000001 280.1 -10.600000000000001Q280.70000000000005 -10.600000000000001 281.20000000000005 -9.8Z"/><path d="M312.20000000000005 -51.300000000000004Q317.90000000000003 -51.300000000000004 322.75 -49.050000000000004Q327.6 -46.800000000000004 331.1 -42.95Q334.6 -39.1 336.55 -34.35Q338.5 -29.6 338.5 -24.5Q338.5 -17.1 335.0 -11.25Q331.5 -5.4 325.8 -2.0500000000000003Q320.1 1.3 313.40000000000003 1.3Q307.70000000000005 1.3 302.90000000000003 -0.9Q298.1 -3.1 294.55 -6.8500000000000005Q291.0 -10.600000000000001 289.05 -15.450000000000001Q287.1 -20.3 287.1 -25.6Q287.1 -32.9 290.5 -38.7Q293.90000000000003 -44.5 299.6 -47.900000000000006Q305.3 -51.300000000000004 312.20000000000005 -51.300000000000004ZM316.5 -6.800000000000001Q318.40000000000003 -6.800000000000001 320.70000000000005 -7.800000000000001Q323.0 -8.8 324.75 -11.3Q326.5 -13.8 326.5 -18.2Q326.5 -21.700000000000003 325.15 -25.950000000000003Q323.8 -30.200000000000003 321.45000000000005 -34.150000000000006Q319.1 -38.1 315.95000000000005 -40.650000000000006Q312.8 -43.2 309.1 -43.2Q305.0 -43.2 302.0 -40.150000000000006Q299.0 -37.1 299.0 -31.8Q299.0 -28.400000000000002 300.35 -24.1Q301.70000000000005 -19.8 304.05000000000007 -15.850000000000001Q306.40000000000003 -11.9 309.6 -9.350000000000001Q312.8 -6.800000000000001 316.5 -6.800000000000001Z"/></g><circle cx="95.8" cy="-65.2" r="7.8" fill="#E3C25A"/></svg><span id="brandName" class="sr">Vianto</span></div>
     <div class="langsw" id="langSw"><button data-l="sq">SQ</button><button data-l="en">EN</button><button data-l="de">DE</button></div>
+    <button class="bell" id="bellBtn" onclick="openNotifs()" style="display:none"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4zM10 20.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="bdg" id="bellN"></span></button>
     <button class="acct" id="acctBtn" onclick="acctClick()">Hyr</button>
   </div>
   <div class="nav">
@@ -353,6 +406,7 @@
   <div class="card">
     <label for="city" data-i18n="city"></label>
     <input id="city" data-i18n-ph="city_ph" autocomplete="off">
+    <div class="quick" id="quickCities"></div>
 
     <label data-i18n="days_q"></label>
     <div class="stepper"><button type="button" onclick="chDays(-1)">−</button><b id="daysV"></b><button type="button" onclick="chDays(1)">+</button></div>
@@ -394,6 +448,10 @@
     <b id="loadMsg"></b>
     <div style="color:var(--mut);font-size:14px;margin-top:6px" data-i18n="load_sub"></div>
   </div>
+  <div class="hfeed" id="homeFeed" style="display:none">
+    <div class="hfh"><h2 data-i18n="home_h"></h2><button class="link" onclick="go('explore')" data-i18n="home_more"></button></div>
+    <div class="hrow" id="homeRow"></div>
+  </div>
 </section>
 
 <!-- ============ PLANI ============ -->
@@ -405,6 +463,7 @@
   <div id="map"></div>
   <div class="card" id="dayCard"></div>
   <div class="card"><b data-i18n="tips"></b><ul class="tips" id="rTips"></ul><div id="rCost" style="color:var(--mut);font-size:14px"></div></div>
+  <div class="card ptools"><b data-i18n="take_h"></b><div class="tbtns"><button class="btn2" onclick="printPlan()" data-i18n="pdf"></button><button class="btn2" onclick="openCal()" data-i18n="cal"></button></div></div>
   <div class="card cmts" id="cmtCard" style="display:none"><h3 class="cmth" id="cmtH"></h3><div id="cmtList"></div>
     <div class="cmtform" id="cmtForm"><input id="cmtIn" maxlength="500" data-i18n-ph="cm_ph" onkeydown="if(event.key==='Enter')addComment()"><button class="btn2 pri" onclick="addComment()" data-i18n="cm_send"></button></div></div>
   <div class="foot" data-i18n="foot"></div>
@@ -503,6 +562,26 @@
   </div>
 </div>
 
+<div class="modal-bg" id="notifBg" onclick="if(event.target===this)closeModal('notifBg')">
+  <div class="modal">
+    <button class="x" onclick="closeModal('notifBg')">×</button>
+    <h3 data-i18n="notif_h"></h3>
+    <div id="notifList"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="calBg" onclick="if(event.target===this)closeModal('calBg')">
+  <div class="modal">
+    <button class="x" onclick="closeModal('calBg')">×</button>
+    <h3 data-i18n="cal_h"></h3>
+    <div style="color:var(--mut);font-size:14px" data-i18n="cal_sub"></div>
+    <label for="calDate" data-i18n="cal_date"></label>
+    <input id="calDate" type="date">
+    <button class="go" onclick="downloadIcs()" data-i18n="cal_btn"></button>
+  </div>
+</div>
+
+<div id="printArea"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -517,6 +596,12 @@ const APP_URL = "https://tonix92.github.io/tonix92/udhetimi/";
 // Përkthimet: shqip (sq), anglisht (en), gjermanisht (de)
 const I18N = {
   sq: {
+    quick: "Ose zgjidh:", home_h: "Plane nga udhëtarët", home_more: "Shiko të gjitha", home_by: a => `nga ${a}`,
+    take_h: "Merre planin me vete", pdf: "📄 PDF / Printo", cal: "📅 Shto në kalendar",
+    cal_h: "Shto në kalendar", cal_sub: "Kur fillon udhëtimi? Çdo ndalesë shtohet si takim me orën e vet.", cal_date: "Data e ditës së parë",
+    cal_btn: "Shkarko skedarin e kalendarit", cal_done: "U shkarkua. Hape skedarin për ta shtuar në kalendar.", made_with: "Krijuar me Vianto",
+    notif_h: "Njoftimet", notif_empty: "Ende asnjë njoftim. Kur dikush pëlqen ose komenton planin tënd, ose fillon të të ndjekë, do ta shohësh këtu.",
+    n_like: (a, c) => `${a} pëlqeu planin tënd${c ? " për " + c : ""}`, n_comment: (a, c) => `${a} komentoi planin tënd${c ? " për " + c : ""}`, n_follow: a => `${a} filloi të të ndjekë`,
     nav_create: "✨ Krijo", nav_mine: "📁 Planet e mia", nav_explore: "🌍 Zbulo", login: "Hyr",
     h_where: "Ku po shkon?", lead: "Më thuaj qytetin dhe çka të pëlqen, unë ta bëj planin ditë për ditë.",
     city: "Cili qytet?", city_ph: "p.sh. Roma, Paris, Barcelona, Vjena, Tirana…",
@@ -574,6 +659,12 @@ const I18N = {
     locale: "sq-AL",
   },
   en: {
+    quick: "Or pick one:", home_h: "Plans from travellers", home_more: "See all", home_by: a => `by ${a}`,
+    take_h: "Take the plan with you", pdf: "📄 PDF / Print", cal: "📅 Add to calendar",
+    cal_h: "Add to calendar", cal_sub: "When does your trip start? Every stop is added as an event at its time.", cal_date: "Date of day 1",
+    cal_btn: "Download calendar file", cal_done: "Downloaded. Open the file to add it to your calendar.", made_with: "Made with Vianto",
+    notif_h: "Notifications", notif_empty: "No notifications yet. When someone likes or comments on your plan, or follows you, you'll see it here.",
+    n_like: (a, c) => `${a} liked your plan${c ? " for " + c : ""}`, n_comment: (a, c) => `${a} commented on your plan${c ? " for " + c : ""}`, n_follow: a => `${a} started following you`,
     nav_create: "✨ Create", nav_mine: "📁 My plans", nav_explore: "🌍 Explore", login: "Log in",
     h_where: "Where are you going?", lead: "Tell me the city and what you love — I'll plan it day by day.",
     city: "Which city?", city_ph: "e.g. Rome, Paris, Barcelona, Vienna, Tirana…",
@@ -631,6 +722,12 @@ const I18N = {
     locale: "en-GB",
   },
   de: {
+    quick: "Oder wähle:", home_h: "Pläne von Reisenden", home_more: "Alle ansehen", home_by: a => `von ${a}`,
+    take_h: "Nimm den Plan mit", pdf: "📄 PDF / Drucken", cal: "📅 In den Kalender",
+    cal_h: "In den Kalender", cal_sub: "Wann beginnt deine Reise? Jeder Stopp wird als Termin mit seiner Uhrzeit eingetragen.", cal_date: "Datum von Tag 1",
+    cal_btn: "Kalenderdatei herunterladen", cal_done: "Heruntergeladen. Öffne die Datei, um sie in deinen Kalender zu übernehmen.", made_with: "Erstellt mit Vianto",
+    notif_h: "Benachrichtigungen", notif_empty: "Noch keine Benachrichtigungen. Wenn jemand deinen Plan mag, kommentiert oder dir folgt, siehst du es hier.",
+    n_like: (a, c) => `${a} gefällt dein Plan${c ? " für " + c : ""}`, n_comment: (a, c) => `${a} hat deinen Plan${c ? " für " + c : ""} kommentiert`, n_follow: a => `${a} folgt dir jetzt`,
     nav_create: "✨ Erstellen", nav_mine: "📁 Meine Pläne", nav_explore: "🌍 Entdecken", login: "Anmelden",
     h_where: "Wohin geht's?", lead: "Sag mir die Stadt und was dich interessiert – ich plane dir jeden Tag.",
     city: "Welche Stadt?", city_ph: "z. B. Rom, Paris, Barcelona, Wien, Tirana…",
@@ -700,7 +797,7 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
   document.querySelectorAll("#langSw button").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
   document.querySelectorAll('.seg[data-name="lang"] button').forEach(b => b.classList.toggle("on", b.dataset.v === LANG));
-  chDays(0); refreshAcct();
+  chDays(0); refreshAcct(); renderQuick(); renderHome();
 }
 function setLang(l) {
   LANG = l; try { localStorage.setItem("udhetimi_lang", l); } catch {}
@@ -756,7 +853,7 @@ async function loadMyProfile() {
 function refreshAcct() {
   const b = document.getElementById("acctBtn");
   b.textContent = user ? displayName(user) : t("login");
-  refreshQuota();
+  refreshQuota(); refreshBell();
 }
 // ---- Kufiri mujor: 5 plane për llogari, rifillon më 1 të muajit ----
 const PLAN_LIMIT = 5;
@@ -1503,6 +1600,131 @@ let tt; function toast(m) { const el = document.getElementById("toast"); el.text
 let pend = null; function confirmTap(k) { if (pend === k) { pend = null; return true; } pend = k; toast(t("press_again")); setTimeout(() => pend = null, 2500); return false; }
 document.getElementById("city").addEventListener("keydown", e => { if (e.key === "Enter") makePlan(); });
 
+// ================== FAQJA E PARË: QYTETE + PLANE ==================
+const CITIES = [["Rome", "Roma", "Rome", "Rom"], ["Paris", "Paris", "Paris", "Paris"], ["Barcelona", "Barcelona", "Barcelona", "Barcelona"],
+  ["London", "Londra", "London", "London"], ["Istanbul", "Stambolli", "Istanbul", "Istanbul"], ["Vienna", "Vjena", "Vienna", "Wien"],
+  ["Amsterdam", "Amsterdami", "Amsterdam", "Amsterdam"], ["Prague", "Praga", "Prague", "Prag"], ["Tirana", "Tirana", "Tirana", "Tirana"],
+  ["Pristina", "Prishtina", "Pristina", "Pristina"], ["Athens", "Athina", "Athens", "Athen"], ["Berlin", "Berlini", "Berlin", "Berlin"]];
+function renderQuick() {
+  const i = { sq: 1, en: 2, de: 3 }[LANG] || 2;
+  document.getElementById("quickCities").innerHTML = `<span class="ql">${esc(t("quick"))}</span>` +
+    CITIES.map(c => `<button type="button" data-v="${c[0]}">${esc(c[i])}</button>`).join("");
+}
+document.getElementById("quickCities").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const inp = document.getElementById("city"); inp.value = b.dataset.v;
+  document.getElementById("err").style.display = "none";
+  inp.classList.remove("flash"); void inp.offsetWidth; inp.classList.add("flash");
+});
+let homeRows = [];
+async function loadHome() {
+  if (!sb) return;
+  const { data } = await sb.from("plans").select("id,user_id,city,country,days,title,author_name,likes,photo_url")
+    .eq("is_public", true).order("likes", { ascending: false }).order("created_at", { ascending: false }).limit(12);
+  homeRows = data || []; renderHome();
+}
+function renderHome() {
+  const box = document.getElementById("homeFeed");
+  if (!homeRows.length) { box.style.display = "none"; return; }
+  document.getElementById("homeRow").innerHTML = homeRows.map(r => `<button class="hcard" onclick="openById('${r.id}')">
+    <div class="hc">${r.photo_url ? `<img src="${esc(r.photo_url)}" alt="${esc(r.city)}" loading="lazy">` : `<span>${esc(r.city)}</span>`}</div>
+    <div class="hb"><b>${esc(r.city)} · ${esc(t("days_n", r.days))}</b><small>${esc(r.title || r.country || "")}</small>
+    <small>${r.author_name ? esc(t("home_by", r.author_name)) : ""}${r.likes ? ` · ❤️ ${r.likes}` : ""}</small></div></button>`).join("");
+  box.style.display = "block";
+}
+
+// ================== NJOFTIMET ==================
+async function refreshBell() {
+  const b = document.getElementById("bellBtn"); if (!b) return;
+  if (!sb || !user) { b.style.display = "none"; return; }
+  b.style.display = "grid"; b.setAttribute("aria-label", t("notif_h"));
+  const { count, error } = await sb.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false);
+  const n = error ? 0 : count || 0, bd = document.getElementById("bellN");
+  bd.textContent = n > 9 ? "9+" : n; bd.classList.toggle("on", n > 0);
+}
+let notifRows = [];
+async function openNotifs() {
+  if (!user) return showAuth("login");
+  const box = document.getElementById("notifList");
+  box.innerHTML = `<div class="empty">${t("loading")}</div>`;
+  openModal("notifBg");
+  const { data, error } = await sb.from("notifications").select("id,actor_id,actor_name,type,plan_id,plan_city,body,read,created_at")
+    .eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
+  if (error) { box.innerHTML = `<div class="empty">${esc(t("notif_empty"))}</div>`; return; }
+  notifRows = data || [];
+  box.innerHTML = notifRows.map((n, i) => {
+    const who = `<b>${esc(n.actor_name || "—")}</b>`, city = esc(n.plan_city || "");
+    const txt = n.type === "like" ? t("n_like", who, city) : n.type === "comment" ? t("n_comment", who, city) : t("n_follow", who);
+    return `<div class="nitem ${n.read ? "" : "unread"}" onclick="notifGo(${i})">
+      <span class="av" style="background:${avColor(n.actor_id)}">${esc(initials(n.actor_name))}</span>
+      <div class="nt">${txt}${n.type === "like" ? " ❤️" : ""}${n.body ? `<span class="nq">“${esc(n.body)}”</span>` : ""}<small>${esc(ago(n.created_at))}</small></div></div>`;
+  }).join("") || `<div class="empty">${esc(t("notif_empty"))}</div>`;
+  if (notifRows.some(n => !n.read)) {
+    await sb.from("notifications").update({ read: true }).eq("user_id", user.id).eq("read", false);
+    refreshBell();
+  }
+}
+function notifGo(i) {
+  const n = notifRows[i]; if (!n) return;
+  closeModal("notifBg");
+  if (n.type === "follow") openProfile(n.actor_id);
+  else if (n.plan_id) openById(n.plan_id, n.type === "comment");
+}
+
+// ================== PDF DHE KALENDARI ==================
+function printPlan() {
+  const p = plan; if (!p) return;
+  const wm = document.querySelector(".brand .wm").cloneNode(true);
+  wm.removeAttribute("class"); wm.setAttribute("class", "pr-wm"); wm.querySelector("g").setAttribute("fill", "#1F4E79");
+  const range = s => s.start ? esc(s.start) + (s.duration_min ? "–" + addMin(s.start, s.duration_min) : "") : "";
+  const link = row.id && row.is_public ? ` · ${API}/p/${row.id}` : "";
+  document.getElementById("printArea").innerHTML = wm.outerHTML +
+    `<h1>${esc(p.title || p.city?.name || "")}</h1>${p.summary ? `<p class="pr-sum">${esc(p.summary)}</p>` : ""}` +
+    p.days.map((d, k) => `<section class="pr-day"><h2 style="color:${COLORS[k % COLORS.length]}">${esc(t("day"))} ${d.day || k + 1}: ${esc(d.theme || "")}</h2>
+      ${d.area ? `<div class="pr-area">${esc(d.area)}</div>` : ""}<table>${d.stops.map(s => `<tr><td class="pr-t">${range(s)}</td>
+      <td><b>${s.type === "meal" ? "🍴 " : ""}${esc(s.name || "")}</b>${s.note ? `<div>${esc(s.note)}</div>` : ""}${s.tip ? `<div class="pr-tip">💡 ${esc(s.tip)}</div>` : ""}</td></tr>`).join("")}</table></section>`).join("") +
+    (p.tips?.length ? `<div class="pr-tips"><h2>${esc(t("tips"))}</h2><ul>${p.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>${p.cost_estimate ? `<div>💶 ${esc(p.cost_estimate)}</div>` : ""}</div>` : "") +
+    `<div class="pr-foot">${esc(t("made_with"))}${esc(link)}</div>`;
+  const old = document.title;
+  document.title = `${p.title || p.city?.name || APP_NAME} – ${APP_NAME}`;
+  addEventListener("afterprint", () => { document.title = old; }, { once: true });
+  setTimeout(() => window.print(), 60);
+}
+function openCal() {
+  const d = new Date(Date.now() + 86400000);
+  document.getElementById("calDate").value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  openModal("calBg");
+}
+function downloadIcs() {
+  const v = document.getElementById("calDate").value; if (!v || !plan) return;
+  const [Y, M, D] = v.split("-").map(Number);
+  const pad = n => String(n).padStart(2, "0");
+  const at = (dt, hm) => { const [h, m] = hm.split(":").map(Number); return `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}T${pad(h)}${pad(m)}00`; };
+  const ic = x => String(x || "").replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/[,;]/g, c => "\\" + c);
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z", uid = row.id || "local" + Date.now();
+  const city = plan.city?.name || "";
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Vianto//Plan//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:" + ic(plan.title || city)];
+  plan.days.forEach((d, k) => {
+    const dt = new Date(Y, M - 1, D + k);
+    d.stops.forEach((s, i) => {
+      if (!/^\d{1,2}:\d{2}$/.test(s.start || "")) return;
+      let end = addMin(s.start, s.duration_min || 60); if (end <= s.start) end = "23:59";
+      const desc = [s.note, s.tip && "💡 " + s.tip].filter(Boolean).join("\n");
+      L.push("BEGIN:VEVENT", `UID:${uid}-${k}-${i}@vianto`, "DTSTAMP:" + stamp, "DTSTART:" + at(dt, s.start), "DTEND:" + at(dt, end),
+        "SUMMARY:" + ic((s.type === "meal" ? "🍴 " : "") + s.name));
+      if (desc) L.push("DESCRIPTION:" + ic(desc));
+      if (s.lat != null) L.push("LOCATION:" + ic(`${s.name}, ${city}`), `GEO:${s.lat};${s.lon}`, `URL:https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}`);
+      L.push("END:VEVENT");
+    });
+  });
+  L.push("END:VCALENDAR");
+  const blob = new Blob([L.join("\r\n") + "\r\n"], { type: "text/calendar;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `vianto-${(city || "plan").toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-")}.ics`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  closeModal("calBg"); toast(t("cal_done"));
+}
+
 // ================== FILLIMI ==================
 (async function init() {
   if (sb) {
@@ -1522,6 +1744,9 @@ document.getElementById("city").addEventListener("keydown", e => { if (e.key ===
   const pid = params.get("p"), uid = params.get("u");
   if (pid && sb) openById(pid);
   else if (uid && sb) openProfile(uid);
+  loadHome();
+  setInterval(() => { if (user && document.visibilityState === "visible") refreshBell(); }, 60000);
+  document.addEventListener("visibilitychange", () => { if (user && document.visibilityState === "visible") refreshBell(); });
 })();
 if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
