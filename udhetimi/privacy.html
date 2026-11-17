@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vianto — Privatësia · Privacy · Datenschutz</title>
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--sea:#1F4E79;--sand:#EBDCC2;--plaster:#FBF5EA;--mut:#6E6556;--terra:#B9603B}
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#EBDCC2,#E3CDA9) fixed;color:#2C2A26;font:16px/1.6 Figtree,system-ui,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:24px 18px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  header a.home{font-family:"Young Serif",Georgia,serif;font-size:28px;color:var(--sea);text-decoration:none}
+  .langs{display:flex;gap:4px;border-radius:999px;box-shadow:inset 0 0 0 1px #D9C8A8;padding:3px}
+  .langs button{border:0;background:none;border-radius:999px;padding:5px 10px;font:600 12px Figtree,sans-serif;color:#8A7C66;cursor:pointer}
+  .langs button.on{background:var(--sea);color:var(--plaster)}
+  article{background:var(--plaster);border:1px solid #E6D6BA;border-radius:22px;padding:26px 22px;box-shadow:0 18px 36px -26px rgba(110,80,30,.45)}
+  article[hidden]{display:none}
+  h1{font-family:"Young Serif",Georgia,serif;font-weight:400;color:var(--sea);font-size:30px;line-height:1.2;margin:0 0 6px}
+  h2{font-family:"Young Serif",Georgia,serif;font-weight:400;color:var(--sea);font-size:20px;margin:26px 0 6px}
+  .date{color:var(--mut);font-size:14px;margin:0 0 14px}
+  ul{padding-left:20px;margin:6px 0}
+  li{margin:4px 0}
+  a{color:var(--terra)}
+  .contact{font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="home" href="./">Vianto</a>
+    <div class="langs"><button data-l="en">EN</button><button data-l="de">DE</button><button data-l="sq">SQ</button></div>
+  </header>
+
+  <!-- ===================== SHQIP ===================== -->
+  <article data-lang="sq">
+    <h1>Politika e privatësisë</h1>
+    <p class="date">Përditësuar më 17 nëntor 2026</p>
+    <p>Vianto është një aplikacion që krijon plane udhëtimi për qytete, ditë për ditë, dhe të lejon t'i ndash ato me të tjerët. Këtu shpjegojmë cilat të dhëna mbledhim, pse, dhe çfarë të drejtash ke.</p>
+
+    <h2>Çfarë të dhënash mbledhim</h2>
+    <ul>
+      <li><b>Llogaria:</b> emaili, emri që zgjedh dhe fjalëkalimi (i ruajtur i enkriptuar). Llogaria nuk është e detyrueshme për një plan provë.</li>
+      <li><b>Planet:</b> qyteti, numri i ditëve, oraret, interesat, buxheti, numri i personave dhe moshat e fëmijëve, dëshirat që shkruan, dhe plani i krijuar.</li>
+      <li><b>Përmbajtja sociale:</b> fotot dhe përshkrimet që poston, pëlqimet, komentet, ndjekjet dhe njoftimet që lidhen me to. Planet dhe postimet publike i sheh kushdo.</li>
+      <li><b>Të dhëna teknike:</b> adresa IP, e cila përdoret vetëm përkohësisht për të kufizuar numrin e planeve në ditë dhe për të mbrojtur shërbimin nga abuzimi.</li>
+    </ul>
+    <p>Nuk përdorim reklama, nuk shesim të dhëna dhe nuk të gjurmojmë në aplikacione ose faqe të tjera.</p>
+
+    <h2>Kush i përpunon të dhënat</h2>
+    <ul>
+      <li><b>Supabase:</b> ruajtja e llogarive, planeve, fotove dhe komenteve.</li>
+      <li><b>Cloudflare:</b> serveri që krijon planet dhe faqet e ndarjes.</li>
+      <li><b>Anthropic (Claude):</b> krijon tekstin e planit. I dërgohen vetëm qyteti, preferencat e udhëtimit dhe dëshirat që shkruan, pa emailin ose emrin tënd.</li>
+      <li><b>OpenStreetMap, Wikipedia dhe Wikidata:</b> serveri ynë kërkon aty vendet e qytetit, pa të dhëna personale.</li>
+      <li><b>GitHub Pages, Esri, Google Fonts, unpkg dhe jsDelivr:</b> japin faqen, hartat, shkronjat dhe libraritë. Ata shohin adresën tënde IP kur hapet faqja.</li>
+    </ul>
+
+    <h2>Sa kohë i ruajmë</h2>
+    <p>Të dhënat e llogarisë dhe planet ruhen derisa t'i fshish vetë ose të fshish llogarinë. Njoftimet fshihen automatikisht pas 60 ditësh. Kufijtë sipas adresës IP fshihen brenda pak ditësh.</p>
+
+    <h2>Fshirja e llogarisë</h2>
+    <p>Mund ta fshish llogarinë kurdo nga aplikacioni: <b>Llogaria → Fshi llogarinë</b>. Me këtë fshihen menjëherë dhe përgjithmonë llogaria, planet, fotot, pëlqimet, komentet, ndjekjet dhe njoftimet e tua.</p>
+
+    <h2>Të drejtat e tua</h2>
+    <p>Ke të drejtë të shohësh, të korrigjosh, të eksportosh ose të fshish të dhënat e tua, dhe të kundërshtosh përpunimin e tyre. Për çdo kërkesë na shkruaj.</p>
+
+    <h2>Fëmijët</h2>
+    <p>Vianto nuk është menduar për fëmijë nën 13 vjeç dhe nuk mbledhim me dije të dhëna prej tyre.</p>
+
+    <h2>Kontakti</h2>
+    <p>Email: <span class="contact" data-contact>—</span></p>
+  </article>
+
+  <!-- ===================== ENGLISH ===================== -->
+  <article data-lang="en" hidden>
+    <h1>Privacy policy</h1>
+    <p class="date">Last updated 17 November 2026</p>
+    <p>Vianto is an app that creates day-by-day city travel plans and lets you share them with others. This page explains what data we collect, why, and what rights you have.</p>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li><b>Account:</b> your email, the name you choose and your password (stored encrypted). An account is not required for a trial plan.</li>
+      <li><b>Plans:</b> city, number of days, times, interests, budget, number of travellers and children's ages, the wishes you type, and the generated plan.</li>
+      <li><b>Social content:</b> photos and captions you post, likes, comments, follows and the notifications related to them. Public plans and posts can be seen by anyone.</li>
+      <li><b>Technical data:</b> your IP address, used only temporarily to limit the number of plans per day and to protect the service from abuse.</li>
+    </ul>
+    <p>We don't show ads, we don't sell data and we don't track you across other apps or websites.</p>
+
+    <h2>Who processes the data</h2>
+    <ul>
+      <li><b>Supabase:</b> stores accounts, plans, photos and comments.</li>
+      <li><b>Cloudflare:</b> runs the server that creates plans and share pages.</li>
+      <li><b>Anthropic (Claude):</b> writes the plan text. It only receives the city, your travel preferences and the wishes you type, never your email or name.</li>
+      <li><b>OpenStreetMap, Wikipedia and Wikidata:</b> our server looks up places in the city there, without personal data.</li>
+      <li><b>GitHub Pages, Esri, Google Fonts, unpkg and jsDelivr:</b> deliver the page, maps, fonts and libraries and see your IP address when the page loads.</li>
+    </ul>
+
+    <h2>How long we keep it</h2>
+    <p>Account data and plans are kept until you delete them or delete your account. Notifications are deleted automatically after 60 days. IP-based limits expire within a few days.</p>
+
+    <h2>Deleting your account</h2>
+    <p>You can delete your account at any time in the app: <b>Account → Delete account</b>. This immediately and permanently deletes your account, plans, photos, likes, comments, follows and notifications.</p>
+
+    <h2>Your rights</h2>
+    <p>You have the right to access, correct, export or delete your data and to object to its processing. Write to us for any request.</p>
+
+    <h2>Children</h2>
+    <p>Vianto is not intended for children under 13 and we don't knowingly collect their data.</p>
+
+    <h2>Contact</h2>
+    <p>Email: <span class="contact" data-contact>—</span></p>
+  </article>
+
+  <!-- ===================== DEUTSCH ===================== -->
+  <article data-lang="de" hidden>
+    <h1>Datenschutzerklärung</h1>
+    <p class="date">Stand: 17. November 2026</p>
+    <p>Vianto ist eine App, die Städtereisen Tag für Tag plant und mit der du deine Pläne mit anderen teilen kannst. Hier erklären wir, welche Daten wir erheben, wozu, und welche Rechte du hast.</p>
+
+    <h2>Welche Daten wir erheben</h2>
+    <ul>
+      <li><b>Konto:</b> deine E-Mail-Adresse, der von dir gewählte Name und dein Passwort (verschlüsselt gespeichert). Für einen Probeplan brauchst du kein Konto.</li>
+      <li><b>Pläne:</b> Stadt, Anzahl der Tage, Uhrzeiten, Interessen, Budget, Anzahl der Reisenden und Alter der Kinder, deine Wünsche und der erstellte Plan.</li>
+      <li><b>Soziale Inhalte:</b> Fotos und Beschreibungen, die du postest, Likes, Kommentare, Follows und die zugehörigen Benachrichtigungen. Öffentliche Pläne und Beiträge kann jede Person sehen.</li>
+      <li><b>Technische Daten:</b> deine IP-Adresse, nur vorübergehend, um die Anzahl der Pläne pro Tag zu begrenzen und den Dienst vor Missbrauch zu schützen.</li>
+    </ul>
+    <p>Wir zeigen keine Werbung, verkaufen keine Daten und verfolgen dich nicht in anderen Apps oder auf anderen Websites.</p>
+
+    <h2>Wer die Daten verarbeitet</h2>
+    <ul>
+      <li><b>Supabase:</b> speichert Konten, Pläne, Fotos und Kommentare.</li>
+      <li><b>Cloudflare:</b> betreibt den Server, der Pläne und Teilen-Seiten erstellt.</li>
+      <li><b>Anthropic (Claude):</b> schreibt den Text des Plans. Übermittelt werden nur Stadt, Reisevorlieben und deine Wünsche, nie deine E-Mail-Adresse oder dein Name.</li>
+      <li><b>OpenStreetMap, Wikipedia und Wikidata:</b> unser Server sucht dort Orte in der Stadt, ohne personenbezogene Daten.</li>
+      <li><b>GitHub Pages, Esri, Google Fonts, unpkg und jsDelivr:</b> liefern Seite, Karten, Schriften und Bibliotheken aus und sehen beim Laden deine IP-Adresse.</li>
+    </ul>
+
+    <h2>Wie lange wir Daten speichern</h2>
+    <p>Kontodaten und Pläne bleiben gespeichert, bis du sie oder dein Konto löschst. Benachrichtigungen werden nach 60 Tagen automatisch gelöscht. IP-basierte Limits verfallen innerhalb weniger Tage.</p>
+
+    <h2>Konto löschen</h2>
+    <p>Du kannst dein Konto jederzeit in der App löschen: <b>Konto → Konto löschen</b>. Dabei werden dein Konto, deine Pläne, Fotos, Likes, Kommentare, Follows und Benachrichtigungen sofort und endgültig gelöscht.</p>
+
+    <h2>Deine Rechte</h2>
+    <p>Du hast das Recht auf Auskunft, Berichtigung, Datenübertragbarkeit und Löschung sowie das Recht, der Verarbeitung zu widersprechen. Schreib uns für jede Anfrage.</p>
+
+    <h2>Kinder</h2>
+    <p>Vianto richtet sich nicht an Kinder unter 13 Jahren, und wir erheben wissentlich keine Daten von ihnen.</p>
+
+    <h2>Kontakt</h2>
+    <p>E-Mail: <span class="contact" data-contact>—</span></p>
+  </article>
+</div>
+<script>
+  // Shkruaj këtu emailin e kontaktit para publikimit në App Store / Play Store:
+  const CONTACT_EMAIL = "";
+  document.querySelectorAll("[data-contact]").forEach(el => {
+    if (CONTACT_EMAIL) el.innerHTML = `<a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>`;
+  });
+  const pick = l => {
+    document.querySelectorAll("article").forEach(a => a.hidden = a.dataset.lang !== l);
+    document.querySelectorAll(".langs button").forEach(b => b.classList.toggle("on", b.dataset.l === l));
+    document.documentElement.lang = l;
+  };
+  document.querySelectorAll(".langs button").forEach(b => b.onclick = () => pick(b.dataset.l));
+  const q = new URLSearchParams(location.search).get("lang");
+  let saved = null; try { saved = localStorage.getItem("udhetimi_lang"); } catch {}
+  const nav = (navigator.language || "").slice(0, 2);
+  pick(["sq", "en", "de"].find(l => l === q) || ["sq", "en", "de"].find(l => l === saved) || (["sq", "en", "de"].includes(nav) ? nav : "en"));
+</script>
+</body>
+</html>
