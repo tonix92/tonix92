@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Radar">
+<title>Radar Fluturimesh</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  html,body{margin:0;height:100%;font-family:system-ui,-apple-system,sans-serif;background:#0b1220;color:#e5e7eb}
+  #map{position:absolute;inset:0;background:#1a1d21}
+  .bar{position:absolute;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:1000;
+       background:rgba(11,18,32,.92);padding:8px 14px;border-radius:12px;font-size:14px;
+       display:flex;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.4);white-space:nowrap}
+  .bar b{color:#fbbf24}
+  .bar button{background:#fbbf24;border:0;border-radius:8px;padding:5px 10px;font-weight:600;cursor:pointer}
+  #info{position:absolute;bottom:0;left:0;right:0;z-index:1000;background:rgba(11,18,32,.96);
+        padding:14px 16px calc(20px + env(safe-area-inset-bottom));border-radius:16px 16px 0 0;display:none;font-size:14px;line-height:1.6}
+  #info h2{margin:0 0 6px;font-size:20px;color:#fbbf24}
+  #info .grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px}
+  #info .x{position:absolute;right:14px;top:10px;background:none;border:0;color:#9ca3af;font-size:22px;cursor:pointer}
+  #setup{position:absolute;inset:0;z-index:2000;background:rgba(11,18,32,.97);display:none;
+         padding:80px 24px;box-sizing:border-box;font-size:15px;line-height:1.5}
+  #setup input{width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid #374151;
+               background:#111827;color:#fff;font-size:15px;margin:12px 0}
+  #setup button{background:#fbbf24;border:0;border-radius:10px;padding:12px 18px;font-weight:700;font-size:15px}
+  .plane{color:#fbbf24;font-size:20px;line-height:20px;text-shadow:0 0 3px #000}
+  .plane.sel{color:#f87171}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="bar">✈️ <span id="status">Duke ngarkuar…</span><button id="refresh">↻</button><button id="cfg">⚙︎</button></div>
+<div id="info"><button class="x" onclick="closeInfo()">×</button><div id="infoBody"></div></div>
+<div id="setup">
+  <h2 style="color:#fbbf24;margin-top:0">Lidh burimin e të dhënave</h2>
+  <div>Ngjit këtu linkun e Cloudflare Worker-it tënd (p.sh. <code>https://radar.emri.workers.dev</code>):</div>
+  <input id="proxyInput" placeholder="https://....workers.dev" autocapitalize="off" autocorrect="off">
+  <button onclick="saveProxy()">Ruaj</button>
+</div>
+
+<script>
+// Të dhënat live: adsb.lol (falas), përmes një Cloudflare Worker (për CORS)
+const REFRESH_MS = 10000;
+const DEFAULT_PROXY = ""; // mund ta vendosësh linkun këtu direkt
+
+function getProxy() {
+  try { return localStorage.getItem("radarProxy") || DEFAULT_PROXY; } catch { return DEFAULT_PROXY; }
+}
+function saveProxy() {
+  const v = document.getElementById("proxyInput").value.trim().replace(/\/+$/, "");
+  if (!/^https:\/\//.test(v)) { document.getElementById("proxyInput").style.borderColor = "#f87171"; return; }
+  try { localStorage.setItem("radarProxy", v); } catch {}
+  proxy = v;
+  document.getElementById("setup").style.display = "none";
+  load();
+}
+let proxy = getProxy();
+
+const map = L.map("map", { zoomControl: false }).setView([42.6, 20.9], 7);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+  attribution: "Tiles © Esri | Data: adsb.lol (ODbL)", maxZoom: 16
+}).addTo(map);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+  maxZoom: 16
+}).addTo(map);
+
+const markers = new Map();
+let selected = null, timer = null;
+
+function icon(heading, sel) {
+  return L.divIcon({
+    className: "",
+    html: `<div class="plane${sel ? " sel" : ""}" style="transform:rotate(${(heading || 0) - 45}deg)">✈</div>`,
+    iconSize: [20, 20], iconAnchor: [10, 10]
+  });
+}
+
+async function load() {
+  clearTimeout(timer);
+  if (!proxy) { document.getElementById("setup").style.display = "block"; setStatus("Mungon linku i Worker-it"); return; }
+  if (map.getZoom() < 5) { setStatus("Zmadho hartën për të parë avionët"); timer = setTimeout(load, REFRESH_MS); return; }
+  const c = map.getCenter();
+  const nm = Math.min(250, Math.ceil(c.distanceTo(map.getBounds().getNorthEast()) / 1852));
+  try {
+    setStatus("Duke përditësuar…");
+    const r = await fetch(`${proxy}/v2/point/${c.lat.toFixed(3)}/${c.lng.toFixed(3)}/${nm}`);
+    if (!r.ok) throw new Error("Gabim " + r.status);
+    const data = await r.json();
+    draw(data.ac || []);
+  } catch (e) {
+    setStatus("⚠️ " + e.message);
+  }
+  timer = setTimeout(load, REFRESH_MS);
+}
+
+function draw(list) {
+  const seen = new Set();
+  let count = 0;
+  for (const a of list) {
+    if (a.lat == null || a.lon == null || a.alt_baro === "ground") continue;
+    const id = a.hex; seen.add(id); count++;
+    const heading = a.track ?? a.true_heading ?? 0;
+    const f = {
+      id, callsign: (a.flight || "").trim() || (a.r || id.toUpperCase()),
+      reg: a.r, type: a.t, desc: a.desc, alt: a.alt_geom ?? a.alt_baro,
+      gs: a.gs, heading, rate: a.baro_rate ?? a.geom_rate, squawk: a.squawk
+    };
+    let m = markers.get(id);
+    if (!m) {
+      m = L.marker([a.lat, a.lon], { icon: icon(heading, id === selected) }).addTo(map);
+      m.on("click", () => select(id));
+      markers.set(id, m);
+    } else {
+      m.setLatLng([a.lat, a.lon]);
+      m.setIcon(icon(heading, id === selected));
+    }
+    m.flight = f;
+    if (id === selected) showInfo(f);
+  }
+  for (const [id, m] of markers) if (!seen.has(id)) { map.removeLayer(m); markers.delete(id); }
+  setStatus(`<b>${count}</b> avionë në ajër · ${new Date().toLocaleTimeString("sq-AL")}`);
+}
+
+function select(id) {
+  const prev = selected; selected = id;
+  [prev, id].forEach(k => { const m = markers.get(k); if (m) m.setIcon(icon(m.flight.heading, k === selected)); });
+  showInfo(markers.get(id).flight);
+}
+
+function showInfo(f) {
+  const n = (v, k, u) => v == null || isNaN(v) ? "–" : Math.round(v * k).toLocaleString("sq-AL") + " " + u;
+  document.getElementById("infoBody").innerHTML = `
+    <h2>${f.callsign}</h2>
+    <div class="grid">
+      <div>Avioni</div><div>${f.desc || f.type || "–"}</div>
+      <div>Regjistrimi</div><div>${f.reg || "–"}</div>
+      <div>Lartësia</div><div>${n(f.alt, 0.3048, "m")} (${n(f.alt, 1, "ft")})</div>
+      <div>Shpejtësia</div><div>${n(f.gs, 1.852, "km/h")}</div>
+      <div>Drejtimi</div><div>${n(f.heading, 1, "°")}</div>
+      <div>Ngjitja/zbritja</div><div>${n(f.rate, 0.00508, "m/s")}</div>
+      <div>Kodi ICAO24</div><div>${f.id.toUpperCase()}</div>
+      <div>Squawk</div><div>${f.squawk || "–"}</div>
+    </div>`;
+  document.getElementById("info").style.display = "block";
+}
+
+function closeInfo() {
+  const m = markers.get(selected); selected = null;
+  if (m) m.setIcon(icon(m.flight.heading, false));
+  document.getElementById("info").style.display = "none";
+}
+
+function setStatus(h) { document.getElementById("status").innerHTML = h; }
+
+let moveT;
+map.on("moveend", () => { clearTimeout(moveT); moveT = setTimeout(load, 800); });
+document.getElementById("refresh").onclick = load;
+document.getElementById("cfg").onclick = () => {
+  document.getElementById("proxyInput").value = proxy;
+  document.getElementById("setup").style.display = "block";
+};
+load();
+</script>
+</body>
+</html>
