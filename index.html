@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Radar">
+<title>Radar Fluturimesh</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  html,body{margin:0;height:100%;font-family:system-ui,-apple-system,sans-serif;background:#0b1220;color:#e5e7eb}
+  #map{position:absolute;inset:0;background:#1a1d21}
+  .top{position:absolute;top:calc(10px + env(safe-area-inset-top));left:10px;right:10px;z-index:1000;
+       display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+  .bar,.search{pointer-events:auto;background:rgba(11,18,32,.92);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+  .bar{padding:8px 12px;font-size:14px;display:flex;gap:8px;align-items:center;white-space:nowrap}
+  .bar b{color:#fbbf24}
+  .bar button{background:#fbbf24;border:0;border-radius:8px;padding:5px 10px;font-weight:600;cursor:pointer}
+  .search{display:flex;width:min(420px,100%);overflow:hidden}
+  .search input{flex:1;background:transparent;border:0;color:#fff;padding:10px 12px;font-size:16px;outline:none;min-width:0}
+  .search button{background:none;border:0;color:#fbbf24;font-size:18px;padding:0 14px;cursor:pointer}
+  #results{pointer-events:auto;width:min(420px,100%);background:rgba(11,18,32,.96);border-radius:12px;display:none;max-height:40vh;overflow:auto}
+  #results div{padding:10px 12px;border-bottom:1px solid #1f2937;cursor:pointer;font-size:14px}
+  #results div:hover{background:#1f2937}
+  #info{position:absolute;bottom:0;left:0;right:0;z-index:1000;background:rgba(11,18,32,.97);max-height:60vh;overflow:auto;
+        padding:14px 16px calc(20px + env(safe-area-inset-bottom));border-radius:16px 16px 0 0;display:none;font-size:14px;line-height:1.55}
+  @media(min-width:800px){#info{left:auto;right:12px;bottom:12px;width:360px;border-radius:16px}}
+  #info h2{margin:0;font-size:20px;color:#fbbf24}
+  #info .sub{color:#9ca3af;margin-bottom:8px}
+  #info .route{display:flex;align-items:center;justify-content:space-between;background:#111827;border-radius:12px;padding:10px 12px;margin:8px 0}
+  #info .route .ap{text-align:center;flex:1}
+  #info .route .code{font-size:22px;font-weight:700}
+  #info .route .city{font-size:12px;color:#9ca3af}
+  #info .route .arrow{color:#fbbf24;font-size:20px;padding:0 8px}
+  #info img{width:100%;border-radius:10px;margin:6px 0;display:block}
+  #info .grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px}
+  #info .x{position:absolute;right:14px;top:10px;background:none;border:0;color:#9ca3af;font-size:24px;cursor:pointer}
+  .legend{position:absolute;left:10px;bottom:calc(24px + env(safe-area-inset-bottom));z-index:900;background:rgba(11,18,32,.85);
+          border-radius:8px;padding:6px 8px;font-size:11px;color:#cbd5e1}
+  .legend .grad{width:160px;height:8px;border-radius:4px;margin:3px 0;
+     background:linear-gradient(90deg,hsl(120,90%,50%),hsl(80,90%,50%),hsl(50,95%,55%),hsl(25,95%,55%),hsl(330,85%,60%),hsl(280,80%,65%))}
+  .legend .lbl{display:flex;justify-content:space-between}
+  .pl svg{display:block;filter:drop-shadow(0 0 2px #000)}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="top">
+  <div class="bar">✈️ <span id="status">Duke ngarkuar…</span><button id="refresh" title="Rifresko">↻</button></div>
+  <form class="search" id="searchForm">
+    <input id="q" placeholder="Kërko fluturim (p.sh. W6 4321, LH1719, 9H-ABC)" autocapitalize="characters" autocorrect="off" autocomplete="off">
+    <button type="submit">🔍</button>
+  </form>
+  <div id="results"></div>
+</div>
+<div class="legend"><div>Lartësia</div><div class="grad"></div><div class="lbl"><span>0</span><span>5 km</span><span>12 km</span></div></div>
+<div id="info"><button class="x" onclick="closeInfo()">×</button><div id="infoBody"></div></div>
+
+<script>
+const PROXY = "https://radar.fatonhashani.workers.dev";
+const REFRESH_MS = 8000;
+const TRAIL_MAX = 400;
+
+const map = L.map("map", { zoomControl: false }).setView([42.6, 20.9], 7);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+  { attribution: "Tiles © Esri | Data: adsb.lol (ODbL), adsbdb.com", maxZoom: 16 }).addTo(map);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+  { maxZoom: 16 }).addTo(map);
+
+const planes = new Map();       // hex -> {marker, f, trail:[[lat,lon,altFt]], lastSeen}
+const routeCache = new Map();   // callsign -> route|null
+const acCache = new Map();      // hex -> aircraft|null
+let selected = null, timer = null, trailLayer = L.layerGroup().addTo(map), loading = false;
+
+// ---------- Ngjyra sipas lartësisë ----------
+function altColor(ft) {
+  if (ft == null || isNaN(ft)) return "#9ca3af";
+  const stops = [[0,120],[3000,80],[10000,50],[20000,25],[30000,330],[40000,280]];
+  ft = Math.max(0, Math.min(40000, ft));
+  for (let i = 1; i < stops.length; i++) {
+    if (ft <= stops[i][0]) {
+      const [a0,h0] = stops[i-1], [a1,h1] = stops[i];
+      let d = h1 - h0; if (Math.abs(d) > 180) d -= Math.sign(d) * 360;
+      const h = (h0 + d * (ft - a0) / (a1 - a0) + 360) % 360;
+      return `hsl(${h.toFixed(0)},90%,55%)`;
+    }
+  }
+  return "hsl(280,80%,65%)";
+}
+
+const PLANE_PATH = "M12 2c.8 0 1.3.8 1.3 1.8v5.4l7.7 4.6v2l-7.7-2.4v4.4l2.2 1.7V21L12 20l-3.5 1v-1.5l2.2-1.7v-4.4L3 15.8v-2l7.7-4.6V3.8C10.7 2.8 11.2 2 12 2z";
+function icon(f, sel) {
+  const color = sel ? "#ffffff" : altColor(f.alt);
+  const size = sel ? 30 : 24;
+  return L.divIcon({
+    className: "pl",
+    html: `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="transform:rotate(${f.heading || 0}deg)">
+             <path d="${PLANE_PATH}" fill="${color}" stroke="${sel ? "#f87171" : "#000"}" stroke-width="${sel ? 1.2 : .6}"/></svg>`,
+    iconSize: [size, size], iconAnchor: [size / 2, size / 2]
+  });
+}
+
+// ---------- Marrja e të dhënave ----------
+async function api(path) {
+  const r = await fetch(PROXY + path);
+  if (!r.ok) throw new Error("Gabim " + r.status);
+  return r.json();
+}
+
+async function load() {
+  clearTimeout(timer);
+  if (loading) return;
+  if (map.getZoom() < 5) { setStatus("Zmadho hartën për të parë avionët"); timer = setTimeout(load, REFRESH_MS); return; }
+  const c = map.getCenter();
+  const nm = Math.min(250, Math.ceil(c.distanceTo(map.getBounds().getNorthEast()) / 1852));
+  loading = true;
+  try {
+    const data = await api(`/v2/point/${c.lat.toFixed(3)}/${c.lng.toFixed(3)}/${nm}`);
+    const list = data.ac || [];
+    // mbaje avionin e zgjedhur edhe nëse del jashtë zonës
+    if (selected && !list.some(a => a.hex === selected)) {
+      try { const s = await api(`/v2/hex/${selected}`); if (s.ac?.length) list.push(...s.ac); } catch {}
+    }
+    draw(list);
+  } catch (e) {
+    setStatus("⚠️ " + e.message);
+  }
+  loading = false;
+  timer = setTimeout(load, REFRESH_MS);
+}
+
+function toFlight(a) {
+  const alt = a.alt_baro === "ground" ? 0 : (a.alt_geom ?? a.alt_baro);
+  return {
+    id: a.hex, callsign: (a.flight || "").trim(), reg: a.r, type: a.t, desc: a.desc,
+    alt, onGround: a.alt_baro === "ground", gs: a.gs, heading: a.track ?? a.true_heading ?? 0,
+    rate: a.baro_rate ?? a.geom_rate, squawk: a.squawk, lat: a.lat, lon: a.lon
+  };
+}
+
+function draw(list) {
+  const seen = new Set(); let count = 0;
+  for (const a of list) {
+    if (a.lat == null || a.lon == null) continue;
+    const f = toFlight(a);
+    if (f.onGround && f.id !== selected) continue;
+    seen.add(f.id); count++;
+    let p = planes.get(f.id);
+    if (!p) {
+      const marker = L.marker([f.lat, f.lon], { icon: icon(f, f.id === selected) }).addTo(map);
+      marker.on("click", () => select(f.id));
+      p = { marker, trail: [] }; planes.set(f.id, p);
+    } else {
+      p.marker.setLatLng([f.lat, f.lon]);
+      p.marker.setIcon(icon(f, f.id === selected));
+    }
+    const last = p.trail[p.trail.length - 1];
+    if (!last || last[0] !== f.lat || last[1] !== f.lon) {
+      p.trail.push([f.lat, f.lon, f.alt]);
+      if (p.trail.length > TRAIL_MAX) p.trail.shift();
+    }
+    p.f = f; p.lastSeen = Date.now();
+    if (f.id === selected) { renderInfo(); drawTrail(); }
+  }
+  for (const [id, p] of planes) if (!seen.has(id) && id !== selected) { map.removeLayer(p.marker); planes.delete(id); }
+  setStatus(`<b>${count}</b> avionë · ${new Date().toLocaleTimeString("sq-AL")}`);
+}
+
+// ---------- Gjurma ----------
+function drawTrail() {
+  trailLayer.clearLayers();
+  const p = planes.get(selected); if (!p || p.trail.length < 2) return;
+  for (let i = 1; i < p.trail.length; i++) {
+    const [la0, lo0] = p.trail[i - 1], [la1, lo1, alt] = p.trail[i];
+    L.polyline([[la0, lo0], [la1, lo1]], { color: altColor(alt), weight: 3, opacity: .9 }).addTo(trailLayer);
+  }
+}
+
+// ---------- Zgjedhja dhe paneli i informacionit ----------
+function select(id) {
+  const prev = selected; selected = id;
+  for (const k of [prev, id]) { const p = planes.get(k); if (p) p.marker.setIcon(icon(p.f, k === selected)); }
+  document.getElementById("info").style.display = "block";
+  renderInfo(); drawTrail(); fetchDetails(id);
+}
+
+async function fetchDetails(id) {
+  const p = planes.get(id); if (!p) return;
+  const cs = p.f.callsign;
+  const jobs = [];
+  if (cs && !routeCache.has(cs)) jobs.push(api(`/v0/callsign/${encodeURIComponent(cs)}`)
+      .then(d => routeCache.set(cs, d?.response?.flightroute || null)).catch(() => routeCache.set(cs, null)));
+  if (!acCache.has(id)) jobs.push(api(`/v0/aircraft/${id}`)
+      .then(d => acCache.set(id, d?.response?.aircraft || null)).catch(() => acCache.set(id, null)));
+  if (!jobs.length) return;
+  await Promise.all(jobs);
+  if (selected === id) renderInfo();
+}
+
+function renderInfo() {
+  const p = planes.get(selected); if (!p) return;
+  const f = p.f, route = f.callsign ? routeCache.get(f.callsign) : undefined, ac = acCache.get(f.id);
+  const n = (v, k, u) => v == null || isNaN(v) ? "–" : Math.round(v * k).toLocaleString("sq-AL") + " " + u;
+  const ap = (a) => a ? `<div class="ap"><div class="code">${a.iata_code || a.icao_code}</div><div class="city">${a.municipality || a.name}<br>${a.country_name || ""}</div></div>` : "";
+  let routeHtml;
+  if (route === undefined && f.callsign) routeHtml = `<div class="route"><div class="ap city">Duke kërkuar rrugën…</div></div>`;
+  else if (route) routeHtml = `<div class="route">${ap(route.origin)}<div class="arrow">✈</div>${ap(route.destination)}</div>`;
+  else routeHtml = `<div class="route"><div class="ap city">Rruga nuk dihet</div></div>`;
+  const airline = route?.airline?.name;
+  const model = ac ? `${ac.manufacturer || ""} ${ac.type || ""}`.trim() : (f.desc || f.type);
+  const photo = ac?.url_photo_thumbnail || ac?.url_photo;
+  document.getElementById("infoBody").innerHTML = `
+    <h2>${f.callsign || f.reg || f.id.toUpperCase()}</h2>
+    <div class="sub">${[airline, model].filter(Boolean).join(" · ") || "&nbsp;"}</div>
+    ${routeHtml}
+    ${photo ? `<img src="${photo}" alt="" onerror="this.remove()">` : ""}
+    <div class="grid">
+      <div>Lartësia</div><div style="color:${altColor(f.alt)}">${n(f.alt, .3048, "m")} (${n(f.alt, 1, "ft")})</div>
+      <div>Shpejtësia</div><div>${n(f.gs, 1.852, "km/h")}</div>
+      <div>Drejtimi</div><div>${n(f.heading, 1, "°")}</div>
+      <div>Ngjitja/zbritja</div><div>${n(f.rate, .00508, "m/s")}</div>
+      <div>Regjistrimi</div><div>${f.reg || ac?.registration || "–"}</div>
+      <div>Pronari</div><div>${ac?.registered_owner || "–"}</div>
+      <div>ICAO24 · Squawk</div><div>${f.id.toUpperCase()} · ${f.squawk || "–"}</div>
+      <div>Gjurma</div><div>${p.trail.length} pika (që kur u hap faqja)</div>
+    </div>`;
+}
+
+function closeInfo() {
+  const p = planes.get(selected); selected = null;
+  if (p) p.marker.setIcon(icon(p.f, false));
+  trailLayer.clearLayers();
+  document.getElementById("info").style.display = "none";
+}
+
+// ---------- Kërkimi ----------
+const norm = s => (s || "").toUpperCase().replace(/[\s-]/g, "");
+document.getElementById("searchForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const q = norm(document.getElementById("q").value);
+  const box = document.getElementById("results");
+  if (!q) { box.style.display = "none"; return; }
+  const local = [...planes.values()].map(p => p.f)
+    .filter(f => norm(f.callsign).includes(q) || norm(f.reg).includes(q) || f.id.toUpperCase() === q);
+  let found = local;
+  if (!found.length) {
+    box.innerHTML = "<div>Duke kërkuar në gjithë botën…</div>"; box.style.display = "block";
+    try {
+      const d = await api(`/v2/callsign/${encodeURIComponent(q)}`);
+      found = (d.ac || []).filter(a => a.lat != null).map(toFlight);
+    } catch {}
+  }
+  if (!found.length) { box.innerHTML = "<div>Nuk u gjet asnjë fluturim aktiv</div>"; box.style.display = "block"; return; }
+  box.innerHTML = "";
+  for (const f of found.slice(0, 20)) {
+    const d = document.createElement("div");
+    d.textContent = `${f.callsign || f.reg || f.id.toUpperCase()} · ${f.desc || f.type || ""} · ${Math.round((f.alt || 0) * .3048)} m`;
+    d.onclick = () => goTo(f);
+    box.appendChild(d);
+  }
+  box.style.display = "block";
+  if (found.length === 1) goTo(found[0]);
+});
+
+function goTo(f) {
+  document.getElementById("results").style.display = "none";
+  document.getElementById("q").blur();
+  if (!planes.has(f.id)) {
+    const marker = L.marker([f.lat, f.lon], { icon: icon(f, true) }).addTo(map);
+    marker.on("click", () => select(f.id));
+    planes.set(f.id, { marker, f, trail: [[f.lat, f.lon, f.alt]], lastSeen: Date.now() });
+  }
+  map.setView([f.lat, f.lon], Math.max(map.getZoom(), 8));
+  select(f.id);
+}
+
+function setStatus(h) { document.getElementById("status").innerHTML = h; }
+
+let moveT;
+map.on("moveend", () => { clearTimeout(moveT); moveT = setTimeout(load, 800); });
+map.on("click", () => { document.getElementById("results").style.display = "none"; });
+document.getElementById("refresh").onclick = load;
+load();
+</script>
+</body>
+</html>
