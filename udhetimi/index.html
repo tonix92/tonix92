@@ -259,6 +259,56 @@
   #map{border:1px solid #E6D6BA}
   .hero{padding-bottom:84px!important}
   .hero .lead{max-width:30ch}
+
+  /* ---- Loading me simbole ---- */
+  .lmk{display:flex;flex-direction:column;align-items:center;gap:6px;margin:4px auto 14px;color:var(--sea)}
+  .lmk svg{width:92px;height:92px}
+  .lmk svg.draw path{stroke-dasharray:1;stroke-dashoffset:1;animation:lmkdraw 1.5s ease forwards}
+  .lmk span{font-family:var(--serif);font-size:15px;color:var(--terra);letter-spacing:.3px}
+  @keyframes lmkdraw{to{stroke-dashoffset:0}}
+  @media (prefers-reduced-motion:reduce){.lmk svg.draw path{animation:none;stroke-dashoffset:0}}
+  /* ---- Postimet ---- */
+  .post{background:var(--plaster);border:1px solid #E6D6BA;border-radius:20px;margin-bottom:18px;overflow:hidden;box-shadow:0 18px 36px -26px rgba(110,80,30,.5)}
+  .post header{display:flex;align-items:center;gap:10px;padding:12px 14px}
+  .post header a{font-weight:700;color:var(--sea);cursor:pointer}
+  .post header small{display:block;color:var(--mut);font-size:12.5px}
+  .av{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+  .pimg{cursor:pointer;background:#E9DCC4}
+  .pimg img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+  .fcover{aspect-ratio:4/3;display:flex;flex-direction:column;justify-content:flex-end;padding:22px;color:var(--plaster);
+    background:radial-gradient(circle at 82% 22%,#E3C25A 0 34px,transparent 35px),linear-gradient(180deg,#2A6496,#1F4E79)}
+  .fcover span{font-family:var(--serif);font-size:38px;line-height:1.05}
+  .fcover small{opacity:.8;margin-top:4px}
+  .pact{display:flex;align-items:center;gap:4px;padding:8px 8px 0}
+  .pact button{border:0;background:none;display:flex;align-items:center;gap:6px;padding:6px 8px;color:var(--sea);font:inherit;font-weight:600;cursor:pointer;border-radius:10px}
+  .pact button:hover{background:#F1E6D2}
+  .pact .see{margin-left:auto;color:var(--terra)}
+  .pcap{margin:4px 16px 2px;font-size:14.5px;line-height:1.45;white-space:pre-line}
+  .pcap b{color:var(--sea)}
+  .pdate{display:block;color:var(--mut);font-size:12px;margin:2px 16px 14px}
+  .likebtn{display:inline-flex;align-items:center;gap:6px}
+  .likebtn svg{width:18px;height:18px}
+  .rphoto{width:calc(100% + 44px);margin:-22px -22px 16px;max-height:520px;object-fit:cover;border-radius:20px 20px 0 0;display:block}
+  .rcap{font-size:15px;white-space:pre-line;margin:0 0 10px;color:var(--txt)}
+  .pcard .thumb{flex:none;width:52px;height:52px;border-radius:14px;object-fit:cover}
+  /* ---- Persona ---- */
+  .uhead{font-weight:700;color:var(--sea);margin:2px 2px 8px}
+  .ulist{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:8px}
+  .uchip{flex:none;display:flex;align-items:center;gap:8px;background:var(--plaster);border:1px solid #E6D6BA;border-radius:999px;padding:5px 14px 5px 5px;cursor:pointer;font:inherit;text-align:left;max-width:260px}
+  .uchip b{display:block;color:var(--sea);font-size:14px}
+  .uchip small{display:block;color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+  /* ---- Komentet ---- */
+  .cmth{font-family:var(--serif);font-weight:400;color:var(--sea);margin:0 0 10px;font-size:22px}
+  .cmt{display:flex;gap:10px;padding:9px 0;border-top:1px solid #EEE2CC;font-size:14.5px;line-height:1.4}
+  .cmt .av{width:30px;height:30px;font-size:11px}
+  .cmt b{color:var(--sea);cursor:pointer}
+  .cmt small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+  .cmt small a{color:var(--terra);cursor:pointer}
+  .cmtform{display:flex;gap:8px;margin-top:10px}
+  .cmtform input{flex:1;margin:0}
+  /* ---- Modal postimi ---- */
+  .photopick{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin:14px 0 4px;min-height:120px;border:2px dashed #D9C6A4;border-radius:16px;cursor:pointer;color:var(--sea);font-weight:600;padding:10px;text-align:center}
+  .photopick img{max-width:100%;max-height:300px;border-radius:12px}
   .quota{margin-top:12px;font-size:13.5px;color:var(--mut);text-align:center;line-height:1.6}
   .quota button.link{border:0;background:none;padding:0;font:inherit;color:var(--terra);font-weight:600;text-decoration:underline;cursor:pointer}
   .quota.none{color:var(--terra);font-weight:600}
@@ -335,7 +385,7 @@
     <div class="err" id="err"></div>
   </div>
   <div class="loading card" id="loading">
-    <div class="spin"></div>
+    <div class="lmk" aria-hidden="true"><svg id="lmkSvg" viewBox="0 0 100 100"></svg><span id="lmkName"></span></div>
     <b id="loadMsg"></b>
     <div style="color:var(--mut);font-size:14px;margin-top:6px" data-i18n="load_sub"></div>
   </div>
@@ -345,11 +395,13 @@
 <section class="view" id="v-plan">
   <div class="note" id="saveNote" style="display:none"></div>
   <div class="actions" id="planActions"></div>
-  <div class="card rhead"><h2 id="rTitle"></h2><p id="rSummary"></p><div class="by" id="rBy"></div></div>
+  <div class="card rhead"><img id="rPhoto" class="rphoto" alt="" style="display:none"><p id="rCaption" class="rcap" style="display:none"></p><h2 id="rTitle"></h2><p id="rSummary"></p><div class="by" id="rBy"></div></div>
   <div class="daytabs" id="dayTabs"></div>
   <div id="map"></div>
   <div class="card" id="dayCard"></div>
   <div class="card"><b data-i18n="tips"></b><ul class="tips" id="rTips"></ul><div id="rCost" style="color:var(--mut);font-size:14px"></div></div>
+  <div class="card cmts" id="cmtCard" style="display:none"><h3 class="cmth" id="cmtH"></h3><div id="cmtList"></div>
+    <div class="cmtform" id="cmtForm"><input id="cmtIn" maxlength="500" data-i18n-ph="cm_ph" onkeydown="if(event.key==='Enter')addComment()"><button class="btn2 pri" onclick="addComment()" data-i18n="cm_send"></button></div></div>
   <div class="foot" data-i18n="foot"></div>
 </section>
 
@@ -370,6 +422,7 @@
     <button data-s="following" data-i18n="ex_following"></button>
   </div>
   <input id="exSearch" data-i18n-ph="ex_ph" style="margin-bottom:12px">
+  <div id="exUsers"></div>
   <div id="exList"></div>
 </section>
 
@@ -429,6 +482,22 @@
   </div>
 </div>
 
+<div class="modal-bg" id="postBg" onclick="if(event.target===this)closeModal('postBg')">
+  <div class="modal">
+    <button class="x" onclick="closeModal('postBg')">×</button>
+    <h3 id="postH"></h3>
+    <div style="color:var(--mut);font-size:14px" data-i18n="post_sub"></div>
+    <label class="photopick" id="photoPick">
+      <input type="file" accept="image/*" id="postFile" onchange="pickPhoto(this.files[0])" hidden>
+      <img id="postPrev" alt="" style="display:none"><span id="postPickTxt" data-i18n="post_photo"></span>
+    </label>
+    <label data-i18n="post_cap_lbl"></label>
+    <textarea id="postCap" maxlength="600" rows="3" data-i18n-ph="post_cap_ph"></textarea>
+    <button class="go" id="postBtn" onclick="postNow()"></button>
+    <button class="go sec" id="unpostBtn" onclick="unpost()" data-i18n="post_unpost"></button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -463,7 +532,7 @@ const I18N = {
     mine_h: "Planet e mia", mine_lead_in: "Të gjitha planet që ke krijuar ose ruajtur.",
     mine_lead_out: "Hyr ose krijo llogari që t'i ruash planet përgjithmonë dhe t'i ndash.", mine_local: "Planet ruhen në këtë telefon.",
     create_acct_btn: "Krijo llogari", empty_mine: "Ende asnjë plan.", create_first: "✨ Krijo të parin",
-    ex_h: "Zbulo plane", ex_lead: "Plane të ndara nga udhëtarë të tjerë. Ruaje cilindo të pëlqen.", ex_ph: "🔍 Kërko qytetin…",
+    ex_h: "Zbulo plane", ex_lead: "Plane të ndara nga udhëtarë të tjerë. Ruaje cilindo të pëlqen.", ex_ph: "Kërko qytet ose person…", a_post: "📸 Posto", a_edit_post: "📸 Ndrysho postimin", post_h: "Posto planin", post_edit_h: "Ndrysho postimin", post_sub: "Postimi shfaqet te \"Zbulo\", ku të tjerët mund ta pëlqejnë dhe komentojnë.", post_photo: "Shto një foto nga udhëtimi (opsionale)", post_photo_change: "Ndrysho foton", post_cap_lbl: "Përshkrimi", post_cap_ph: "Si ishte udhëtimi? Ndonjë këshillë për të tjerët?", post_btn: "Posto", post_update: "Ruaj ndryshimet", post_unpost: "Hiq postimin", posting: "Duke postuar…", posted: "U postua!", unposted: "Postimi u hoq.", post_login: "Krijo llogari falas për të postuar planet.", ex_open: "Shiko planin", cm_h: "Komentet", cm_ph: "Shkruaj një koment…", cm_send: "Dërgo", cm_login: "Hyr për të komentuar.", cm_empty: "Ende pa komente. Bëhu i pari!", cm_del: "Fshi", users_h: "Persona", photo_big: "Fotoja është shumë e madhe ose nuk lexohet.",
     ex_empty: "Ende asnjë plan publik. Bëhu i pari që e ndan!", ex_empty_q: "Asnjë plan për këtë qytet ende.", ex_off: "Kjo pjesë aktivizohet kur të lidhet databaza.",
     loading: "Duke ngarkuar…",
     b_public: "publik", b_private: "privat", b_local: "vetëm në këtë telefon", by: a => `nga ${a}`, days_badge: n => `${n}<br>ditë`,
@@ -520,7 +589,7 @@ const I18N = {
     mine_h: "My plans", mine_lead_in: "All the plans you've created or saved.",
     mine_lead_out: "Log in or create an account to keep your plans forever and share them.", mine_local: "Plans are saved on this device.",
     create_acct_btn: "Create account", empty_mine: "No plans yet.", create_first: "✨ Create your first",
-    ex_h: "Explore plans", ex_lead: "Plans shared by other travellers. Save any you like.", ex_ph: "🔍 Search a city…",
+    ex_h: "Explore plans", ex_lead: "Plans shared by other travellers. Save any you like.", ex_ph: "Search a city or a person…", a_post: "📸 Post", a_edit_post: "📸 Edit post", post_h: "Post your plan", post_edit_h: "Edit post", post_sub: "Your post appears in \"Explore\", where others can like and comment on it.", post_photo: "Add a photo from your trip (optional)", post_photo_change: "Change photo", post_cap_lbl: "Caption", post_cap_ph: "How was the trip? Any tips for others?", post_btn: "Post", post_update: "Save changes", post_unpost: "Remove post", posting: "Posting…", posted: "Posted!", unposted: "Post removed.", post_login: "Create a free account to post your plans.", ex_open: "View plan", cm_h: "Comments", cm_ph: "Write a comment…", cm_send: "Send", cm_login: "Log in to comment.", cm_empty: "No comments yet. Be the first!", cm_del: "Delete", users_h: "People", photo_big: "The photo is too large or can't be read.",
     ex_empty: "No public plans yet. Be the first to share one!", ex_empty_q: "No plans for this city yet.", ex_off: "This section turns on once the database is connected.",
     loading: "Loading…",
     b_public: "public", b_private: "private", b_local: "this device only", by: a => `by ${a}`, days_badge: n => `${n}<br>${n === 1 ? "day" : "days"}`,
@@ -577,7 +646,7 @@ const I18N = {
     mine_h: "Meine Pläne", mine_lead_in: "Alle Pläne, die du erstellt oder gespeichert hast.",
     mine_lead_out: "Melde dich an oder erstelle ein Konto, um deine Pläne dauerhaft zu speichern und zu teilen.", mine_local: "Pläne werden auf diesem Gerät gespeichert.",
     create_acct_btn: "Konto erstellen", empty_mine: "Noch keine Pläne.", create_first: "✨ Ersten Plan erstellen",
-    ex_h: "Pläne entdecken", ex_lead: "Von anderen Reisenden geteilte Pläne. Speichere, was dir gefällt.", ex_ph: "🔍 Stadt suchen…",
+    ex_h: "Pläne entdecken", ex_lead: "Von anderen Reisenden geteilte Pläne. Speichere, was dir gefällt.", ex_ph: "Stadt oder Person suchen…", a_post: "📸 Posten", a_edit_post: "📸 Beitrag bearbeiten", post_h: "Plan posten", post_edit_h: "Beitrag bearbeiten", post_sub: "Dein Beitrag erscheint unter \"Entdecken\", wo andere ihn liken und kommentieren können.", post_photo: "Foto von deiner Reise hinzufügen (optional)", post_photo_change: "Foto ändern", post_cap_lbl: "Beschreibung", post_cap_ph: "Wie war die Reise? Tipps für andere?", post_btn: "Posten", post_update: "Änderungen speichern", post_unpost: "Beitrag entfernen", posting: "Wird gepostet…", posted: "Gepostet!", unposted: "Beitrag entfernt.", post_login: "Erstelle ein kostenloses Konto, um Pläne zu posten.", ex_open: "Plan ansehen", cm_h: "Kommentare", cm_ph: "Schreib einen Kommentar…", cm_send: "Senden", cm_login: "Melde dich an, um zu kommentieren.", cm_empty: "Noch keine Kommentare. Sei der Erste!", cm_del: "Löschen", users_h: "Personen", photo_big: "Das Foto ist zu groß oder kann nicht gelesen werden.",
     ex_empty: "Noch keine öffentlichen Pläne. Teile als Erste:r!", ex_empty_q: "Noch keine Pläne für diese Stadt.", ex_off: "Dieser Bereich wird aktiv, sobald die Datenbank verbunden ist.",
     loading: "Lädt…",
     b_public: "öffentlich", b_private: "privat", b_local: "nur auf diesem Gerät", by: a => `von ${a}`, days_badge: n => `${n}<br>${n === 1 ? "Tag" : "Tage"}`,
@@ -803,7 +872,7 @@ async function makePlan(req) {
   if (!req.city) { err.textContent = t("need_city"); err.style.display = "block"; return; }
   go("create");
   const btn = document.getElementById("goBtn"); btn.disabled = true;
-  const load = document.getElementById("loading"); load.style.display = "block";
+  const load = document.getElementById("loading"); load.style.display = "block"; startLmk();
   load.scrollIntoView({ behavior: "smooth", block: "center" });
   const msgs = t("loads");
   let mi = 0; const msgEl = document.getElementById("loadMsg"); msgEl.textContent = msgs[0];
@@ -822,8 +891,33 @@ async function makePlan(req) {
   } catch (e) {
     err.textContent = "⚠️ " + (/fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message);
     err.style.display = "block";
-  } finally { clearInterval(tick); load.style.display = "none"; btn.disabled = false; }
+  } finally { clearInterval(tick); stopLmk(); load.style.display = "none"; btn.disabled = false; }
 }
+
+// ---- Ngarkimi: simbole qytetesh që vizatohen një nga një ----
+const LMK = [
+  { n: "Paris", vb: "0 -4 80 128", d: '<path d="M40 0v8M37 8h6l2 30h-10zM35 38h10l6 34H29zM27 72h26M29 72q-8 30-20 48M51 72q8 30 20 48M9 120h12q19-30 38 0h12M33 50h14M24 98h32"/>' },
+  { n: "Roma", vb: "-4 -20 128 128", d: '<path d="M0 70V30q0-14 60-14t60 14v40zM0 30q60 10 120 0M0 50q60 10 120 0M12 70V58q4-6 8 0v12M32 70V60q4-6 8 0v10M52 70V61q4-6 8 0v9M72 70V61q4-6 8 0v9M92 70V60q4-6 8 0v10M12 42v-6q4-5 8 0v6M32 44v-6q4-5 8 0v6M52 45v-6q4-5 8 0v6M72 45v-6q4-5 8 0v6M92 44v-6q4-5 8 0v6"/>' },
+  { n: "London", vb: "-34 -2 128 128", d: '<path d="M30 0l-8 22h16zM22 22h16v10H22zM18 32h24v18H18zM20 50h20v70H20zM14 120h32M24 41a6 6 0 1 0 12 0a6 6 0 1 0-12 0M30 41v-4M30 41l3 2M25 62h10M25 80h10M25 98h10"/>' },
+  { n: "Pisa", vb: "-28 -2 128 128", d: '<g transform="rotate(5 30 120)"><path d="M14 20h32v100H14zM16 10h28v10H16zM20 4h20v6H20zM14 40h32M14 60h32M14 80h32M14 100h32M20 26v10M30 26v10M40 26v10M20 66v10M30 66v10M40 66v10"/></g><path d="M-4 124h70"/>' },
+  { n: "Berlin", vb: "-4 -16 138 138", d: '<path d="M0 100h130M4 100V40h122v60M0 40h130M0 30h130v10H0zM40 30V18h50v12M56 18v-8h18v8M60 10q5-8 10 0M16 40v60M30 40v60M48 40v60M62 40v60M68 40v60M82 40v60M100 40v60M114 40v60"/>' },
+  { n: "Athinë", vb: "-6 -4 112 112", d: '<path d="M0 90h100M6 90V44h88v46M0 44l50-26 50 26zM20 44l30-16 30 16M14 44v46M28 44v46M42 44v46M58 44v46M72 44v46M86 44v46"/>' },
+  { n: "Amsterdam", vb: "-4 -12 92 96", d: '<path d="M30 80V30h20v50M26 80h28M30 30l10-12 10 12M36 80V64h8v16M40 22L12-4M40 22l28-26M40 22l-26 26M40 22l26 26M12-4l-4 8 26 22M68-4l4 8-26 22M14 48l-6-6 24-22M66 48l6-6-24-22"/>' },
+  { n: "Barcelona", vb: "-4 -18 128 128", d: '<path d="M0 92h120M10 92V40l6-34 6 34v52M30 92V30l7-30 7 30v62M52 92V20l8-24 8 24v72M76 92V30l7-30 7 30v62M98 92V40l6-34 6 34v52M60 50v42M56 70h8"/>' },
+  { n: "Istanbul", vb: "-4 -12 128 128", d: '<path d="M10 92h100M20 92V56h80v36M30 56q30-50 60 0M44 34q16-14 32 0M60 22v-8M4 92V20M116 92V20M4 20V8M116 20V8M2 30h4M114 30h4M36 92V74q4-6 8 0v18M56 92V72q4-6 8 0v20M76 92V74q4-6 8 0v18"/>' },
+];
+let lmkTimer = null, lmkI = 0;
+function showLmk() {
+  const L = LMK[lmkI % LMK.length]; lmkI++;
+  const svg = document.getElementById("lmkSvg"); if (!svg) return;
+  svg.setAttribute("viewBox", L.vb);
+  svg.innerHTML = `<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${L.d}</g>`;
+  svg.querySelectorAll("path").forEach(p => p.setAttribute("pathLength", "1"));
+  svg.classList.remove("draw"); void svg.getBoundingClientRect(); svg.classList.add("draw");
+  document.getElementById("lmkName").textContent = L.n;
+}
+function startLmk() { stopLmk(); lmkI = Math.floor(Math.random() * LMK.length); showLmk(); lmkTimer = setInterval(showLmk, 1900); }
+function stopLmk() { clearInterval(lmkTimer); lmkTimer = null; }
 
 // ================== RUAJTJA ==================
 const strip = p => { const c = JSON.parse(JSON.stringify(p, (k, v) => k === "_marker" ? undefined : v)); delete c.usage; delete c.remaining; delete c.quota; delete c.guest; delete c.cached; return c; };
@@ -858,7 +952,7 @@ async function migrateLocal() {
 function planCard(o) {
   const pub = o.is_public ? `<span class="pill pub">${t("b_public")}</span>` : o.local ? `<span class="pill">${t("b_local")}</span>` : `<span class="pill">${t("b_private")}</span>`;
   const meta = [o.country, o.author && view === "explore" ? t("by", o.author) : null, o.date, o.saves ? `⭐ ${o.saves}` : null].filter(Boolean).join(" · ");
-  return `<div class="pcard" onclick="${o.onclick}"><div class="badge">${t("days_badge", o.days)}</div>
+  return `<div class="pcard" onclick="${o.onclick}">${o.photo_url ? `<img class="thumb" src="${esc(o.photo_url)}" alt="" loading="lazy">` : `<div class="badge">${t("days_badge", o.days)}</div>`}
     <div class="t"><b>${esc(o.city)} ${view === "mine" || (view === "profile" && o.mine) ? pub : ""}</b><small>${esc(o.title || "")}</small><br><small>${esc(meta)}</small></div>${o.likes ? `<span class="likes">❤️ ${o.likes}</span>` : ""}<span>›</span></div>`;
 }
 const fmtDate = d => new Date(d).toLocaleDateString(t("locale"), LANG === "sq" ? { day: "2-digit", month: "2-digit", year: "numeric" } : { day: "numeric", month: "short", year: "numeric" });
@@ -870,7 +964,7 @@ async function loadMine() {
   if (!user) {
     lead.innerHTML = sb ? `${t("mine_lead_out")} <button class="btn2 pri" onclick="showAuth('signup')" style="margin-top:8px">${t("create_acct_btn")}</button>` : t("mine_local");
   } else { lead.textContent = t("mine_lead_in"); box.innerHTML = `<div class="empty">${t("loading")}</div>`;
-    const { data, error } = await sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
+    const { data, error } = await sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,photo_url,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
     if (error) html += `<div class="err" style="display:block">${esc(error.message)}</div>`;
     (data || []).forEach(r => html += planCard({ ...r, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` }));
   }
@@ -889,12 +983,13 @@ document.getElementById("exTabs").addEventListener("click", e => {
   loadExplore();
 });
 async function loadExplore() {
-  const box = document.getElementById("exList");
+  const box = document.getElementById("exList"), ub = document.getElementById("exUsers");
   if (!sb) { box.innerHTML = `<div class="empty">${t("ex_off")}</div>`; return; }
   box.innerHTML = `<div class="empty">${t("loading")}</div>`;
-  let q = sb.from("plans").select("id,user_id,city,country,days,title,author_name,saves,likes,created_at").eq("is_public", true);
-  const s = aVal("exSearch");
-  if (s) q = q.ilike("city", `%${s.replace(/[%_,()]/g, "")}%`);
+  const s = aVal("exSearch").replace(/[%_,()]/g, "").trim();
+  loadUserSearch(s);
+  let q = sb.from("plans").select("id,user_id,city,country,days,title,author_name,saves,likes,comments,photo_url,caption,created_at,posted_at").eq("is_public", true);
+  if (s) q = q.ilike("city", `%${s}%`);
   if (exSort === "following") {
     if (!user) { box.innerHTML = `<div class="empty">${t("follow_login")}<br><br><button class="btn2 pri" onclick="showAuth('signup')">${t("create_acct_btn")}</button></div>`; return; }
     const { data: f } = await sb.from("follows").select("followee").eq("follower", user.id);
@@ -902,11 +997,54 @@ async function loadExplore() {
     if (!ids.length) { box.innerHTML = `<div class="empty">${t("follow_none")}</div>`; return; }
     q = q.in("user_id", ids);
   }
-  q = exSort === "top" ? q.order("likes", { ascending: false }).order("created_at", { ascending: false }) : q.order("created_at", { ascending: false });
-  const { data, error } = await q.limit(40);
+  q = exSort === "top" ? q.order("likes", { ascending: false }).order("created_at", { ascending: false })
+                       : q.order("posted_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
+  const { data, error } = await q.limit(30);
   if (error) { box.innerHTML = `<div class="err" style="display:block">${esc(error.message)}</div>`; return; }
-  box.innerHTML = (data || []).map(r => planCard({ ...r, author: r.author_name, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` })).join("")
-    || `<div class="empty">${s ? t("ex_empty_q") : t("ex_empty")}</div>`;
+  const rows = data || [];
+  let likedSet = new Set();
+  if (user && rows.length) {
+    const { data: lk } = await sb.from("likes").select("plan_id").eq("user_id", user.id).in("plan_id", rows.map(r => r.id));
+    likedSet = new Set((lk || []).map(x => x.plan_id));
+  }
+  feedRows = Object.fromEntries(rows.map(r => [r.id, r]));
+  box.innerHTML = rows.map(r => feedCard(r, likedSet.has(r.id))).join("") || `<div class="empty">${s ? t("ex_empty_q") : t("ex_empty")}</div>`;
+}
+let feedRows = {};
+const HEART = on => `<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" fill="${on ? "#C2412D" : "none"}" stroke="${on ? "#C2412D" : "currentColor"}" stroke-width="1.8"/></svg>`;
+const BUBBLE = `<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 5.5h16v10.5H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+function coverHtml(r) {
+  if (r.photo_url) return `<img src="${esc(r.photo_url)}" alt="${esc(r.city)}" loading="lazy">`;
+  return `<div class="fcover"><span>${esc(r.city)}</span><small>${esc(t("days_n", r.days))}</small></div>`;
+}
+function feedCard(r, liked) {
+  const name = r.author_name || "—";
+  return `<article class="post">
+    <header><span class="av" style="background:${avColor(r.user_id)}" onclick="openProfile('${r.user_id}')">${esc(initials(name))}</span>
+      <div><a onclick="openProfile('${r.user_id}')">${esc(name)}</a><small>${esc([r.city, r.country].filter(Boolean).join(", "))} · ${esc(t("days_n", r.days))}</small></div></header>
+    <div class="pimg" onclick="openById('${r.id}')">${coverHtml(r)}</div>
+    <div class="pact"><button class="lk ${liked ? "on" : ""}" onclick="feedLike('${r.id}',this)">${HEART(liked)}<span>${r.likes || 0}</span></button>
+      <button onclick="openById('${r.id}',true)">${BUBBLE}<span>${r.comments || 0}</span></button>
+      <button class="see" onclick="openById('${r.id}')">${esc(t("ex_open"))}</button></div>
+    ${r.caption ? `<p class="pcap"><b>${esc(name)}</b> ${esc(r.caption)}</p>` : `<p class="pcap"><b>${esc(r.title || "")}</b></p>`}
+    <small class="pdate">${esc(fmtDate(r.posted_at || r.created_at))}</small>
+  </article>`;
+}
+async function feedLike(id, btn) {
+  if (!user) return showAuth("signup", t("like_login"));
+  const on = btn.classList.contains("on"), r = feedRows[id];
+  const res = on ? await sb.from("likes").delete().eq("user_id", user.id).eq("plan_id", id) : await sb.from("likes").insert({ user_id: user.id, plan_id: id });
+  if (res.error) return toast(t("err") + res.error.message);
+  r.likes = Math.max(0, (r.likes || 0) + (on ? -1 : 1));
+  btn.classList.toggle("on", !on); btn.innerHTML = `${HEART(!on)}<span>${r.likes}</span>`;
+}
+async function loadUserSearch(s) {
+  const ub = document.getElementById("exUsers");
+  if (!s || s.length < 2) { ub.innerHTML = ""; return; }
+  const { data } = await sb.from("profiles").select("id,name,bio").ilike("name", `%${s}%`).limit(8);
+  if (aVal("exSearch").replace(/[%_,()]/g, "").trim() !== s) return;
+  ub.innerHTML = (data || []).length ? `<div class="uhead">${esc(t("users_h"))}</div><div class="ulist">` + data.map(u =>
+    `<button class="uchip" onclick="openProfile('${u.id}')"><span class="av" style="background:${avColor(u.id)}">${esc(initials(u.name))}</span><span><b>${esc(u.name || "—")}</b>${u.bio ? `<small>${esc(u.bio.slice(0, 60))}</small>` : ""}</span></button>`).join("") + `</div>` : "";
 }
 
 // ================== PROFILI ==================
@@ -923,7 +1061,7 @@ async function openProfile(id) {
   const isMe = user && user.id === id;
   const [{ data: prof }, plansRes, fol, fing, amI] = await Promise.all([
     sb.from("profiles").select("id,name,bio").eq("id", id).maybeSingle(),
-    (() => { let q = sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,created_at").eq("user_id", id); if (!isMe) q = q.eq("is_public", true); return q.order("created_at", { ascending: false }).limit(60); })(),
+    (() => { let q = sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,photo_url,created_at").eq("user_id", id); if (!isMe) q = q.eq("is_public", true); return q.order("created_at", { ascending: false }).limit(60); })(),
     sb.from("follows").select("follower", { count: "exact", head: true }).eq("followee", id),
     sb.from("follows").select("followee", { count: "exact", head: true }).eq("follower", id),
     user && !isMe ? sb.from("follows").select("followee").eq("follower", user.id).eq("followee", id).maybeSingle() : Promise.resolve({ data: null }),
@@ -990,11 +1128,12 @@ async function toggleLike() {
   renderActions();
 }
 
-async function openById(id) {
+async function openById(id, toComments) {
   if (!sb) return;
   const { data, error } = await sb.from("plans").select("*").eq("id", id).maybeSingle();
   if (error || !data) { toast(t("not_found")); go("create"); return; }
   openPlan(data.data, data, user && data.user_id === user.id ? "own" : "shared");
+  if (toComments) setTimeout(() => document.getElementById("cmtCard").scrollIntoView({ behavior: "smooth", block: "start" }), 400);
 }
 function openLocal(id) { const x = localList().find(l => l.localId === id); if (x) openPlan(x.plan, { localId: id }, "own"); }
 
@@ -1007,6 +1146,7 @@ function openPlan(p, r, m) {
   openPlanHeader();
   renderActions();
   loadLikeState();
+  loadComments();
   renderTabs();
   if (!map) {
     map = L.map("map", { scrollWheelZoom: false });
@@ -1019,6 +1159,9 @@ function openPlan(p, r, m) {
 
 function openPlanHeader() {
   const p = plan;
+  const ph = document.getElementById("rPhoto"), cap = document.getElementById("rCaption");
+  ph.style.display = row.photo_url && row.is_public ? "block" : "none"; if (row.photo_url) ph.src = row.photo_url;
+  cap.style.display = row.caption && row.is_public ? "block" : "none"; cap.textContent = row.caption || "";
   document.getElementById("rTitle").textContent = p.title || p.city?.name;
   document.getElementById("rSummary").textContent = p.summary || "";
   const by = document.getElementById("rBy");
@@ -1036,9 +1179,11 @@ function renderActions() {
   const A = document.getElementById("planActions"), N = document.getElementById("saveNote");
   N.style.display = "none";
   let h = "";
-  if (row.id && row.is_public) h += `<button class="btn2 likebtn ${liked ? "on" : ""}" onclick="toggleLike()">${liked ? "❤️" : "🤍"} ${row.likes || 0}</button>`;
+  if (row.id && row.is_public) h += `<button class="btn2 likebtn ${liked ? "on" : ""}" onclick="toggleLike()">${HEART(liked)} ${row.likes || 0}</button>`
+    + `<button class="btn2 likebtn" onclick="document.getElementById('cmtCard').scrollIntoView({behavior:'smooth'})">${BUBBLE} ${row.comments || 0}</button>`;
   if (mode === "own") {
-    h += `<button class="btn2 pri" onclick="openShare()">${t("a_share")}</button>`;
+    h += `<button class="btn2 pri" onclick="openPost()">${row.is_public ? t("a_edit_post") : t("a_post")}</button>`;
+    h += `<button class="btn2" onclick="openShare()">${t("a_share")}</button>`;
     h += `<button class="btn2" onclick="regenerate()">${t("a_regen")}</button>`;
     h += `<button class="btn2" onclick="copyPlan()">${t("a_copy")}</button>`;
     h += `<button class="btn2" onclick="deletePlan()">🗑️</button>`;
@@ -1149,6 +1294,98 @@ function planText() {
 }
 async function copyPlan() { try { await navigator.clipboard.writeText(planText()); toast(t("copied")); } catch { toast(t("copy_fail")); } }
 
+// ================== POSTIMET (si Instagram) ==================
+let postBlob = null;
+function openPost() {
+  if (!sb) return toast(t("accounts_off"));
+  if (!user || !row.id) return showAuth("signup", t("post_login"));
+  postBlob = null;
+  const posted = !!row.is_public;
+  document.getElementById("postH").textContent = posted ? t("post_edit_h") : t("post_h");
+  document.getElementById("postCap").value = row.caption || "";
+  const prev = document.getElementById("postPrev");
+  prev.style.display = row.photo_url ? "block" : "none"; if (row.photo_url) prev.src = row.photo_url;
+  document.getElementById("postPickTxt").textContent = row.photo_url ? t("post_photo_change") : t("post_photo");
+  document.getElementById("postBtn").textContent = posted ? t("post_update") : t("post_btn");
+  document.getElementById("unpostBtn").style.display = posted ? "block" : "none";
+  document.getElementById("postFile").value = "";
+  openModal("postBg");
+}
+async function pickPhoto(file) {
+  if (!file) return;
+  try {
+    const img = await createImageBitmap(file, { imageOrientation: "from-image" }).catch(() => createImageBitmap(file));
+    const k = Math.min(1, 1080 / Math.max(img.width, img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    postBlob = await new Promise(r => c.toBlob(r, "image/jpeg", 0.82));
+    const prev = document.getElementById("postPrev"); prev.src = URL.createObjectURL(postBlob); prev.style.display = "block";
+    document.getElementById("postPickTxt").textContent = t("post_photo_change");
+  } catch { postBlob = null; toast(t("photo_big")); }
+}
+async function postNow() {
+  const btn = document.getElementById("postBtn"); btn.disabled = true; btn.textContent = t("posting");
+  try {
+    let photo_url = row.photo_url || null;
+    if (postBlob) {
+      const path = `${user.id}/${row.id}-${Date.now()}.jpg`;
+      const up = await sb.storage.from("photos").upload(path, postBlob, { contentType: "image/jpeg", cacheControl: "31536000" });
+      if (up.error) throw up.error;
+      photo_url = sb.storage.from("photos").getPublicUrl(path).data.publicUrl;
+    }
+    const upd = { is_public: true, author_name: displayName(user), caption: document.getElementById("postCap").value.trim().slice(0, 600) || null, photo_url };
+    if (!row.is_public) upd.posted_at = new Date().toISOString();
+    const { error } = await sb.from("plans").update(upd).eq("id", row.id);
+    if (error) throw error;
+    Object.assign(row, upd);
+    closeModal("postBg"); toast(t("posted"));
+    openPlanHeader(); renderActions(); loadComments();
+  } catch (e) { toast(t("err") + (e.message || e)); }
+  finally { btn.disabled = false; btn.textContent = row.is_public ? t("post_update") : t("post_btn"); }
+}
+async function unpost() {
+  const { error } = await sb.from("plans").update({ is_public: false }).eq("id", row.id);
+  if (error) return toast(t("err") + error.message);
+  row.is_public = false; closeModal("postBg"); toast(t("unposted"));
+  openPlanHeader(); renderActions(); loadComments();
+}
+
+// ================== KOMENTET ==================
+const ago = d => { const s = (Date.now() - new Date(d)) / 1000; const rtf = new Intl.RelativeTimeFormat(t("locale"), { numeric: "auto" });
+  return s < 60 ? rtf.format(0, "second") : s < 3600 ? rtf.format(-Math.floor(s / 60), "minute") : s < 86400 ? rtf.format(-Math.floor(s / 3600), "hour") : s < 604800 ? rtf.format(-Math.floor(s / 86400), "day") : fmtDate(d); };
+async function loadComments() {
+  const card = document.getElementById("cmtCard");
+  if (!sb || !row.id || !row.is_public) { card.style.display = "none"; return; }
+  card.style.display = "block";
+  document.getElementById("cmtH").textContent = `${t("cm_h")} (${row.comments || 0})`;
+  const form = document.getElementById("cmtForm");
+  form.innerHTML = user ? `<input id="cmtIn" maxlength="500" placeholder="${esc(t("cm_ph"))}" onkeydown="if(event.key==='Enter')addComment()"><button class="btn2 pri" onclick="addComment()">${esc(t("cm_send"))}</button>`
+                        : `<button class="btn2 pri" onclick="showAuth('login')">${esc(t("cm_login"))}</button>`;
+  const id = row.id;
+  const { data } = await sb.from("comments").select("id,user_id,author_name,body,created_at").eq("plan_id", id).order("created_at", { ascending: true }).limit(200);
+  if (row.id !== id) return;
+  const list = data || [];
+  row.comments = list.length; document.getElementById("cmtH").textContent = `${t("cm_h")} (${list.length})`;
+  document.getElementById("cmtList").innerHTML = list.length ? list.map(c => `<div class="cmt">
+      <span class="av" style="background:${avColor(c.user_id)}" onclick="openProfile('${c.user_id}')">${esc(initials(c.author_name))}</span>
+      <div><b onclick="openProfile('${c.user_id}')">${esc(c.author_name || "—")}</b> ${esc(c.body)}<small>${esc(ago(c.created_at))}${user && (user.id === c.user_id || user.id === row.user_id) ? ` · <a onclick="delComment('${c.id}')">${esc(t("cm_del"))}</a>` : ""}</small></div></div>`).join("")
+    : `<div class="empty" style="padding:14px 0">${esc(t("cm_empty"))}</div>`;
+}
+async function addComment() {
+  const inp = document.getElementById("cmtIn"); const body = (inp?.value || "").trim();
+  if (!body || !user) return;
+  inp.disabled = true;
+  const { error } = await sb.from("comments").insert({ plan_id: row.id, user_id: user.id, author_name: displayName(user), body: body.slice(0, 500) });
+  inp.disabled = false;
+  if (error) return toast(t("err") + error.message);
+  inp.value = ""; await loadComments(); renderActions();
+}
+async function delComment(id) {
+  const { error } = await sb.from("comments").delete().eq("id", id);
+  if (error) return toast(t("err") + error.message);
+  await loadComments(); renderActions();
+}
+
 // ================== NDARJA ==================
 const shareUrl = () => row.id ? `${API}/p/${row.id}` : APP_URL;
 function openShare() {
@@ -1177,9 +1414,10 @@ function updateShareLinks() {
   document.getElementById("shTg").href = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
 }
 async function setPublic(v) {
-  const { error } = await sb.from("plans").update({ is_public: v, author_name: displayName(user) }).eq("id", row.id);
+  const upd = { is_public: v, author_name: displayName(user) }; if (v && !row.posted_at) upd.posted_at = new Date().toISOString();
+  const { error } = await sb.from("plans").update(upd).eq("id", row.id);
   if (error) { toast(t("err") + error.message); document.getElementById("pubToggle").checked = !v; return; }
-  row.is_public = v; updateShareLinks(); renderActions();
+  Object.assign(row, upd); updateShareLinks(); renderActions(); openPlanHeader(); loadComments();
   toast(v ? t("pub_on") : t("pub_off"));
 }
 async function copyLink() { try { await navigator.clipboard.writeText(shareUrl()); toast(t("link_copied")); } catch { document.getElementById("shareLink").select(); } }
