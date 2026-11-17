@@ -251,6 +251,55 @@
   #map{background:#1b1f24}
   .leaflet-control-attribution{background:rgba(14,26,44,.7)!important;color:#9AA6B4}
   .leaflet-control-attribution a{color:#C9A962}
+
+  /* ===== Colour layer ===== */
+  :root{--sun1:#FFB547;--sun2:#FF5E7E;--sun3:#9B6BFF;--sun4:#2ED3C0;--sunset:linear-gradient(100deg,#FFB547 0%,#FF5E7E 38%,#9B6BFF 72%,#2ED3C0 100%)}
+  body{background:
+    radial-gradient(700px 500px at 92% 4%,rgba(255,94,126,.30),transparent 62%),
+    radial-gradient(650px 520px at 8% 30%,rgba(155,107,255,.28),transparent 62%),
+    radial-gradient(700px 520px at 85% 78%,rgba(46,211,192,.22),transparent 62%),
+    radial-gradient(600px 420px at 15% 100%,rgba(255,181,71,.20),transparent 62%),
+    linear-gradient(180deg,#151B3D 0%,#0E1A2C 100%);background-attachment:fixed}
+  body::after{opacity:.5;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FFB547'/%3E%3Cstop offset='.35' stop-color='%23FF5E7E'/%3E%3Cstop offset='.65' stop-color='%239B6BFF'/%3E%3Cstop offset='1' stop-color='%232ED3C0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url%28%23g%29' stroke-width='.28'%3E%3Ccircle cx='50' cy='50' r='49.5' stroke-width='.5'/%3E%3Cellipse cx='50' cy='50' rx='9' ry='49.5'/%3E%3Cellipse cx='50' cy='50' rx='20' ry='49.5'/%3E%3Cellipse cx='50' cy='50' rx='31' ry='49.5'/%3E%3Cellipse cx='50' cy='50' rx='41' ry='49.5'/%3E%3Cpath d='M50 .5v99M16 14H84M6.7 26H93.3M2 38H98M.5 50H99.5M2 62H98M6.7 74H93.3M16 86H84'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat}
+  .top{border-bottom:0;box-shadow:0 1px 0 rgba(255,255,255,.06)}
+  .top::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--sunset);opacity:.9}
+  .brand .mark{color:var(--sun1)}
+  .nav button.on{border-bottom-color:transparent;background:var(--sunset) bottom/100% 2px no-repeat}
+  .acct{border-color:rgba(255,94,126,.6);color:#FFC2CF}
+  .hero h1{background:linear-gradient(100deg,#FFE3B0 0%,#FFB547 25%,#FF5E7E 55%,#B98BFF 85%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:4px}
+  .card,.pcard{border:1px solid rgba(255,255,255,.09);background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.025))}
+  .card{position:relative}
+  .card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(140deg,rgba(255,181,71,.55),rgba(255,94,126,.25) 35%,rgba(155,107,255,.15) 65%,rgba(46,211,192,.5));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  #interests .chip{border-color:color-mix(in srgb,var(--c,#fff) 45%,transparent);color:color-mix(in srgb,var(--c,#fff) 70%,#fff)}
+  #interests .chip.on{background:var(--c);border-color:var(--c);color:#14122B;box-shadow:0 6px 18px -8px var(--c)}
+  #interests .chip:nth-child(1){--c:#FF7A59}
+  #interests .chip:nth-child(2){--c:#FFB547}
+  #interests .chip:nth-child(3){--c:#FF5E9C}
+  #interests .chip:nth-child(4){--c:#B57BFF}
+  #interests .chip:nth-child(5){--c:#3DD68C}
+  #interests .chip:nth-child(6){--c:#2ED3C0}
+  #interests .chip:nth-child(7){--c:#FF8A3D}
+  #interests .chip:nth-child(8){--c:#E85DFF}
+  #interests .chip:nth-child(9){--c:#7C8CFF}
+  #interests .chip:nth-child(10){--c:#FFD166}
+  #interests .chip:nth-child(11){--c:#5EC8FF}
+  #interests .chip:nth-child(12){--c:#FF6B8B}
+  .seg button.on{background:#fff;color:#1A1640}
+  .seg[data-name="pace"] button.on{background:linear-gradient(135deg,#2ED3C0,#5EC8FF);color:#0B1E2A}
+  .seg[data-name="transport"] button.on{background:linear-gradient(135deg,#B57BFF,#7C8CFF);color:#140F33}
+  .seg[data-name="budget"] button.on{background:linear-gradient(135deg,#FFD166,#FFB547);color:#2A1A00}
+  .seg[data-name="lang"] button.on{background:linear-gradient(135deg,#FF7A9A,#FF5E7E);color:#2A0712}
+  .stepper button{border-color:rgba(255,181,71,.4);color:#FFD08A}
+  .stepper b{color:#FFE3B0}
+  input:focus,textarea:focus{border-color:#FF5E7E;box-shadow:0 0 0 3px rgba(255,94,126,.18)}
+  .go{background:var(--sunset);background-size:160% 100%;color:#1A0F24;font-weight:700;box-shadow:0 16px 36px -14px rgba(255,94,126,.75),inset 0 1px 0 rgba(255,255,255,.4);transition:background-position .4s}
+  .go:hover{background:var(--sunset);background-size:160% 100%;background-position:100% 0}
+  .btn2.pri,.tabsm button.on{background:linear-gradient(135deg,#FF7A59,#FF5E7E);border-color:transparent;color:#2A0712}
+  .spin{border-color:rgba(255,255,255,.1);border-top-color:#FF5E7E;border-right-color:#FFB547}
+  .sbody .tip{color:#FFD166}
+  .pcard .badge{background:linear-gradient(135deg,rgba(255,181,71,.25),rgba(255,94,126,.25));color:#FFD08A}
+  .note{background:linear-gradient(135deg,rgba(255,181,71,.12),rgba(155,107,255,.12));border-color:rgba(255,181,71,.25)}
+  .rhead h2{background:linear-gradient(100deg,#FFE3B0,#FFB547 40%,#FF5E7E);-webkit-background-clip:text;background-clip:text;color:transparent}
 </style>
 </head>
 <body>
@@ -616,7 +665,7 @@ function setLang(l) {
 }
 document.getElementById("langSw").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.l); });
 
-const COLORS = ["#5FB3B0", "#D4B26A", "#D48A9E", "#8FA9E0", "#AFC271", "#DE9A62", "#7CC0DC"];
+const COLORS = ["#2ED3C0", "#FFB547", "#FF5E9C", "#9B8BFF", "#3DD68C", "#FF7A59", "#5EC8FF"];
 const LOCAL_KEY = "udhetimi_plans_v1";
 const sb = (SUPABASE_URL.startsWith("http") && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 let user = null;
