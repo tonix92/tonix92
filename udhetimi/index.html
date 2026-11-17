@@ -259,6 +259,12 @@
   #map{border:1px solid #E6D6BA}
   .hero{padding-bottom:84px!important}
   .hero .lead{max-width:30ch}
+  .quota{margin-top:12px;font-size:13.5px;color:var(--mut);text-align:center;line-height:1.6}
+  .quota button.link{border:0;background:none;padding:0;font:inherit;color:var(--terra);font-weight:600;text-decoration:underline;cursor:pointer}
+  .quota.none{color:var(--terra);font-weight:600}
+  .qdots{display:inline-flex;gap:4px;margin-right:8px;vertical-align:middle}
+  .qdots i{width:8px;height:8px;border-radius:50%;background:#E2D3BA}
+  .qdots i.on{background:var(--olive)}
   :root{--serif:"Young Serif",Georgia,serif;--sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif}
   h1,.rhead h2,.dayhead h3,.sbody .nm,.pcard .t b,.modal h3,.pfmain h2,#loadMsg,.stepper b,.brand,.num,.pcard .badge{font-weight:400!important}
   h1{letter-spacing:-.6px}
@@ -325,6 +331,7 @@
     <textarea id="notes" data-i18n-ph="notes_ph"></textarea>
 
     <button class="go" id="goBtn" onclick="makePlan()" data-i18n="go"></button>
+    <div class="quota" id="quota"></div>
     <div class="err" id="err"></div>
   </div>
   <div class="loading card" id="loading">
@@ -450,6 +457,7 @@ const I18N = {
     notes_ph: "p.sh. Mbërrij ditën e parë në 14:00. Dua ta shoh perëndimin e diellit.",
     go: "✨ Krijo planin", load_sub: "Zakonisht zgjat 15–40 sekonda",
     loads: ["Po kërkoj atraksionet…", "Po shoh cilat janë më të njohurat…", "Po i ndaj sipas zonave…", "Po e shkruaj planin ditë për ditë…", "Edhe pak…"],
+    q_left: (l, n) => `Të kanë mbetur ${l} nga ${n} plane këtë muaj.`, q_none: d => `I ke përdorur planet e këtij muaji. Të rejat vijnë më ${d}.`, q_guest: "Pa llogari: 1 plan provë në ditë.", q_guest_link: "Hyr falas për 5 plane në muaj",
     need_city: "Shkruaj qytetin.", no_conn: "Nuk u lidh me serverin. Kontrollo internetin.", bad_resp: "Përgjigje e pavlefshme nga serveri.",
     tips: "💡 Këshilla", foot: "Kontrollo oraret dhe çmimet para se të shkosh. Të dhënat: © OpenStreetMap, Wikidata · Plani: Claude",
     mine_h: "Planet e mia", mine_lead_in: "Të gjitha planet që ke krijuar ose ruajtur.",
@@ -506,6 +514,7 @@ const I18N = {
     notes_ph: "e.g. I arrive on day one at 2 pm. I'd love to catch the sunset.",
     go: "✨ Create my plan", load_sub: "Usually takes 15–40 seconds",
     loads: ["Finding attractions…", "Checking which are the most famous…", "Grouping them by area…", "Writing your day-by-day plan…", "Almost there…"],
+    q_left: (l, n) => `You have ${l} of ${n} plans left this month.`, q_none: d => `You've used this month's plans. New ones arrive on ${d}.`, q_guest: "Without an account: 1 trial plan a day.", q_guest_link: "Log in free for 5 plans a month",
     need_city: "Enter a city.", no_conn: "Couldn't reach the server. Check your connection.", bad_resp: "Invalid response from the server.",
     tips: "💡 Tips", foot: "Check opening hours and prices before you go. Data: © OpenStreetMap, Wikidata · Plan: Claude",
     mine_h: "My plans", mine_lead_in: "All the plans you've created or saved.",
@@ -562,6 +571,7 @@ const I18N = {
     notes_ph: "z. B. Ich komme am ersten Tag um 14 Uhr an. Ich möchte den Sonnenuntergang sehen.",
     go: "✨ Plan erstellen", load_sub: "Dauert meist 15–40 Sekunden",
     loads: ["Suche Sehenswürdigkeiten…", "Prüfe, welche am bekanntesten sind…", "Teile sie nach Vierteln auf…", "Schreibe deinen Tagesplan…", "Gleich fertig…"],
+    q_left: (l, n) => `Du hast diesen Monat noch ${l} von ${n} Plänen.`, q_none: d => `Deine Pläne für diesen Monat sind aufgebraucht. Neue gibt es am ${d}.`, q_guest: "Ohne Konto: 1 Testplan pro Tag.", q_guest_link: "Kostenlos anmelden für 5 Pläne im Monat",
     need_city: "Bitte eine Stadt eingeben.", no_conn: "Keine Verbindung zum Server. Prüfe dein Internet.", bad_resp: "Ungültige Antwort vom Server.",
     tips: "💡 Tipps", foot: "Öffnungszeiten und Preise vor dem Besuch prüfen. Daten: © OpenStreetMap, Wikidata · Plan: Claude",
     mine_h: "Meine Pläne", mine_lead_in: "Alle Pläne, die du erstellt oder gespeichert hast.",
@@ -671,7 +681,22 @@ async function loadMyProfile() {
 }
 function refreshAcct() {
   const b = document.getElementById("acctBtn");
-  b.textContent = user ? "👤 " + displayName(user) : t("login");
+  b.textContent = user ? displayName(user) : t("login");
+  refreshQuota();
+}
+// ---- Kufiri mujor: 5 plane për llogari, rifillon më 1 të muajit ----
+const PLAN_LIMIT = 5;
+let quota = null;
+const nextMonthStr = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() + 1, 1).toLocaleDateString({ sq: "sq-AL", en: "en-GB", de: "de-DE" }[LANG], { day: "numeric", month: "long" }); };
+async function refreshQuota(q) {
+  const el = document.getElementById("quota"); if (!el) return;
+  if (!user || !sb) { quota = null; el.innerHTML = `${t("q_guest")} <button class="link" onclick="showAuth('signup')">${t("q_guest_link")}</button>`; return; }
+  if (q) quota = q;
+  else { const { data } = await sb.rpc("plan_quota"); if (data) quota = { used: data.used, limit: data.limit || PLAN_LIMIT }; }
+  if (!quota) { el.textContent = ""; return; }
+  const left = Math.max(0, quota.limit - quota.used);
+  el.classList.toggle("none", left === 0);
+  el.innerHTML = left > 0 ? `<span class="qdots">${"<i class=on></i>".repeat(left)}${"<i></i>".repeat(quota.limit - left)}</span>${t("q_left", left, quota.limit)}` : t("q_none", nextMonthStr());
 }
 function acctClick() { user ? showAccount() : showAuth("login"); }
 
@@ -784,8 +809,13 @@ async function makePlan(req) {
   let mi = 0; const msgEl = document.getElementById("loadMsg"); msgEl.textContent = msgs[0];
   const tick = setInterval(() => { mi = Math.min(mi + 1, msgs.length - 1); msgEl.textContent = msgs[mi]; }, 6000);
   try {
-    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...req, ui: LANG }) });
+    const headers = { "Content-Type": "application/json" };
+    if (sb && user) { const { data: ses } = await sb.auth.getSession(); if (ses?.session?.access_token) headers.Authorization = "Bearer " + ses.session.access_token; }
+    const r = await fetch(API, { method: "POST", headers, body: JSON.stringify({ ...req, ui: LANG }) });
     const data = await r.json().catch(() => ({ error: t("bad_resp") }));
+    if (data.quota) refreshQuota(data.quota);
+    if (data.code === "guest") setTimeout(() => showAuth("signup"), 900);
+    if (data.code === "auth") setTimeout(() => showAuth("login"), 900);
     if (!r.ok || data.error) throw new Error(data.error || "Gabim " + r.status);
     const row = await storePlan(data);
     openPlan(data, row, "own");
@@ -796,7 +826,7 @@ async function makePlan(req) {
 }
 
 // ================== RUAJTJA ==================
-const strip = p => { const c = JSON.parse(JSON.stringify(p, (k, v) => k === "_marker" ? undefined : v)); delete c.usage; delete c.remaining; return c; };
+const strip = p => { const c = JSON.parse(JSON.stringify(p, (k, v) => k === "_marker" ? undefined : v)); delete c.usage; delete c.remaining; delete c.quota; delete c.guest; delete c.cached; return c; };
 function rowFromPlan(p) {
   return { city: p.city?.name || p.request?.city, country: p.city?.country || null, days: p.days.length,
            title: p.title || null, summary: p.summary || null, data: strip(p), author_name: user ? displayName(user) : null };
