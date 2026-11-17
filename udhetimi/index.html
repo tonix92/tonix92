@@ -246,6 +246,11 @@
   .modal .btn2,.modal .go.sec,.modal .tabsm button{background:#fff;color:#13233A;border-color:#E2E2DB}
   .modal .switch{background:#F3F3EE}
   .modal h3{color:#13233A}
+  .num,.numicon{color:#0E1A2C!important}
+  .numicon{border-color:#0E1A2C}
+  #map{background:#1b1f24}
+  .leaflet-control-attribution{background:rgba(14,26,44,.7)!important;color:#9AA6B4}
+  .leaflet-control-attribution a{color:#C9A962}
 </style>
 </head>
 <body>
@@ -611,7 +616,7 @@ function setLang(l) {
 }
 document.getElementById("langSw").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.l); });
 
-const COLORS = ["#1F5F66", "#A8823A", "#7A3B52", "#2E4A7D", "#5B6B2F", "#8A5A2B", "#3E6E8E"];
+const COLORS = ["#5FB3B0", "#D4B26A", "#D48A9E", "#8FA9E0", "#AFC271", "#DE9A62", "#7CC0DC"];
 const LOCAL_KEY = "udhetimi_plans_v1";
 const sb = (SUPABASE_URL.startsWith("http") && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 let user = null;
@@ -963,7 +968,8 @@ function openPlan(p, r, m) {
   renderTabs();
   if (!map) {
     map = L.map("map", { scrollWheelZoom: false });
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16, attribution: "© Esri, HERE, Garmin, © OpenStreetMap" }).addTo(map);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16 }).addTo(map);
     layer = L.layerGroup().addTo(map);
   }
   setTimeout(() => { map.invalidateSize(); selectDay(0); }, 60);
