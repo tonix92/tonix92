@@ -1,1 +1,1115 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Udhëtimi">
+<meta name="theme-color" content="#0b7a75">
+<title>Udhëtimi — plani yt i qytetit</title>
+<meta property="og:title" content="Udhëtimi — plani yt i qytetit">
+<meta property="og:description" content="Plani yt i qytetit ditë për ditë · Your city plan, day by day · Dein Stadtplan, Tag für Tag">
+<meta property="og:image" content="https://tonix92.github.io/tonix92/udhetimi/og.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js"></script>
+<style>
+  :root{--bg:#f6f3ee;--card:#fff;--txt:#1f2933;--mut:#6b7280;--acc:#0b7a75;--acc2:#e8f4f3;--line:#e5e1da;--warm:#d9822b;--bad:#b42318}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  .top{position:sticky;top:0;z-index:50;background:rgba(246,243,238,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+  .topin{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:10px 16px}
+  .brand{font-weight:800;font-size:19px;cursor:pointer;margin-right:auto;white-space:nowrap}
+  .langsw{display:flex;background:#efebe4;border-radius:999px;padding:2px}
+  .langsw button{border:0;background:none;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:700;color:var(--mut);cursor:pointer}
+  .langsw button.on{background:#fff;color:var(--txt)}
+  .acct{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-weight:600;font-size:14px;cursor:pointer;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nav{max-width:720px;margin:0 auto;display:flex;gap:4px;padding:0 12px 8px}
+  .nav button{flex:1;border:0;background:none;padding:9px 4px;border-radius:10px;font-weight:600;color:var(--mut);cursor:pointer;font-size:14px}
+  .nav button.on{background:#fff;color:var(--txt);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .wrap{max-width:720px;margin:0 auto;padding:16px 16px calc(40px + env(safe-area-inset-bottom))}
+  h1{font-size:26px;margin:4px 0 2px;letter-spacing:-.5px}
+  .lead{margin:0 0 16px;color:var(--mut)}
+  .card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+  label:first-child{margin-top:0}
+  input,select,textarea{width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--txt);outline:none}
+  input:focus,textarea:focus{border-color:var(--acc)}
+  textarea{height:70px;resize:vertical}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stepper{display:flex;align-items:center;gap:10px}
+  .stepper button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:22px;cursor:pointer}
+  .stepper b{font-size:22px;min-width:70px;text-align:center}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:14px;cursor:pointer;user-select:none}
+  .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+  .seg{display:flex;background:#efebe4;border-radius:12px;padding:3px;gap:3px}
+  .seg button{flex:1;border:0;background:none;padding:10px 6px;border-radius:9px;font-size:14px;cursor:pointer;color:var(--mut)}
+  .seg button.on{background:#fff;color:var(--txt);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .go{width:100%;border:0;border-radius:14px;background:var(--acc);color:#fff;font-size:17px;font-weight:700;padding:15px;cursor:pointer;margin-top:8px}
+  .go:disabled{opacity:.6}
+  .go.sec{background:var(--acc2);color:var(--acc)}
+  .go.danger{background:#fdecea;color:var(--bad)}
+  .err{background:#fdecea;color:#9b1c1c;border-radius:12px;padding:12px;margin-top:12px;display:none;font-size:14px}
+  .note{background:var(--acc2);color:#0b4f4c;border-radius:12px;padding:12px;font-size:14px;margin-bottom:14px}
+  .note a,.note button.link{color:var(--acc);font-weight:700}
+  .loading{text-align:center;padding:30px 10px;display:none}
+  .spin{width:42px;height:42px;border:4px solid var(--acc2);border-top-color:var(--acc);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 14px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .view{display:none}.view.on{display:block}
+  .rhead h2{margin:0;font-size:24px}
+  .rhead p{color:var(--mut);margin:6px 0 0}
+  .rhead .by{font-size:13px;color:var(--mut);margin-top:8px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .btn2{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer;font-size:14px;color:var(--txt)}
+  .btn2.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+  .daytabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+  .daytabs button{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:600;cursor:pointer}
+  .daytabs button.on{color:#fff}
+  #map{height:300px;border-radius:18px;margin-bottom:14px;z-index:1}
+  .dayhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+  .dayhead h3{margin:0;font-size:19px}
+  .dayhead .area{color:var(--mut);font-size:14px}
+  .gm{flex:none;text-decoration:none;background:var(--acc2);color:var(--acc);font-weight:700;font-size:13px;border-radius:10px;padding:8px 10px}
+  .stop{display:flex;gap:12px;position:relative;padding-bottom:16px}
+  .stop:not(:last-child)::before{content:"";position:absolute;left:15px;top:34px;bottom:0;border-left:2px dashed var(--line)}
+  .num{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px}
+  .num.meal{background:var(--warm)!important;font-size:16px}
+  .num.other{background:#9ca3af!important}
+  .sbody{flex:1;min-width:0;cursor:pointer}
+  .sbody .time{font-size:13px;color:var(--mut)}
+  .sbody .nm{font-weight:700;font-size:16px;margin:1px 0 3px}
+  .sbody .note2{font-size:14px;line-height:1.45}
+  .sbody .tip{font-size:13px;color:var(--acc);margin-top:4px}
+  .travel{font-size:12px;color:var(--mut);margin:-8px 0 10px 44px}
+  .links a{font-size:12px;color:var(--mut);margin-right:10px}
+  .tips li{margin:6px 0;line-height:1.45}
+  .foot{color:var(--mut);font-size:12px;text-align:center;margin-top:16px}
+  .numicon{width:28px;height:28px;border-radius:50%;color:#fff;font-weight:700;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);font-size:13px}
+  .pcard{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .pcard .badge{flex:none;width:52px;height:52px;border-radius:14px;background:var(--acc2);display:grid;place-items:center;font-weight:800;color:var(--acc);font-size:13px;text-align:center;line-height:1.1}
+  .pcard .t{flex:1;min-width:0}
+  .pcard .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pcard .t small{color:var(--mut)}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#efebe4;color:var(--mut);margin-left:4px;vertical-align:middle}
+  .pill.pub{background:var(--acc2);color:var(--acc)}
+  .empty{color:var(--mut);text-align:center;padding:26px 10px}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
+  .modal-bg.on{display:flex}
+  .modal{background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;position:relative}
+  @media(min-width:600px){.modal-bg{align-items:center}.modal{border-radius:22px}}
+  .modal h3{margin:0 0 4px;font-size:21px}
+  .modal .x{position:absolute;right:14px;top:12px;border:0;background:none;font-size:26px;color:var(--mut);cursor:pointer}
+  .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg);border-radius:14px;padding:12px;margin:12px 0}
+  .switch small{display:block;color:var(--mut)}
+  .tog{position:relative;width:52px;height:30px;flex:none}
+  .tog input{opacity:0;width:0;height:0}
+  .tog span{position:absolute;inset:0;background:#d1d5db;border-radius:999px;transition:.2s;cursor:pointer}
+  .tog span::after{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .tog input:checked+span{background:var(--acc)}
+  .tog input:checked+span::after{transform:translateX(22px)}
+  .sharegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+  .sharegrid a,.sharegrid button{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;font-size:12px;color:var(--txt);text-decoration:none;cursor:pointer;padding:0}
+  .sharegrid .ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:24px;color:#fff;font-weight:800}
+  .linkbox{display:flex;gap:8px}
+  .linkbox input{font-size:14px}
+  .toast{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);background:#1f2933;color:#fff;padding:10px 16px;border-radius:12px;z-index:200;display:none;font-size:14px;max-width:90vw;text-align:center}
+  #storyPrev{width:100%;border-radius:14px;display:none;margin-top:10px}
+  .tabsm{display:flex;gap:6px;margin:12px 0}
+  .tabsm button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px;font-weight:600;cursor:pointer}
+  .tabsm button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+  .prof{display:flex;gap:14px;align-items:center}
+  .avatar{flex:none;width:68px;height:68px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:26px}
+  .pfmain{flex:1;min-width:0}
+  .pfmain h2{margin:0;font-size:22px}
+  .pfbio{color:var(--mut);font-size:14px;margin:4px 0}
+  .pfstats{display:flex;gap:14px;font-size:14px}
+  .pfstats b{font-size:16px}
+  .likebtn.on{background:#fdecea;border-color:#f5c2c0;color:#b42318}
+  .by a{color:var(--acc);font-weight:600;cursor:pointer;text-decoration:none}
+  .pcard .likes{color:#b42318;font-size:13px;white-space:nowrap}
+</style>
+</head>
+<body>
 
+<div class="top">
+  <div class="topin">
+    <div class="brand" onclick="go('create')">🧭 <span id="brandName">Udhëtimi</span></div>
+    <div class="langsw" id="langSw"><button data-l="sq">SQ</button><button data-l="en">EN</button><button data-l="de">DE</button></div>
+    <button class="acct" id="acctBtn" onclick="acctClick()">Hyr</button>
+  </div>
+  <div class="nav">
+    <button data-v="create" class="on" onclick="go('create')" data-i18n="nav_create"></button>
+    <button data-v="mine" onclick="go('mine')" data-i18n="nav_mine"></button>
+    <button data-v="explore" onclick="go('explore')" data-i18n="nav_explore"></button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ KRIJO ============ -->
+<section class="view on" id="v-create">
+  <h1 data-i18n="h_where"></h1>
+  <p class="lead" data-i18n="lead"></p>
+  <div class="card">
+    <label for="city" data-i18n="city"></label>
+    <input id="city" data-i18n-ph="city_ph" autocomplete="off">
+
+    <label data-i18n="days_q"></label>
+    <div class="stepper"><button type="button" onclick="chDays(-1)">−</button><b id="daysV"></b><button type="button" onclick="chDays(1)">+</button></div>
+
+    <div class="grid2">
+      <div><label for="start" data-i18n="start"></label><input id="start" type="time" value="09:00"></div>
+      <div><label for="end" data-i18n="end"></label><input id="end" type="time" value="19:00"></div>
+    </div>
+
+    <label data-i18n="pace"></label>
+    <div class="seg" data-name="pace"><button data-v="qete" data-i18n="pace_qete"></button><button data-v="normal" class="on" data-i18n="pace_normal"></button><button data-v="intensiv" data-i18n="pace_intensiv"></button></div>
+
+    <label data-i18n="move"></label>
+    <div class="seg" data-name="transport"><button data-v="kembe" class="on" data-i18n="tr_kembe"></button><button data-v="publik" data-i18n="tr_publik"></button><button data-v="vetura" data-i18n="tr_vetura"></button></div>
+
+    <label data-i18n="interests"></label>
+    <div class="chips" id="interests">
+      <span class="chip on" data-v="histori" data-i18n="i_histori"></span><span class="chip" data-v="muze" data-i18n="i_muze"></span><span class="chip" data-v="art" data-i18n="i_art"></span>
+      <span class="chip" data-v="arkitekture" data-i18n="i_arkitekture"></span><span class="chip" data-v="natyre" data-i18n="i_natyre"></span><span class="chip on" data-v="pamje" data-i18n="i_pamje"></span>
+      <span class="chip on" data-v="ushqim" data-i18n="i_ushqim"></span><span class="chip" data-v="blerje" data-i18n="i_blerje"></span><span class="chip" data-v="nate" data-i18n="i_nate"></span>
+      <span class="chip" data-v="femije" data-i18n="i_femije"></span><span class="chip" data-v="fe" data-i18n="i_fe"></span><span class="chip" data-v="fotografi" data-i18n="i_fotografi"></span>
+    </div>
+
+    <label data-i18n="budget"></label>
+    <div class="seg" data-name="budget"><button data-v="ulet" data-i18n="b_ulet"></button><button data-v="mesem" class="on" data-i18n="b_mesem"></button><button data-v="larte" data-i18n="b_larte"></button></div>
+
+    <label data-i18n="plang"></label>
+    <div class="seg" data-name="lang"><button data-v="sq" class="on">🇦🇱 Shqip</button><button data-v="en">🇬🇧 English</button><button data-v="de">🇩🇪 Deutsch</button></div>
+
+    <label for="notes" data-i18n="notes"></label>
+    <textarea id="notes" data-i18n-ph="notes_ph"></textarea>
+
+    <button class="go" id="goBtn" onclick="makePlan()" data-i18n="go"></button>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="loading card" id="loading">
+    <div class="spin"></div>
+    <b id="loadMsg"></b>
+    <div style="color:var(--mut);font-size:14px;margin-top:6px" data-i18n="load_sub"></div>
+  </div>
+</section>
+
+<!-- ============ PLANI ============ -->
+<section class="view" id="v-plan">
+  <div class="note" id="saveNote" style="display:none"></div>
+  <div class="actions" id="planActions"></div>
+  <div class="card rhead"><h2 id="rTitle"></h2><p id="rSummary"></p><div class="by" id="rBy"></div></div>
+  <div class="daytabs" id="dayTabs"></div>
+  <div id="map"></div>
+  <div class="card" id="dayCard"></div>
+  <div class="card"><b data-i18n="tips"></b><ul class="tips" id="rTips"></ul><div id="rCost" style="color:var(--mut);font-size:14px"></div></div>
+  <div class="foot" data-i18n="foot"></div>
+</section>
+
+<!-- ============ PLANET E MIA ============ -->
+<section class="view" id="v-mine">
+  <h1 data-i18n="mine_h"></h1>
+  <p class="lead" id="mineLead"></p>
+  <div id="mineList"></div>
+</section>
+
+<!-- ============ ZBULO ============ -->
+<section class="view" id="v-explore">
+  <h1 data-i18n="ex_h"></h1>
+  <p class="lead" data-i18n="ex_lead"></p>
+  <div class="tabsm" id="exTabs">
+    <button data-s="new" class="on" data-i18n="ex_new"></button>
+    <button data-s="top" data-i18n="ex_top"></button>
+    <button data-s="following" data-i18n="ex_following"></button>
+  </div>
+  <input id="exSearch" data-i18n-ph="ex_ph" style="margin-bottom:12px">
+  <div id="exList"></div>
+</section>
+
+<!-- ============ PROFILI ============ -->
+<section class="view" id="v-profile">
+  <div class="card prof">
+    <div class="avatar" id="pfAvatar"></div>
+    <div class="pfmain">
+      <h2 id="pfName"></h2>
+      <div id="pfBio" class="pfbio"></div>
+      <div class="pfstats" id="pfStats"></div>
+    </div>
+  </div>
+  <div class="actions" id="pfActions"></div>
+  <div id="pfEdit" class="card" style="display:none">
+    <label data-i18n="pf_name"></label><input id="pfNameIn" maxlength="40">
+    <label data-i18n="pf_bio"></label><textarea id="pfBioIn" maxlength="160"></textarea>
+    <button class="go" onclick="saveProfile()" data-i18n="save"></button>
+  </div>
+  <h3 style="margin:16px 0 10px" data-i18n="pf_plans"></h3>
+  <div id="pfList"></div>
+</section>
+
+</div>
+
+<!-- ============ MODAL: LLOGARIA ============ -->
+<div class="modal-bg" id="authBg" onclick="if(event.target===this)closeModal('authBg')">
+  <div class="modal">
+    <button class="x" onclick="closeModal('authBg')">×</button>
+    <div id="authBody"></div>
+  </div>
+</div>
+
+<!-- ============ MODAL: NDAJE ============ -->
+<div class="modal-bg" id="shareBg" onclick="if(event.target===this)closeModal('shareBg')">
+  <div class="modal">
+    <button class="x" onclick="closeModal('shareBg')">×</button>
+    <h3 data-i18n="share_h"></h3>
+    <div style="color:var(--mut);font-size:14px" id="shareSub"></div>
+    <div class="switch" id="pubSwitch">
+      <div><b data-i18n="public_t"></b><small data-i18n="public_s"></small></div>
+      <label class="tog"><input type="checkbox" id="pubToggle" onchange="setPublic(this.checked)"><span></span></label>
+    </div>
+    <div id="shareInner">
+      <div class="linkbox"><input id="shareLink" readonly><button class="btn2" onclick="copyLink()" data-i18n="copy"></button></div>
+      <div class="sharegrid">
+        <a id="shWa" target="_blank" rel="noopener"><div class="ic" style="background:#25D366">💬</div>WhatsApp</a>
+        <a id="shFb" target="_blank" rel="noopener"><div class="ic" style="background:#1877F2">f</div>Facebook</a>
+        <a id="shX" target="_blank" rel="noopener"><div class="ic" style="background:#000">𝕏</div>X</a>
+        <a id="shTg" target="_blank" rel="noopener"><div class="ic" style="background:#229ED9">✈️</div>Telegram</a>
+      </div>
+      <button class="go sec" id="nativeShare" onclick="nativeShare()" data-i18n="share_more"></button>
+    </div>
+    <button class="go" onclick="makeStory()" data-i18n="story_btn"></button>
+    <img id="storyPrev" alt="">
+    <div id="storyHelp" style="display:none;color:var(--mut);font-size:13px;margin-top:8px"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================== KONFIGURIMI ==================
+const APP_NAME = "Udhëtimi";                       // emri i app-it: ndryshoje vetëm këtu
+const API = "https://udhetimi.fatonhashani.workers.dev";
+const SUPABASE_URL = "https://omobkhqirxnyxhmihvzz.supabase.co";      // p.sh. https://abcdxyz.supabase.co
+const SUPABASE_KEY = "sb_publishable_AywIFi9zrPhLthM2hooPog_jwg31RIv";      // "anon public" ose "publishable" key
+const APP_URL = "https://tonix92.github.io/tonix92/udhetimi/";
+// ================================================
+
+// Përkthimet: shqip (sq), anglisht (en), gjermanisht (de)
+const I18N = {
+  sq: {
+    nav_create: "✨ Krijo", nav_mine: "📁 Planet e mia", nav_explore: "🌍 Zbulo", login: "Hyr",
+    h_where: "Ku po shkon?", lead: "Më thuaj qytetin dhe çka të pëlqen, unë ta bëj planin ditë për ditë.",
+    city: "Cili qytet?", city_ph: "p.sh. Roma, Paris, Barcelona, Vjena, Tirana…",
+    days_q: "Sa ditë?", days_n: n => `${n} ditë`, start: "Fillon çdo ditë", end: "Mbaron",
+    pace: "Ritmi", pace_qete: "🐢 I qetë", pace_normal: "🚶 Normal", pace_intensiv: "🏃 Intensiv",
+    move: "Lëvizja", tr_kembe: "👟 Në këmbë", tr_publik: "🚇 + Transport", tr_vetura: "🚗 Veturë",
+    interests: "Çka të intereson?",
+    i_histori: "🏛️ Histori", i_muze: "🖼️ Muze", i_art: "🎨 Art", i_arkitekture: "🏰 Arkitekturë", i_natyre: "🌳 Natyrë & parqe", i_pamje: "🌅 Pamje",
+    i_ushqim: "🍝 Ushqim lokal", i_blerje: "🛍️ Blerje", i_nate: "🌙 Jetë nate", i_femije: "👨‍👩‍👧 Me fëmijë", i_fe: "⛪ Vende fetare", i_fotografi: "📸 Fotografi",
+    budget: "Buxheti", b_ulet: "€ I ulët", b_mesem: "€€ Mesatar", b_larte: "€€€ I lartë",
+    plang: "Gjuha e planit", notes: "Dëshira të tjera (opsionale)",
+    notes_ph: "p.sh. Mbërrij ditën e parë në 14:00. Dua ta shoh perëndimin e diellit.",
+    go: "✨ Krijo planin", load_sub: "Zakonisht zgjat 15–40 sekonda",
+    loads: ["Po kërkoj atraksionet…", "Po shoh cilat janë më të njohurat…", "Po i ndaj sipas zonave…", "Po e shkruaj planin ditë për ditë…", "Edhe pak…"],
+    need_city: "Shkruaj qytetin.", no_conn: "Nuk u lidh me serverin. Kontrollo internetin.", bad_resp: "Përgjigje e pavlefshme nga serveri.",
+    tips: "💡 Këshilla", foot: "Kontrollo oraret dhe çmimet para se të shkosh. Të dhënat: © OpenStreetMap, Wikidata · Plani: Claude",
+    mine_h: "Planet e mia", mine_lead_in: "Të gjitha planet që ke krijuar ose ruajtur.",
+    mine_lead_out: "Hyr ose krijo llogari që t'i ruash planet përgjithmonë dhe t'i ndash.", mine_local: "Planet ruhen në këtë telefon.",
+    create_acct_btn: "Krijo llogari", empty_mine: "Ende asnjë plan.", create_first: "✨ Krijo të parin",
+    ex_h: "Zbulo plane", ex_lead: "Plane të ndara nga udhëtarë të tjerë. Ruaje cilindo të pëlqen.", ex_ph: "🔍 Kërko qytetin…",
+    ex_empty: "Ende asnjë plan publik. Bëhu i pari që e ndan!", ex_empty_q: "Asnjë plan për këtë qytet ende.", ex_off: "Kjo pjesë aktivizohet kur të lidhet databaza.",
+    loading: "Duke ngarkuar…",
+    b_public: "publik", b_private: "privat", b_local: "vetëm në këtë telefon", by: a => `nga ${a}`, days_badge: n => `${n}<br>ditë`,
+    share_h: "Ndaje planin", public_t: "Plan publik", public_s: "Kushdo me link e sheh, dhe del te \"Zbulo\"",
+    copy: "Kopjo", share_more: "📤 Ndaje në aplikacione të tjera…", story_btn: "🖼️ Foto për Instagram / TikTok Story",
+    story_help: "Mbaje gishtin mbi foto → <b>Ruaje në foto</b>, pastaj postoje në Instagram/TikTok.", download: "⬇️ Shkarko",
+    share_need: "Për ta ndarë me link duhet llogari.", share_story_only: "Foton për Story mund ta bësh edhe pa llogari:", share_story_noacct: "Bëj një foto të planit për rrjetet sociale:",
+    share_own: "Bëje publik që shokët ta hapin me link.", share_other: "Dërgoja këtë plan dikujt.",
+    share_text: (n, c) => `${n} ditë në ${c} 🧭 Shiko planin tim:`,
+    welcome: "Mirë se u ktheve 👋", tab_login: "Hyr", tab_signup: "Krijo llogari", email: "Email", password: "Fjalëkalimi", forgot: "Harrova fjalëkalimin",
+    signup_h: "Krijo llogarinë", signup_sub: "Ruaj planet, ndaji me shokët dhe postoji në rrjete sociale.",
+    name_lbl: "Emri (shfaqet te planet publike)", pass8: "Fjalëkalimi (të paktën 8 shkronja)", create_acct: "Krijo llogarinë",
+    reset_h: "Rivendos fjalëkalimin", reset_sub: "Do të të dërgojmë një link në email.", send_link: "Dërgo linkun", back: "← Kthehu",
+    newpass_h: "Fjalëkalimi i ri", newpass_lbl: "Fjalëkalimi i ri", save: "Ruaje", my_plans_btn: "📁 Planet e mia", logout: "Dil nga llogaria",
+    e_invalid: "Email ose fjalëkalim i gabuar.", e_exists: "Ky email ka tashmë llogari. Provo të hysh.", e_unconfirmed: "Konfirmo email-in tënd fillimisht (shiko inbox-in).",
+    e_rate: "Shumë tentime. Provo pas pak minutash.", e_pass: "Fjalëkalimi duhet të ketë të paktën 8 shkronja.", need_name: "Shkruaj emrin.",
+    check_email: "📧 Të dërguam një email. Kliko linkun për ta konfirmuar llogarinë, pastaj hyr këtu.", reset_sent: "📧 Nëse ky email ka llogari, të dërguam linkun për ta ndryshuar fjalëkalimin.",
+    logged_in: "U kyçe ✓", acct_created: "Llogaria u krijua ✓", pass_changed: "Fjalëkalimi u ndryshua ✓", logged_out: "Dole nga llogaria",
+    accounts_off: "Llogaritë ende nuk janë aktivizuar.", need_acct_save: "Krijo llogari (ose hyr) që ta ruash këtë plan.",
+    a_share: "🔗 Ndaje / Posto", a_regen: "🔄 Krijo tjetër", a_copy: "📋 Kopjo", a_save: "⭐ Ruaje te planet e mia", a_share2: "🔗 Ndaje", a_similar: "✏️ Krijo një të ngjashëm",
+    local_note: "💾 Ky plan është ruajtur vetëm në këtë telefon.", local_btn: "Krijo llogari për ta ruajtur dhe ndarë",
+    saved_ok: "U ruajt te planet e tua ✓", deleted: "Plani u fshi", copied: "Plani u kopjua ✓", link_copied: "Linku u kopjua ✓", copy_fail: "Kopjimi nuk u lejua",
+    press_again: "Shtyp përsëri për ta fshirë", pub_on: "Plani është publik ✓", pub_off: "Plani është privat", err: "Gabim: ", not_found: "Plani nuk u gjet ose është privat.",
+    migrated: n => `${n} plan(e) u ruajtën në llogarinë tënde ✓`, edit_create: "Ndrysho çka të duash dhe krijo planin tënd", not_saved: "Plani nuk u ruajt në llogari: ",
+    day: "Dita", all: "🗺️ Të gjitha", gmaps: "🧭 Rruga në Google Maps", map: "📍 Harta", h: "orë",
+    plan_by: a => `Plan nga ${a}`, saved_times: n => `⭐ ruajtur ${n} herë`,
+    story_days: (n, c) => `${n} ditë${c ? " · " + c : ""}`, story_more: n => `+ ${n} ditë të tjera`, story_free: "Krijo planin tënd falas:",
+    tips_label: "Këshilla:", ex_new: "🆕 Të rejat", ex_top: "🔥 Më të pëlqyerat", ex_following: "👥 Që ndjek",
+    pf_name: "Emri", pf_bio: "Për mua (opsionale)", pf_plans: "Planet", my_profile: "👤 Profili im",
+    follow_login: "Krijo llogari që të ndjekësh udhëtarë të tjerë.", follow_none: "Ende nuk ndjek askënd. Hap profilin e dikujt te \"Zbulo\" dhe shtyp \"Ndiq\".",
+    pf_n_plans: "plane", pf_followers: "ndjekës", pf_following: "ndjek", pf_edit: "✏️ Ndrysho profilin",
+    follow: "➕ Ndiq", unfollow: "✓ E ndjek", pf_empty: "Ende asnjë plan publik.", saved_ok_short: "U ruajt ✓",
+    followed: "Tani e ndjek ✓", unfollowed: "Nuk e ndjek më", like_login: "Krijo llogari që të pëlqesh plane.",
+    locale: "sq-AL",
+  },
+  en: {
+    nav_create: "✨ Create", nav_mine: "📁 My plans", nav_explore: "🌍 Explore", login: "Log in",
+    h_where: "Where are you going?", lead: "Tell me the city and what you love — I'll plan it day by day.",
+    city: "Which city?", city_ph: "e.g. Rome, Paris, Barcelona, Vienna, Tirana…",
+    days_q: "How many days?", days_n: n => `${n} ${n === 1 ? "day" : "days"}`, start: "Start each day", end: "End",
+    pace: "Pace", pace_qete: "🐢 Relaxed", pace_normal: "🚶 Normal", pace_intensiv: "🏃 Intense",
+    move: "Getting around", tr_kembe: "👟 On foot", tr_publik: "🚇 + Transit", tr_vetura: "🚗 Car",
+    interests: "What are you into?",
+    i_histori: "🏛️ History", i_muze: "🖼️ Museums", i_art: "🎨 Art", i_arkitekture: "🏰 Architecture", i_natyre: "🌳 Nature & parks", i_pamje: "🌅 Viewpoints",
+    i_ushqim: "🍝 Local food", i_blerje: "🛍️ Shopping", i_nate: "🌙 Nightlife", i_femije: "👨‍👩‍👧 With kids", i_fe: "⛪ Religious sites", i_fotografi: "📸 Photography",
+    budget: "Budget", b_ulet: "€ Low", b_mesem: "€€ Medium", b_larte: "€€€ High",
+    plang: "Plan language", notes: "Anything else? (optional)",
+    notes_ph: "e.g. I arrive on day one at 2 pm. I'd love to catch the sunset.",
+    go: "✨ Create my plan", load_sub: "Usually takes 15–40 seconds",
+    loads: ["Finding attractions…", "Checking which are the most famous…", "Grouping them by area…", "Writing your day-by-day plan…", "Almost there…"],
+    need_city: "Enter a city.", no_conn: "Couldn't reach the server. Check your connection.", bad_resp: "Invalid response from the server.",
+    tips: "💡 Tips", foot: "Check opening hours and prices before you go. Data: © OpenStreetMap, Wikidata · Plan: Claude",
+    mine_h: "My plans", mine_lead_in: "All the plans you've created or saved.",
+    mine_lead_out: "Log in or create an account to keep your plans forever and share them.", mine_local: "Plans are saved on this device.",
+    create_acct_btn: "Create account", empty_mine: "No plans yet.", create_first: "✨ Create your first",
+    ex_h: "Explore plans", ex_lead: "Plans shared by other travellers. Save any you like.", ex_ph: "🔍 Search a city…",
+    ex_empty: "No public plans yet. Be the first to share one!", ex_empty_q: "No plans for this city yet.", ex_off: "This section turns on once the database is connected.",
+    loading: "Loading…",
+    b_public: "public", b_private: "private", b_local: "this device only", by: a => `by ${a}`, days_badge: n => `${n}<br>${n === 1 ? "day" : "days"}`,
+    share_h: "Share your plan", public_t: "Public plan", public_s: "Anyone with the link can see it, and it appears in \"Explore\"",
+    copy: "Copy", share_more: "📤 Share to other apps…", story_btn: "🖼️ Image for Instagram / TikTok Story",
+    story_help: "Press and hold the image → <b>Save to Photos</b>, then post it on Instagram/TikTok.", download: "⬇️ Download",
+    share_need: "You need an account to share with a link.", share_story_only: "You can still make a Story image without an account:", share_story_noacct: "Make an image of your plan for social media:",
+    share_own: "Make it public so friends can open it with a link.", share_other: "Send this plan to someone.",
+    share_text: (n, c) => `${n} days in ${c} 🧭 Check out my plan:`,
+    welcome: "Welcome back 👋", tab_login: "Log in", tab_signup: "Sign up", email: "Email", password: "Password", forgot: "Forgot password",
+    signup_h: "Create your account", signup_sub: "Save plans, share them with friends and post them on social media.",
+    name_lbl: "Name (shown on public plans)", pass8: "Password (at least 8 characters)", create_acct: "Create account",
+    reset_h: "Reset password", reset_sub: "We'll email you a link.", send_link: "Send link", back: "← Back",
+    newpass_h: "New password", newpass_lbl: "New password", save: "Save", my_plans_btn: "📁 My plans", logout: "Log out",
+    e_invalid: "Wrong email or password.", e_exists: "This email already has an account. Try logging in.", e_unconfirmed: "Please confirm your email first (check your inbox).",
+    e_rate: "Too many attempts. Try again in a few minutes.", e_pass: "Password must be at least 8 characters.", need_name: "Enter your name.",
+    check_email: "📧 We sent you an email. Click the link to confirm your account, then log in here.", reset_sent: "📧 If this email has an account, we sent a link to reset your password.",
+    logged_in: "Logged in ✓", acct_created: "Account created ✓", pass_changed: "Password changed ✓", logged_out: "Logged out",
+    accounts_off: "Accounts aren't enabled yet.", need_acct_save: "Create an account (or log in) to save this plan.",
+    a_share: "🔗 Share / Post", a_regen: "🔄 Make another", a_copy: "📋 Copy", a_save: "⭐ Save to my plans", a_share2: "🔗 Share", a_similar: "✏️ Make a similar one",
+    local_note: "💾 This plan is only saved on this device.", local_btn: "Create an account to save and share it",
+    saved_ok: "Saved to your plans ✓", deleted: "Plan deleted", copied: "Plan copied ✓", link_copied: "Link copied ✓", copy_fail: "Copying not allowed",
+    press_again: "Tap again to delete", pub_on: "Plan is public ✓", pub_off: "Plan is private", err: "Error: ", not_found: "Plan not found or private.",
+    migrated: n => `${n} plan(s) saved to your account ✓`, edit_create: "Change anything you like and create your own", not_saved: "Plan wasn't saved to your account: ",
+    day: "Day", all: "🗺️ All", gmaps: "🧭 Route in Google Maps", map: "📍 Map", h: "h",
+    plan_by: a => `Plan by ${a}`, saved_times: n => `⭐ saved ${n} times`,
+    story_days: (n, c) => `${n} ${n === 1 ? "day" : "days"}${c ? " · " + c : ""}`, story_more: n => `+ ${n} more days`, story_free: "Create your own plan for free:",
+    tips_label: "Tips:", ex_new: "🆕 New", ex_top: "🔥 Most liked", ex_following: "👥 Following",
+    pf_name: "Name", pf_bio: "About me (optional)", pf_plans: "Plans", my_profile: "👤 My profile",
+    follow_login: "Create an account to follow other travellers.", follow_none: "You're not following anyone yet. Open someone's profile in \"Explore\" and tap \"Follow\".",
+    pf_n_plans: "plans", pf_followers: "followers", pf_following: "following", pf_edit: "✏️ Edit profile",
+    follow: "➕ Follow", unfollow: "✓ Following", pf_empty: "No public plans yet.", saved_ok_short: "Saved ✓",
+    followed: "You're now following ✓", unfollowed: "Unfollowed", like_login: "Create an account to like plans.",
+    locale: "en-GB",
+  },
+  de: {
+    nav_create: "✨ Erstellen", nav_mine: "📁 Meine Pläne", nav_explore: "🌍 Entdecken", login: "Anmelden",
+    h_where: "Wohin geht's?", lead: "Sag mir die Stadt und was dich interessiert – ich plane dir jeden Tag.",
+    city: "Welche Stadt?", city_ph: "z. B. Rom, Paris, Barcelona, Wien, Tirana…",
+    days_q: "Wie viele Tage?", days_n: n => `${n} ${n === 1 ? "Tag" : "Tage"}`, start: "Tagesbeginn", end: "Tagesende",
+    pace: "Tempo", pace_qete: "🐢 Entspannt", pace_normal: "🚶 Normal", pace_intensiv: "🏃 Intensiv",
+    move: "Fortbewegung", tr_kembe: "👟 Zu Fuß", tr_publik: "🚇 + ÖPNV", tr_vetura: "🚗 Auto",
+    interests: "Was interessiert dich?",
+    i_histori: "🏛️ Geschichte", i_muze: "🖼️ Museen", i_art: "🎨 Kunst", i_arkitekture: "🏰 Architektur", i_natyre: "🌳 Natur & Parks", i_pamje: "🌅 Aussichtspunkte",
+    i_ushqim: "🍝 Lokales Essen", i_blerje: "🛍️ Shopping", i_nate: "🌙 Nachtleben", i_femije: "👨‍👩‍👧 Mit Kindern", i_fe: "⛪ Religiöse Orte", i_fotografi: "📸 Fotografie",
+    budget: "Budget", b_ulet: "€ Günstig", b_mesem: "€€ Mittel", b_larte: "€€€ Gehoben",
+    plang: "Sprache des Plans", notes: "Sonstige Wünsche (optional)",
+    notes_ph: "z. B. Ich komme am ersten Tag um 14 Uhr an. Ich möchte den Sonnenuntergang sehen.",
+    go: "✨ Plan erstellen", load_sub: "Dauert meist 15–40 Sekunden",
+    loads: ["Suche Sehenswürdigkeiten…", "Prüfe, welche am bekanntesten sind…", "Teile sie nach Vierteln auf…", "Schreibe deinen Tagesplan…", "Gleich fertig…"],
+    need_city: "Bitte eine Stadt eingeben.", no_conn: "Keine Verbindung zum Server. Prüfe dein Internet.", bad_resp: "Ungültige Antwort vom Server.",
+    tips: "💡 Tipps", foot: "Öffnungszeiten und Preise vor dem Besuch prüfen. Daten: © OpenStreetMap, Wikidata · Plan: Claude",
+    mine_h: "Meine Pläne", mine_lead_in: "Alle Pläne, die du erstellt oder gespeichert hast.",
+    mine_lead_out: "Melde dich an oder erstelle ein Konto, um deine Pläne dauerhaft zu speichern und zu teilen.", mine_local: "Pläne werden auf diesem Gerät gespeichert.",
+    create_acct_btn: "Konto erstellen", empty_mine: "Noch keine Pläne.", create_first: "✨ Ersten Plan erstellen",
+    ex_h: "Pläne entdecken", ex_lead: "Von anderen Reisenden geteilte Pläne. Speichere, was dir gefällt.", ex_ph: "🔍 Stadt suchen…",
+    ex_empty: "Noch keine öffentlichen Pläne. Teile als Erste:r!", ex_empty_q: "Noch keine Pläne für diese Stadt.", ex_off: "Dieser Bereich wird aktiv, sobald die Datenbank verbunden ist.",
+    loading: "Lädt…",
+    b_public: "öffentlich", b_private: "privat", b_local: "nur auf diesem Gerät", by: a => `von ${a}`, days_badge: n => `${n}<br>${n === 1 ? "Tag" : "Tage"}`,
+    share_h: "Plan teilen", public_t: "Öffentlicher Plan", public_s: "Jede:r mit dem Link kann ihn sehen, und er erscheint unter \"Entdecken\"",
+    copy: "Kopieren", share_more: "📤 In anderen Apps teilen…", story_btn: "🖼️ Bild für Instagram / TikTok Story",
+    story_help: "Bild gedrückt halten → <b>In Fotos sichern</b>, dann auf Instagram/TikTok posten.", download: "⬇️ Herunterladen",
+    share_need: "Zum Teilen per Link brauchst du ein Konto.", share_story_only: "Ein Story-Bild kannst du auch ohne Konto erstellen:", share_story_noacct: "Erstelle ein Bild deines Plans für Social Media:",
+    share_own: "Mach ihn öffentlich, damit Freunde ihn per Link öffnen können.", share_other: "Schick diesen Plan jemandem.",
+    share_text: (n, c) => `${n} Tage in ${c} 🧭 Schau dir meinen Plan an:`,
+    welcome: "Willkommen zurück 👋", tab_login: "Anmelden", tab_signup: "Registrieren", email: "E-Mail", password: "Passwort", forgot: "Passwort vergessen",
+    signup_h: "Konto erstellen", signup_sub: "Pläne speichern, mit Freunden teilen und auf Social Media posten.",
+    name_lbl: "Name (wird bei öffentlichen Plänen angezeigt)", pass8: "Passwort (mind. 8 Zeichen)", create_acct: "Konto erstellen",
+    reset_h: "Passwort zurücksetzen", reset_sub: "Wir schicken dir einen Link per E-Mail.", send_link: "Link senden", back: "← Zurück",
+    newpass_h: "Neues Passwort", newpass_lbl: "Neues Passwort", save: "Speichern", my_plans_btn: "📁 Meine Pläne", logout: "Abmelden",
+    e_invalid: "E-Mail oder Passwort falsch.", e_exists: "Für diese E-Mail gibt es schon ein Konto. Melde dich an.", e_unconfirmed: "Bitte bestätige zuerst deine E-Mail (Posteingang prüfen).",
+    e_rate: "Zu viele Versuche. Bitte in ein paar Minuten erneut.", e_pass: "Das Passwort braucht mindestens 8 Zeichen.", need_name: "Bitte Namen eingeben.",
+    check_email: "📧 Wir haben dir eine E-Mail geschickt. Klicke auf den Link zur Bestätigung und melde dich dann hier an.", reset_sent: "📧 Falls zu dieser E-Mail ein Konto existiert, haben wir dir einen Link geschickt.",
+    logged_in: "Angemeldet ✓", acct_created: "Konto erstellt ✓", pass_changed: "Passwort geändert ✓", logged_out: "Abgemeldet",
+    accounts_off: "Konten sind noch nicht aktiviert.", need_acct_save: "Erstelle ein Konto (oder melde dich an), um diesen Plan zu speichern.",
+    a_share: "🔗 Teilen / Posten", a_regen: "🔄 Neu erstellen", a_copy: "📋 Kopieren", a_save: "⭐ In meinen Plänen speichern", a_share2: "🔗 Teilen", a_similar: "✏️ Ähnlichen erstellen",
+    local_note: "💾 Dieser Plan ist nur auf diesem Gerät gespeichert.", local_btn: "Konto erstellen zum Speichern und Teilen",
+    saved_ok: "In deinen Plänen gespeichert ✓", deleted: "Plan gelöscht", copied: "Plan kopiert ✓", link_copied: "Link kopiert ✓", copy_fail: "Kopieren nicht erlaubt",
+    press_again: "Zum Löschen erneut tippen", pub_on: "Plan ist öffentlich ✓", pub_off: "Plan ist privat", err: "Fehler: ", not_found: "Plan nicht gefunden oder privat.",
+    migrated: n => `${n} Plan/Pläne in deinem Konto gespeichert ✓`, edit_create: "Ändere, was du willst, und erstelle deinen eigenen", not_saved: "Plan wurde nicht im Konto gespeichert: ",
+    day: "Tag", all: "🗺️ Alle", gmaps: "🧭 Route in Google Maps", map: "📍 Karte", h: "Std.",
+    plan_by: a => `Plan von ${a}`, saved_times: n => `⭐ ${n}× gespeichert`,
+    story_days: (n, c) => `${n} ${n === 1 ? "Tag" : "Tage"}${c ? " · " + c : ""}`, story_more: n => `+ ${n} weitere Tage`, story_free: "Erstelle deinen eigenen Plan kostenlos:",
+    tips_label: "Tipps:", ex_new: "🆕 Neu", ex_top: "🔥 Beliebteste", ex_following: "👥 Gefolgt",
+    pf_name: "Name", pf_bio: "Über mich (optional)", pf_plans: "Pläne", my_profile: "👤 Mein Profil",
+    follow_login: "Erstelle ein Konto, um anderen Reisenden zu folgen.", follow_none: "Du folgst noch niemandem. Öffne ein Profil unter \"Entdecken\" und tippe auf \"Folgen\".",
+    pf_n_plans: "Pläne", pf_followers: "Follower", pf_following: "folgt", pf_edit: "✏️ Profil bearbeiten",
+    follow: "➕ Folgen", unfollow: "✓ Gefolgt", pf_empty: "Noch keine öffentlichen Pläne.", saved_ok_short: "Gespeichert ✓",
+    followed: "Du folgst jetzt ✓", unfollowed: "Nicht mehr gefolgt", like_login: "Erstelle ein Konto, um Pläne zu liken.",
+    locale: "de-DE",
+  },
+};
+
+let LANG = (() => { try { const l = localStorage.getItem("udhetimi_lang"); if (I18N[l]) return l; } catch {} const n = (navigator.language || "").slice(0, 2); return I18N[n] ? n : "sq"; })();
+const t = (k, ...a) => { const v = I18N[LANG][k] ?? I18N.sq[k] ?? k; return typeof v === "function" ? v(...a) : v; };
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.getElementById("brandName").textContent = APP_NAME;
+  document.title = APP_NAME;
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
+  document.querySelectorAll("#langSw button").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
+  document.querySelectorAll('.seg[data-name="lang"] button').forEach(b => b.classList.toggle("on", b.dataset.v === LANG));
+  chDays(0); refreshAcct();
+}
+function setLang(l) {
+  LANG = l; try { localStorage.setItem("udhetimi_lang", l); } catch {}
+  applyLang();
+  if (view === "mine") loadMine();
+  if (view === "explore") loadExplore();
+  if (view === "profile" && pfUser) openProfile(pfUser);
+  if (view === "plan" && plan) { const on = document.querySelector("#dayTabs button.on"); const i = on ? +on.dataset.i : 0; openPlanHeader(); renderActions(); renderTabs(); selectDay(i); }
+}
+document.getElementById("langSw").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.l); });
+
+const COLORS = ["#0b7a75", "#c2410c", "#7c3aed", "#0369a1", "#be185d", "#15803d", "#a16207"];
+const LOCAL_KEY = "udhetimi_plans_v1";
+const sb = (SUPABASE_URL.startsWith("http") && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+let user = null;
+
+// ================== NAVIGIMI ==================
+let view = "create";
+function go(v) {
+  view = v;
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  if (v !== "plan") setUrlPlan(null);
+  if (v === "mine") loadMine();
+  if (v === "explore") loadExplore();
+  if (v !== "profile") setUrlParam("u", null);
+  window.scrollTo({ top: 0 });
+}
+function setUrlParam(k, v) {
+  const u = new URL(location.href);
+  if (v) u.searchParams.set(k, v); else u.searchParams.delete(k);
+  history.replaceState(null, "", u.pathname + u.search);
+}
+function setUrlPlan(id) {
+  const u = new URL(location.href);
+  if (id) u.searchParams.set("p", id); else u.searchParams.delete("p");
+  history.replaceState(null, "", u.pathname + u.search);
+}
+
+// ================== LLOGARIA ==================
+let myProfile = null;
+const displayName = u => (u && myProfile && myProfile.id === u.id && myProfile.name) || u?.user_metadata?.name || (u?.email || "").split("@")[0];
+async function loadMyProfile() {
+  if (!sb || !user) { myProfile = null; return; }
+  let { data } = await sb.from("profiles").select("id,name,bio").eq("id", user.id).maybeSingle();
+  if (!data) {
+    const name = (user.user_metadata?.name || (user.email || "").split("@")[0]).slice(0, 40);
+    await sb.from("profiles").insert({ id: user.id, name });
+    data = { id: user.id, name, bio: "" };
+  }
+  myProfile = data; refreshAcct();
+}
+function refreshAcct() {
+  const b = document.getElementById("acctBtn");
+  b.textContent = user ? "👤 " + displayName(user) : t("login");
+}
+function acctClick() { user ? showAccount() : showAuth("login"); }
+
+function showAuth(mode, msg) {
+  if (!sb) return toast(t("accounts_off"));
+  const B = document.getElementById("authBody");
+  const tabs = mode === "login" || mode === "signup" ? `<div class="tabsm">
+      <button class="${mode === "login" ? "on" : ""}" onclick="showAuth('login')">${t("tab_login")}</button>
+      <button class="${mode === "signup" ? "on" : ""}" onclick="showAuth('signup')">${t("tab_signup")}</button></div>` : "";
+  const forms = {
+    login: `<h3>${t("welcome")}</h3>${tabs}
+      <label>${t("email")}</label><input id="aEmail" type="email" autocomplete="email">
+      <label>${t("password")}</label><input id="aPass" type="password" autocomplete="current-password">
+      <button class="go" onclick="doLogin()">${t("tab_login")}</button>
+      <button class="go sec" onclick="showAuth('reset')">${t("forgot")}</button>`,
+    signup: `<h3>${t("signup_h")}</h3>${tabs}
+      <div style="color:var(--mut);font-size:14px">${t("signup_sub")}</div>
+      <label>${t("name_lbl")}</label><input id="aName" autocomplete="name" maxlength="40">
+      <label>${t("email")}</label><input id="aEmail" type="email" autocomplete="email">
+      <label>${t("pass8")}</label><input id="aPass" type="password" autocomplete="new-password">
+      <button class="go" onclick="doSignup()">${t("create_acct")}</button>`,
+    reset: `<h3>${t("reset_h")}</h3>
+      <div style="color:var(--mut);font-size:14px">${t("reset_sub")}</div>
+      <label>${t("email")}</label><input id="aEmail" type="email" autocomplete="email">
+      <button class="go" onclick="doReset()">${t("send_link")}</button>
+      <button class="go sec" onclick="showAuth('login')">${t("back")}</button>`,
+    newpass: `<h3>${t("newpass_h")}</h3>
+      <label>${t("newpass_lbl")}</label><input id="aPass" type="password" autocomplete="new-password">
+      <button class="go" onclick="doNewPass()">${t("save")}</button>`,
+  };
+  B.innerHTML = (msg ? `<div class="note" style="margin-top:10px">${msg}</div>` : "") + forms[mode] + `<div class="err" id="aErr"></div>`;
+  openModal("authBg");
+  setTimeout(() => B.querySelector("input")?.focus(), 200);
+}
+function showAccount() {
+  document.getElementById("authBody").innerHTML = `<h3>👤 ${esc(displayName(user))}</h3>
+    <div style="color:var(--mut)">${esc(user.email)}</div>
+    <button class="go" onclick="closeModal('authBg');openProfile(user.id)">${t("my_profile")}</button>
+    <button class="go sec" onclick="closeModal('authBg');go('mine')">${t("my_plans_btn")}</button>
+    <button class="go danger" onclick="doLogout()">${t("logout")}</button>`;
+  openModal("authBg");
+}
+const aVal = id => document.getElementById(id)?.value.trim() || "";
+function aErr(m) { const e = document.getElementById("aErr"); e.textContent = m; e.style.display = "block"; }
+const authMsg = e => {
+  const m = e?.message || String(e);
+  if (/Invalid login/i.test(m)) return t("e_invalid");
+  if (/already registered/i.test(m)) return t("e_exists");
+  if (/Email not confirmed/i.test(m)) return t("e_unconfirmed");
+  if (/rate limit/i.test(m)) return t("e_rate");
+  if (/Password should be/i.test(m)) return t("e_pass");
+  return m;
+};
+async function doLogin() {
+  const { error } = await sb.auth.signInWithPassword({ email: aVal("aEmail"), password: document.getElementById("aPass").value });
+  if (error) return aErr(authMsg(error));
+  closeModal("authBg"); toast(t("logged_in"));
+}
+async function doSignup() {
+  const name = aVal("aName"), email = aVal("aEmail"), pass = document.getElementById("aPass").value;
+  if (name.length < 2) return aErr(t("need_name"));
+  if (pass.length < 8) return aErr(t("e_pass"));
+  const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { name }, emailRedirectTo: APP_URL } });
+  if (error) return aErr(authMsg(error));
+  if (!data.session) showAuth("login", t("check_email"));
+  else { closeModal("authBg"); toast(t("acct_created")); }
+}
+async function doReset() {
+  const { error } = await sb.auth.resetPasswordForEmail(aVal("aEmail"), { redirectTo: APP_URL });
+  if (error) return aErr(authMsg(error));
+  showAuth("login", t("reset_sent"));
+}
+async function doNewPass() {
+  const p = document.getElementById("aPass").value;
+  if (p.length < 8) return aErr(t("e_pass"));
+  const { error } = await sb.auth.updateUser({ password: p });
+  if (error) return aErr(authMsg(error));
+  closeModal("authBg"); toast(t("pass_changed"));
+}
+async function doLogout() { await sb.auth.signOut(); closeModal("authBg"); toast(t("logged_out")); if (view === "mine") loadMine(); }
+
+// ================== FORMA ==================
+let days = 3;
+function chDays(d) { days = Math.max(1, Math.min(7, days + d)); document.getElementById("daysV").textContent = t("days_n", days); }
+document.querySelectorAll(".seg").forEach(seg => seg.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  seg.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+}));
+document.getElementById("interests").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) c.classList.toggle("on"); });
+const segVal = n => document.querySelector(`.seg[data-name="${n}"] .on`)?.dataset.v;
+function readForm() {
+  return {
+    city: document.getElementById("city").value.trim(), days,
+    start: document.getElementById("start").value, end: document.getElementById("end").value,
+    pace: segVal("pace"), transport: segVal("transport"), budget: segVal("budget"), lang: segVal("lang"),
+    interests: [...document.querySelectorAll("#interests .chip.on")].map(c => c.dataset.v),
+    notes: document.getElementById("notes").value.trim(),
+  };
+}
+
+async function makePlan(req) {
+  req = req || readForm();
+  const err = document.getElementById("err"); err.style.display = "none";
+  if (!req.city) { err.textContent = t("need_city"); err.style.display = "block"; return; }
+  go("create");
+  const btn = document.getElementById("goBtn"); btn.disabled = true;
+  const load = document.getElementById("loading"); load.style.display = "block";
+  load.scrollIntoView({ behavior: "smooth", block: "center" });
+  const msgs = t("loads");
+  let mi = 0; const msgEl = document.getElementById("loadMsg"); msgEl.textContent = msgs[0];
+  const tick = setInterval(() => { mi = Math.min(mi + 1, msgs.length - 1); msgEl.textContent = msgs[mi]; }, 6000);
+  try {
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...req, ui: LANG }) });
+    const data = await r.json().catch(() => ({ error: t("bad_resp") }));
+    if (!r.ok || data.error) throw new Error(data.error || "Gabim " + r.status);
+    const row = await storePlan(data);
+    openPlan(data, row, "own");
+  } catch (e) {
+    err.textContent = "⚠️ " + (/fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message);
+    err.style.display = "block";
+  } finally { clearInterval(tick); load.style.display = "none"; btn.disabled = false; }
+}
+
+// ================== RUAJTJA ==================
+const strip = p => { const c = JSON.parse(JSON.stringify(p, (k, v) => k === "_marker" ? undefined : v)); delete c.usage; delete c.remaining; return c; };
+function rowFromPlan(p) {
+  return { city: p.city?.name || p.request?.city, country: p.city?.country || null, days: p.days.length,
+           title: p.title || null, summary: p.summary || null, data: strip(p), author_name: user ? displayName(user) : null };
+}
+async function storePlan(p) {
+  if (sb && user) {
+    const { data, error } = await sb.from("plans").insert(rowFromPlan(p)).select("id,user_id,is_public,author_name,saves").single();
+    if (!error) return data;
+    toast(t("not_saved") + error.message);
+  }
+  const list = localList();
+  const local = { localId: "L" + Date.now(), savedAt: Date.now(), plan: strip(p) };
+  list.unshift(local);
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list.slice(0, 10))); } catch {}
+  return { localId: local.localId };
+}
+function localList() { try { const l = JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; return l.filter(x => x.plan); } catch { return []; } }
+function removeLocal(id) { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(localList().filter(x => x.localId !== id))); } catch {} }
+
+// Pas kyçjes: kalo planet lokale në llogari
+async function migrateLocal() {
+  const list = localList(); if (!list.length || !sb || !user) return;
+  const rows = list.map(x => rowFromPlan(x.plan));
+  const { error } = await sb.from("plans").insert(rows);
+  if (!error) { try { localStorage.removeItem(LOCAL_KEY); } catch {} toast(t("migrated", rows.length)); }
+}
+
+// ================== PLANET E MIA / ZBULO ==================
+function planCard(o) {
+  const pub = o.is_public ? `<span class="pill pub">${t("b_public")}</span>` : o.local ? `<span class="pill">${t("b_local")}</span>` : `<span class="pill">${t("b_private")}</span>`;
+  const meta = [o.country, o.author && view === "explore" ? t("by", o.author) : null, o.date, o.saves ? `⭐ ${o.saves}` : null].filter(Boolean).join(" · ");
+  return `<div class="pcard" onclick="${o.onclick}"><div class="badge">${t("days_badge", o.days)}</div>
+    <div class="t"><b>${esc(o.city)} ${view === "mine" || (view === "profile" && o.mine) ? pub : ""}</b><small>${esc(o.title || "")}</small><br><small>${esc(meta)}</small></div>${o.likes ? `<span class="likes">❤️ ${o.likes}</span>` : ""}<span>›</span></div>`;
+}
+const fmtDate = d => new Date(d).toLocaleDateString(t("locale"), LANG === "sq" ? { day: "2-digit", month: "2-digit", year: "numeric" } : { day: "numeric", month: "short", year: "numeric" });
+
+async function loadMine() {
+  const lead = document.getElementById("mineLead"), box = document.getElementById("mineList");
+  const local = localList();
+  let html = "";
+  if (!user) {
+    lead.innerHTML = sb ? `${t("mine_lead_out")} <button class="btn2 pri" onclick="showAuth('signup')" style="margin-top:8px">${t("create_acct_btn")}</button>` : t("mine_local");
+  } else { lead.textContent = t("mine_lead_in"); box.innerHTML = `<div class="empty">${t("loading")}</div>`;
+    const { data, error } = await sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
+    if (error) html += `<div class="err" style="display:block">${esc(error.message)}</div>`;
+    (data || []).forEach(r => html += planCard({ ...r, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` }));
+  }
+  local.forEach(x => html += planCard({ city: x.plan.city?.name, country: x.plan.city?.country, days: x.plan.days.length, title: x.plan.title,
+    local: true, date: fmtDate(x.savedAt), onclick: `openLocal('${x.localId}')` }));
+  box.innerHTML = html || `<div class="empty">${t("empty_mine")} <br><br><button class="btn2 pri" onclick="go('create')">${t("create_first")}</button></div>`;
+}
+
+let exTimer;
+document.getElementById("exSearch").addEventListener("input", () => { clearTimeout(exTimer); exTimer = setTimeout(loadExplore, 350); });
+let exSort = "new";
+document.getElementById("exTabs").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  exSort = b.dataset.s;
+  document.querySelectorAll("#exTabs button").forEach(x => x.classList.toggle("on", x === b));
+  loadExplore();
+});
+async function loadExplore() {
+  const box = document.getElementById("exList");
+  if (!sb) { box.innerHTML = `<div class="empty">${t("ex_off")}</div>`; return; }
+  box.innerHTML = `<div class="empty">${t("loading")}</div>`;
+  let q = sb.from("plans").select("id,user_id,city,country,days,title,author_name,saves,likes,created_at").eq("is_public", true);
+  const s = aVal("exSearch");
+  if (s) q = q.ilike("city", `%${s.replace(/[%_,()]/g, "")}%`);
+  if (exSort === "following") {
+    if (!user) { box.innerHTML = `<div class="empty">${t("follow_login")}<br><br><button class="btn2 pri" onclick="showAuth('signup')">${t("create_acct_btn")}</button></div>`; return; }
+    const { data: f } = await sb.from("follows").select("followee").eq("follower", user.id);
+    const ids = (f || []).map(x => x.followee);
+    if (!ids.length) { box.innerHTML = `<div class="empty">${t("follow_none")}</div>`; return; }
+    q = q.in("user_id", ids);
+  }
+  q = exSort === "top" ? q.order("likes", { ascending: false }).order("created_at", { ascending: false }) : q.order("created_at", { ascending: false });
+  const { data, error } = await q.limit(40);
+  if (error) { box.innerHTML = `<div class="err" style="display:block">${esc(error.message)}</div>`; return; }
+  box.innerHTML = (data || []).map(r => planCard({ ...r, author: r.author_name, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` })).join("")
+    || `<div class="empty">${s ? t("ex_empty_q") : t("ex_empty")}</div>`;
+}
+
+// ================== PROFILI ==================
+let pfUser = null;
+const AV_COLORS = ["#0b7a75", "#c2410c", "#7c3aed", "#0369a1", "#be185d", "#15803d", "#a16207"];
+const avColor = id => AV_COLORS[[...String(id)].reduce((s, c) => s + c.charCodeAt(0), 0) % AV_COLORS.length];
+const initials = n => String(n || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+async function openProfile(id) {
+  if (!sb || !id) return;
+  pfUser = id;
+  go("profile"); setUrlParam("u", id);
+  document.getElementById("pfEdit").style.display = "none";
+  document.getElementById("pfList").innerHTML = `<div class="empty">${t("loading")}</div>`;
+  const isMe = user && user.id === id;
+  const [{ data: prof }, plansRes, fol, fing, amI] = await Promise.all([
+    sb.from("profiles").select("id,name,bio").eq("id", id).maybeSingle(),
+    (() => { let q = sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,created_at").eq("user_id", id); if (!isMe) q = q.eq("is_public", true); return q.order("created_at", { ascending: false }).limit(60); })(),
+    sb.from("follows").select("follower", { count: "exact", head: true }).eq("followee", id),
+    sb.from("follows").select("followee", { count: "exact", head: true }).eq("follower", id),
+    user && !isMe ? sb.from("follows").select("followee").eq("follower", user.id).eq("followee", id).maybeSingle() : Promise.resolve({ data: null }),
+  ]);
+  if (pfUser !== id) return;
+  const name = prof?.name || "—";
+  const plans = plansRes.data || [];
+  const likesTotal = plans.filter(p => p.is_public).reduce((s, p) => s + (p.likes || 0), 0);
+  const av = document.getElementById("pfAvatar"); av.textContent = initials(name); av.style.background = avColor(id);
+  document.getElementById("pfName").textContent = name;
+  document.getElementById("pfBio").textContent = prof?.bio || "";
+  document.getElementById("pfStats").innerHTML = `<span><b>${plans.filter(p => isMe ? true : p.is_public).length}</b> ${t("pf_n_plans")}</span>
+    <span><b id="pfFollowers">${fol.count || 0}</b> ${t("pf_followers")}</span><span><b>${fing.count || 0}</b> ${t("pf_following")}</span><span><b>${likesTotal}</b> ❤️</span>`;
+  let a = "";
+  if (isMe) a = `<button class="btn2" onclick="toggleEdit()">${t("pf_edit")}</button>`;
+  else a = `<button class="btn2 ${amI.data ? "" : "pri"}" id="followBtn" data-on="${amI.data ? 1 : 0}" onclick="toggleFollow()">${amI.data ? t("unfollow") : t("follow")}</button>`;
+  a += `<button class="btn2" onclick="copyProfileLink()">🔗 ${t("copy")}</button>`;
+  document.getElementById("pfActions").innerHTML = a;
+  document.getElementById("pfList").innerHTML = plans.map(r => planCard({ ...r, mine: isMe, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` })).join("")
+    || `<div class="empty">${t("pf_empty")}</div>`;
+  if (isMe) { document.getElementById("pfNameIn").value = prof?.name || ""; document.getElementById("pfBioIn").value = prof?.bio || ""; }
+}
+function toggleEdit() { const e = document.getElementById("pfEdit"); e.style.display = e.style.display === "none" ? "block" : "none"; }
+async function saveProfile() {
+  const name = aVal("pfNameIn"), bio = aVal("pfBioIn");
+  if (name.length < 1) return toast(t("need_name"));
+  const { error } = await sb.from("profiles").update({ name, bio }).eq("id", user.id);
+  if (error) return toast(t("err") + error.message);
+  await sb.from("plans").update({ author_name: name }).eq("user_id", user.id);
+  myProfile = { id: user.id, name, bio }; refreshAcct();
+  toast(t("saved_ok_short")); openProfile(user.id);
+}
+async function toggleFollow() {
+  if (!user) return showAuth("signup", t("follow_login"));
+  const b = document.getElementById("followBtn"), on = b.dataset.on === "1";
+  const res = on ? await sb.from("follows").delete().eq("follower", user.id).eq("followee", pfUser)
+                 : await sb.from("follows").insert({ follower: user.id, followee: pfUser });
+  if (res.error) return toast(t("err") + res.error.message);
+  b.dataset.on = on ? "0" : "1"; b.textContent = on ? t("follow") : t("unfollow"); b.classList.toggle("pri", on);
+  const c = document.getElementById("pfFollowers"); c.textContent = Math.max(0, +c.textContent + (on ? -1 : 1));
+  toast(on ? t("unfollowed") : t("followed"));
+}
+async function copyProfileLink() {
+  const u = `${APP_URL}?u=${pfUser}`;
+  try { await navigator.clipboard.writeText(u); toast(t("link_copied")); } catch { toast(u); }
+}
+
+// ================== PËLQIMET ==================
+let liked = false;
+async function loadLikeState() {
+  liked = false;
+  if (sb && user && row.id && row.is_public) {
+    const { data } = await sb.from("likes").select("plan_id").eq("user_id", user.id).eq("plan_id", row.id).maybeSingle();
+    liked = !!data;
+  }
+  renderActions();
+}
+async function toggleLike() {
+  if (!user) return showAuth("signup", t("like_login"));
+  const res = liked ? await sb.from("likes").delete().eq("user_id", user.id).eq("plan_id", row.id)
+                    : await sb.from("likes").insert({ user_id: user.id, plan_id: row.id });
+  if (res.error) return toast(t("err") + res.error.message);
+  liked = !liked; row.likes = Math.max(0, (row.likes || 0) + (liked ? 1 : -1));
+  renderActions();
+}
+
+async function openById(id) {
+  if (!sb) return;
+  const { data, error } = await sb.from("plans").select("*").eq("id", id).maybeSingle();
+  if (error || !data) { toast(t("not_found")); go("create"); return; }
+  openPlan(data.data, data, user && data.user_id === user.id ? "own" : "shared");
+}
+function openLocal(id) { const x = localList().find(l => l.localId === id); if (x) openPlan(x.plan, { localId: id }, "own"); }
+
+// ================== SHFAQJA E PLANIT ==================
+let plan = null, row = null, mode = "own", map = null, layer = null;
+function openPlan(p, r, m) {
+  plan = p; row = r || {}; mode = m;
+  go("plan");
+  if (row.id) setUrlPlan(row.id);
+  openPlanHeader();
+  renderActions();
+  loadLikeState();
+  renderTabs();
+  if (!map) {
+    map = L.map("map", { scrollWheelZoom: false });
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+    layer = L.layerGroup().addTo(map);
+  }
+  setTimeout(() => { map.invalidateSize(); selectDay(0); }, 60);
+}
+
+function openPlanHeader() {
+  const p = plan;
+  document.getElementById("rTitle").textContent = p.title || p.city?.name;
+  document.getElementById("rSummary").textContent = p.summary || "";
+  const by = document.getElementById("rBy");
+  by.innerHTML = mode === "shared" && row.author_name
+    ? `<a onclick="openProfile('${esc(row.user_id)}')">${esc(t("plan_by", row.author_name))}</a>` + (row.saves ? " · " + esc(t("saved_times", row.saves)) : "")
+    : "";
+  document.getElementById("rTips").innerHTML = (p.tips || []).map(x => `<li>${esc(x)}</li>`).join("");
+  document.getElementById("rCost").textContent = p.cost_estimate ? "💶 " + p.cost_estimate : "";
+}
+function renderTabs() {
+  document.getElementById("dayTabs").innerHTML = plan.days.map((d, i) => `<button data-i="${i}">${t("day")} ${d.day || i + 1}</button>`).join("") + `<button data-i="-1">${t("all")}</button>`;
+  document.querySelectorAll("#dayTabs button").forEach(b => b.onclick = () => selectDay(+b.dataset.i));
+}
+function renderActions() {
+  const A = document.getElementById("planActions"), N = document.getElementById("saveNote");
+  N.style.display = "none";
+  let h = "";
+  if (row.id && row.is_public) h += `<button class="btn2 likebtn ${liked ? "on" : ""}" onclick="toggleLike()">${liked ? "❤️" : "🤍"} ${row.likes || 0}</button>`;
+  if (mode === "own") {
+    h += `<button class="btn2 pri" onclick="openShare()">${t("a_share")}</button>`;
+    h += `<button class="btn2" onclick="regenerate()">${t("a_regen")}</button>`;
+    h += `<button class="btn2" onclick="copyPlan()">${t("a_copy")}</button>`;
+    h += `<button class="btn2" onclick="deletePlan()">🗑️</button>`;
+    if (row.localId && sb) { N.innerHTML = `${t("local_note")} <button class="btn2 pri" style="margin-top:8px" onclick="showAuth('signup')">${t("local_btn")}</button>`; N.style.display = "block"; }
+  } else {
+    h += `<button class="btn2 pri" onclick="saveCopy()">${t("a_save")}</button>`;
+    h += `<button class="btn2" onclick="openShare()">${t("a_share2")}</button>`;
+    h += `<button class="btn2" onclick="useAsTemplate()">${t("a_similar")}</button>`;
+  }
+  A.innerHTML = h;
+}
+
+function selectDay(i) {
+  document.querySelectorAll("#dayTabs button").forEach(b => {
+    const on = +b.dataset.i === i; b.classList.toggle("on", on);
+    b.style.background = on ? (i < 0 ? "#1f2933" : COLORS[i % COLORS.length]) : "#fff";
+    b.style.borderColor = on ? b.style.background : "";
+  });
+  layer.clearLayers();
+  const list = i < 0 ? plan.days.map((d, k) => [d, k]) : [[plan.days[i], i]];
+  const bounds = [];
+  for (const [d, k] of list) {
+    const color = COLORS[k % COLORS.length], pts = [];
+    let n = 0;
+    d.stops.forEach(s => {
+      if (s.lat == null) return;
+      n++; pts.push([s.lat, s.lon]); bounds.push([s.lat, s.lon]);
+      s._marker = L.marker([s.lat, s.lon], { icon: L.divIcon({ className: "", html: `<div class="numicon" style="background:${color}">${i < 0 ? (d.day || k + 1) : n}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] }) })
+        .bindPopup(`<b>${esc(s.name)}</b><br>${esc(s.start || "")}`).addTo(layer);
+    });
+    if (pts.length > 1) L.polyline(pts, { color, weight: 4, opacity: .7, dashArray: "6 8" }).addTo(layer);
+  }
+  if (bounds.length) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+  else if (plan.city) map.setView([plan.city.lat, plan.city.lon], 13);
+  renderDay(i);
+}
+
+function renderDay(i) {
+  const card = document.getElementById("dayCard");
+  if (i < 0) {
+    card.innerHTML = plan.days.map((d, k) => `<div style="margin-bottom:12px"><b style="color:${COLORS[k % COLORS.length]}">${t("day")} ${d.day || k + 1}: ${esc(d.theme || "")}</b>
+      <div style="color:var(--mut);font-size:14px">${d.stops.filter(s => s.type !== "meal").map(s => esc(s.name)).join(" → ")}</div></div>`).join("");
+    return;
+  }
+  const d = plan.days[i], color = COLORS[i % COLORS.length];
+  let n = 0;
+  const stops = d.stops.map((s, idx) => {
+    const isMeal = s.type === "meal", hasPt = s.lat != null;
+    const label = isMeal ? "🍴" : hasPt ? ++n : "•";
+    const end = s.start && s.duration_min ? addMin(s.start, s.duration_min) : "";
+    const travel = idx > 0 && s.travel_min ? `<div class="travel">${tIcon()} ~${s.travel_min} min</div>` : "";
+    const links = hasPt ? `<div class="links"><a href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}" target="_blank" rel="noopener">${t("map")}</a>${s.wiki ? `<a href="${wikiUrl(s.wiki)}" target="_blank" rel="noopener">📖 Wikipedia</a>` : ""}</div>` : "";
+    return `${travel}<div class="stop"><div class="num ${isMeal ? "meal" : hasPt ? "" : "other"}" style="background:${color}">${label}</div>
+      <div class="sbody" data-idx="${idx}">
+        <div class="time">${esc(s.start || "")}${end ? "–" + end : ""}${s.duration_min ? ` · ${fmtDur(s.duration_min)}` : ""}</div>
+        <div class="nm">${esc(s.name || "")}</div>
+        ${s.note ? `<div class="note2">${esc(s.note)}</div>` : ""}${s.tip ? `<div class="tip">💡 ${esc(s.tip)}</div>` : ""}${links}
+      </div></div>`;
+  }).join("");
+  card.innerHTML = `<div class="dayhead"><div><h3 style="color:${color}">${t("day")} ${d.day || i + 1}: ${esc(d.theme || "")}</h3>
+    <div class="area">${esc(d.area || "")}</div></div>${gmapsLink(d)}</div><div>${stops}</div>`;
+  card.querySelectorAll(".sbody").forEach(el => el.onclick = e => {
+    if (e.target.closest("a")) return;
+    const s = d.stops[+el.dataset.idx];
+    if (s._marker) { map.setView(s._marker.getLatLng(), 16); s._marker.openPopup(); document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "center" }); }
+  });
+}
+function gmapsLink(d) {
+  const pts = d.stops.filter(s => s.lat != null);
+  if (pts.length < 2) return "";
+  const mode = { kembe: "walking", publik: "walking", vetura: "driving" }[plan.request?.transport] || "walking";
+  const ll = s => `${s.lat},${s.lon}`;
+  const way = pts.slice(1, -1).slice(0, 8).map(ll).join("|");
+  return `<a class="gm" href="https://www.google.com/maps/dir/?api=1&origin=${ll(pts[0])}&destination=${ll(pts[pts.length - 1])}${way ? "&waypoints=" + encodeURIComponent(way) : ""}&travelmode=${mode}" target="_blank" rel="noopener">${t("gmaps")}</a>`;
+}
+
+// ================== VEPRIMET E PLANIT ==================
+async function saveCopy() {
+  if (!user) return showAuth("signup", t("need_acct_save"));
+  const { data, error } = await sb.from("plans").insert(rowFromPlan(plan)).select("id,user_id,is_public,author_name,saves").single();
+  if (error) return toast(t("err") + error.message);
+  if (row.id) sb.rpc("count_save", { plan_id: row.id }).then(() => {}, () => {});
+  toast(t("saved_ok"));
+  openPlan(plan, data, "own");
+}
+async function deletePlan() {
+  if (!confirmTap("del")) return;
+  if (row.id) { const { error } = await sb.from("plans").delete().eq("id", row.id); if (error) return toast(t("err") + error.message); }
+  if (row.localId) removeLocal(row.localId);
+  toast(t("deleted")); go("mine");
+}
+function regenerate() { if (plan.request) { fillForm(plan.request); makePlan({ ...plan.request, fresh: true }); } else go("create"); }
+function useAsTemplate() { if (plan.request) fillForm(plan.request); go("create"); toast(t("edit_create")); }
+function fillForm(r) {
+  document.getElementById("city").value = r.city || plan.city?.name || "";
+  days = r.days || plan.days.length; chDays(0);
+  if (r.start) document.getElementById("start").value = r.start;
+  if (r.end) document.getElementById("end").value = r.end;
+  for (const n of ["pace", "transport", "budget", "lang"]) if (r[n]) document.querySelectorAll(`.seg[data-name="${n}"] button`).forEach(b => b.classList.toggle("on", b.dataset.v === r[n]));
+  if (r.interests) document.querySelectorAll("#interests .chip").forEach(c => c.classList.toggle("on", r.interests.includes(c.dataset.v)));
+  document.getElementById("notes").value = r.notes || "";
+}
+function planText() {
+  const lines = [plan.title, plan.summary, ""];
+  plan.days.forEach((d, k) => { lines.push(`${t("day").toUpperCase()} ${d.day || k + 1}: ${d.theme || ""}`); d.stops.forEach(s => lines.push(`${s.start || ""}  ${s.name}${s.note ? " — " + s.note : ""}`)); lines.push(""); });
+  if (plan.tips?.length) lines.push(t("tips_label"), ...plan.tips.map(x => "• " + x));
+  return lines.join("\n");
+}
+async function copyPlan() { try { await navigator.clipboard.writeText(planText()); toast(t("copied")); } catch { toast(t("copy_fail")); } }
+
+// ================== NDARJA ==================
+const shareUrl = () => row.id ? `${API}/p/${row.id}` : APP_URL;
+function openShare() {
+  const canLink = !!row.id;
+  const isOwn = mode === "own";
+  document.getElementById("pubSwitch").style.display = isOwn && canLink ? "flex" : "none";
+  document.getElementById("pubToggle").checked = !!row.is_public;
+  document.getElementById("storyPrev").style.display = "none";
+  document.getElementById("storyHelp").style.display = "none";
+  const sub = document.getElementById("shareSub");
+  if (!canLink) sub.innerHTML = sb ? `${t("share_need")} <button class="btn2 pri" onclick="closeModal('shareBg');showAuth('signup')">${t("create_acct_btn")}</button><br><br>${t("share_story_only")}` : t("share_story_noacct");
+  else sub.textContent = isOwn ? t("share_own") : t("share_other");
+  updateShareLinks();
+  document.getElementById("nativeShare").style.display = navigator.share ? "block" : "none";
+  openModal("shareBg");
+}
+function updateShareLinks() {
+  const canLink = !!row.id && (row.is_public || mode === "shared");
+  document.getElementById("shareInner").style.display = canLink ? "block" : "none";
+  if (!canLink) return;
+  const url = shareUrl(), text = t("share_text", plan.days.length, plan.city?.name);
+  document.getElementById("shareLink").value = url;
+  document.getElementById("shWa").href = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
+  document.getElementById("shFb").href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  document.getElementById("shX").href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+  document.getElementById("shTg").href = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+}
+async function setPublic(v) {
+  const { error } = await sb.from("plans").update({ is_public: v, author_name: displayName(user) }).eq("id", row.id);
+  if (error) { toast(t("err") + error.message); document.getElementById("pubToggle").checked = !v; return; }
+  row.is_public = v; updateShareLinks(); renderActions();
+  toast(v ? t("pub_on") : t("pub_off"));
+}
+async function copyLink() { try { await navigator.clipboard.writeText(shareUrl()); toast(t("link_copied")); } catch { document.getElementById("shareLink").select(); } }
+async function nativeShare() {
+  try { await navigator.share({ title: plan.title, text: t("share_text", plan.days.length, plan.city?.name), url: shareUrl() }); } catch {}
+}
+
+// ---------- Foto për Story (1080×1920) ----------
+async function makeStory() {
+  const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#0b7a75"); g.addColorStop(1, "#0d3b52");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.arc(W - 60, 160, 340, 0, 7); x.fill(); x.beginPath(); x.arc(60, H - 200, 300, 0, 7); x.fill();
+  const F = "system-ui,-apple-system,'Segoe UI',sans-serif";
+  x.fillStyle = "rgba(255,255,255,.85)"; x.font = `600 40px ${F}`; x.fillText("🧭 " + APP_NAME, 80, 150);
+  x.fillStyle = "#fff"; x.font = `800 112px ${F}`;
+  let y = wrap(x, plan.city?.name || plan.title, 80, 300, W - 160, 120, 2);
+  x.font = `500 46px ${F}`; x.fillStyle = "rgba(255,255,255,.85)";
+  x.fillText(t("story_days", plan.days.length, plan.city?.country), 80, y + 85);
+  y += 160;
+  const maxDays = Math.min(plan.days.length, 4), perDay = plan.days.length > 3 ? 3 : plan.days.length === 1 ? 8 : 5;
+  for (let k = 0; k < maxDays; k++) {
+    const d = plan.days[k], col = COLORS[k % COLORS.length];
+    const cnt = Math.max(1, Math.min(perDay, d.stops.filter(s => s.type !== "meal").length));
+    roundRect(x, 60, y, W - 120, 110 + cnt * 62, 36, "rgba(255,255,255,.96)");
+    x.fillStyle = col; x.font = `800 40px ${F}`; x.fillText(`${t("day").toUpperCase()} ${d.day || k + 1}`, 100, y + 64);
+    x.fillStyle = "#6b7280"; x.font = `500 34px ${F}`; clip(x, d.theme || "", 330, y + 64, W - 450);
+    const sts = d.stops.filter(s => s.type !== "meal").slice(0, perDay);
+    sts.forEach((s, j) => {
+      const yy = y + 130 + j * 62;
+      x.fillStyle = col; x.beginPath(); x.arc(122, yy - 12, 22, 0, 7); x.fill();
+      x.fillStyle = "#fff"; x.font = `700 26px ${F}`; x.textAlign = "center"; x.fillText(j + 1, 122, yy - 3); x.textAlign = "left";
+      x.fillStyle = "#1f2933"; x.font = `600 36px ${F}`; clip(x, s.name, 165, yy, W - 290);
+    });
+    y += 110 + cnt * 62 + 30;
+    if (y > H - 260) break;
+  }
+  if (plan.days.length > maxDays) { x.fillStyle = "#fff"; x.font = `600 38px ${F}`; x.fillText(t("story_more", plan.days.length - maxDays), 80, y + 20); }
+  x.fillStyle = "rgba(255,255,255,.9)"; x.font = `600 34px ${F}`; x.textAlign = "center";
+  x.fillText(t("story_free"), W / 2, H - 150);
+  x.font = `800 38px ${F}`; x.fillText(APP_URL.replace("https://", "").replace(/\/$/, ""), W / 2, H - 95);
+  x.textAlign = "left";
+
+  const blob = await new Promise(r => c.toBlob(r, "image/png"));
+  const file = new File([blob], `udhetimi-${(plan.city?.name || "plan").toLowerCase().replace(/\s+/g, "-")}.png`, { type: "image/png" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: plan.title }); return; } catch (e) { if (e.name === "AbortError") return; }
+  }
+  const url = URL.createObjectURL(blob), img = document.getElementById("storyPrev");
+  img.src = url; img.style.display = "block";
+  const help = document.getElementById("storyHelp");
+  help.innerHTML = `${t("story_help")} <a href="${url}" download="${file.name}">${t("download")}</a>`;
+  help.style.display = "block";
+  img.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function wrap(x, text, X, Y, maxW, lh, maxLines) {
+  const words = String(text).split(" "); let line = "", lines = 0;
+  for (const w of words) {
+    const t = line ? line + " " + w : w;
+    if (x.measureText(t).width > maxW && line) { x.fillText(line, X, Y); Y += lh; line = w; if (++lines >= maxLines - 1) break; }
+    else line = t;
+  }
+  x.fillText(line, X, Y); return Y;
+}
+function clip(x, t, X, Y, maxW) { t = String(t); if (x.measureText(t).width <= maxW) return x.fillText(t, X, Y); while (t.length > 1 && x.measureText(t + "…").width > maxW) t = t.slice(0, -1); x.fillText(t + "…", X, Y); }
+function roundRect(x, X, Y, w, h, r, fill) { x.fillStyle = fill; x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.fill(); }
+
+// ================== NDIHMËSE ==================
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function addMin(t, m) { const [h, mi] = t.split(":").map(Number); const v = h * 60 + mi + m; return `${String(Math.floor(v / 60) % 24).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`; }
+function fmtDur(m) { return m >= 60 ? `${Math.floor(m / 60)} ${t("h")}${m % 60 ? " " + (m % 60) + " min" : ""}` : m + " min"; }
+function wikiUrl(w) { const [l, ...t] = w.split(":"); return `https://${l}.wikipedia.org/wiki/${encodeURIComponent(t.join(":").replace(/ /g, "_"))}`; }
+function tIcon() { return { kembe: "🚶", publik: "🚶/🚇", vetura: "🚗" }[plan.request?.transport] || "🚶"; }
+function openModal(id) { document.getElementById(id).classList.add("on"); }
+function closeModal(id) { document.getElementById(id).classList.remove("on"); }
+let tt; function toast(m) { const el = document.getElementById("toast"); el.textContent = m; el.style.display = "block"; clearTimeout(tt); tt = setTimeout(() => el.style.display = "none", 2600); }
+let pend = null; function confirmTap(k) { if (pend === k) { pend = null; return true; } pend = k; toast(t("press_again")); setTimeout(() => pend = null, 2500); return false; }
+document.getElementById("city").addEventListener("keydown", e => { if (e.key === "Enter") makePlan(); });
+
+// ================== FILLIMI ==================
+(async function init() {
+  if (sb) {
+    const { data } = await sb.auth.getSession();
+    user = data.session?.user || null;
+    if (user) loadMyProfile();
+    sb.auth.onAuthStateChange((ev, session) => {
+      const was = user; user = session?.user || null; refreshAcct();
+      if (!user) myProfile = null;
+      if (!was && user) loadMyProfile();
+      if (ev === "PASSWORD_RECOVERY") showAuth("newpass");
+      if (!was && user && ev === "SIGNED_IN") { migrateLocal(); if (view === "mine") loadMine(); if (view === "plan" && mode === "own" && row.localId) renderActions(); }
+    });
+  }
+  applyLang();
+  const params = new URL(location.href).searchParams;
+  const pid = params.get("p"), uid = params.get("u");
+  if (pid && sb) openById(pid);
+  else if (uid && sb) openProfile(uid);
+})();
+</script>
+</body>
+</html>
