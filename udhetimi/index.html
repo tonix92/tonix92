@@ -348,6 +348,11 @@
   .hcard small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
   @keyframes flash{0%{box-shadow:0 0 0 3px rgba(227,194,90,.9)}100%{box-shadow:0 0 0 0 rgba(227,194,90,0)}}
   #city.flash{animation:flash .9s ease-out}
+  .who small{display:block;color:var(--mut);font-size:13px;margin-bottom:6px}
+  .stepper.sm button{width:38px;height:38px;font-size:18px}
+  .stepper.sm b{min-width:34px;font-size:22px}
+  .rgrp{color:var(--mut);font-size:14px;margin-top:6px}
+  .rgrp:empty{display:none}
   .tbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .nitem{display:flex;gap:10px;align-items:flex-start;padding:11px 8px;border-bottom:1px solid #EEE3CF;cursor:pointer}
   .nitem:last-child{border-bottom:0}
@@ -411,6 +416,16 @@
     <label data-i18n="days_q"></label>
     <div class="stepper"><button type="button" onclick="chDays(-1)">−</button><b id="daysV"></b><button type="button" onclick="chDays(1)">+</button></div>
 
+    <label data-i18n="who_q"></label>
+    <div class="grid2 who">
+      <div><small data-i18n="adults"></small><div class="stepper sm"><button type="button" onclick="chGroup('adults',-1)">−</button><b id="adultsV">2</b><button type="button" onclick="chGroup('adults',1)">+</button></div></div>
+      <div><small data-i18n="kids"></small><div class="stepper sm"><button type="button" onclick="chGroup('kids',-1)">−</button><b id="kidsV">0</b><button type="button" onclick="chGroup('kids',1)">+</button></div></div>
+    </div>
+    <div id="kidAgesBox" style="display:none">
+      <label data-i18n="kid_ages"></label>
+      <div class="chips" id="kidAges"><span class="chip" data-v="0-3"></span><span class="chip" data-v="4-8"></span><span class="chip" data-v="9-12"></span><span class="chip" data-v="13-17"></span></div>
+    </div>
+
     <div class="grid2">
       <div><label for="start" data-i18n="start"></label><input id="start" type="time" value="09:00"></div>
       <div><label for="end" data-i18n="end"></label><input id="end" type="time" value="19:00"></div>
@@ -458,7 +473,7 @@
 <section class="view" id="v-plan">
   <div class="note" id="saveNote" style="display:none"></div>
   <div class="actions" id="planActions"></div>
-  <div class="card rhead"><img id="rPhoto" class="rphoto" alt="" style="display:none"><p id="rCaption" class="rcap" style="display:none"></p><h2 id="rTitle"></h2><p id="rSummary"></p><div class="by" id="rBy"></div></div>
+  <div class="card rhead"><img id="rPhoto" class="rphoto" alt="" style="display:none"><p id="rCaption" class="rcap" style="display:none"></p><h2 id="rTitle"></h2><p id="rSummary"></p><div class="rgrp" id="rGroup"></div><div class="by" id="rBy"></div></div>
   <div class="daytabs" id="dayTabs"></div>
   <div id="map"></div>
   <div class="card" id="dayCard"></div>
@@ -596,6 +611,8 @@ const APP_URL = "https://tonix92.github.io/tonix92/udhetimi/";
 // Përkthimet: shqip (sq), anglisht (en), gjermanisht (de)
 const I18N = {
   sq: {
+    who_q: "Kush udhëton?", adults: "Të rritur", kids: "Fëmijë", kid_ages: "Moshat e fëmijëve", yrs: "vjeç",
+    grp: (a, k) => `👥 ${a} ${a === 1 ? "i rritur" : "të rritur"}${k ? ` · ${k} fëmijë` : ""}`,
     quick: "Ose zgjidh:", home_h: "Plane nga udhëtarët", home_more: "Shiko të gjitha", home_by: a => `nga ${a}`,
     take_h: "Merre planin me vete", pdf: "📄 PDF / Printo", cal: "📅 Shto në kalendar",
     cal_h: "Shto në kalendar", cal_sub: "Kur fillon udhëtimi? Çdo ndalesë shtohet si takim me orën e vet.", cal_date: "Data e ditës së parë",
@@ -659,6 +676,8 @@ const I18N = {
     locale: "sq-AL",
   },
   en: {
+    who_q: "Who's travelling?", adults: "Adults", kids: "Children", kid_ages: "Children's ages", yrs: "yrs",
+    grp: (a, k) => `👥 ${a} ${a === 1 ? "adult" : "adults"}${k ? ` · ${k} ${k === 1 ? "child" : "children"}` : ""}`,
     quick: "Or pick one:", home_h: "Plans from travellers", home_more: "See all", home_by: a => `by ${a}`,
     take_h: "Take the plan with you", pdf: "📄 PDF / Print", cal: "📅 Add to calendar",
     cal_h: "Add to calendar", cal_sub: "When does your trip start? Every stop is added as an event at its time.", cal_date: "Date of day 1",
@@ -722,6 +741,8 @@ const I18N = {
     locale: "en-GB",
   },
   de: {
+    who_q: "Wer reist mit?", adults: "Erwachsene", kids: "Kinder", kid_ages: "Alter der Kinder", yrs: "J.",
+    grp: (a, k) => `👥 ${a} ${a === 1 ? "Erwachsene/r" : "Erwachsene"}${k ? ` · ${k} ${k === 1 ? "Kind" : "Kinder"}` : ""}`,
     quick: "Oder wähle:", home_h: "Pläne von Reisenden", home_more: "Alle ansehen", home_by: a => `von ${a}`,
     take_h: "Nimm den Plan mit", pdf: "📄 PDF / Drucken", cal: "📅 In den Kalender",
     cal_h: "In den Kalender", cal_sub: "Wann beginnt deine Reise? Jeder Stopp wird als Termin mit seiner Uhrzeit eingetragen.", cal_date: "Datum von Tag 1",
@@ -797,7 +818,7 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
   document.querySelectorAll("#langSw button").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
   document.querySelectorAll('.seg[data-name="lang"] button').forEach(b => b.classList.toggle("on", b.dataset.v === LANG));
-  chDays(0); refreshAcct(); renderQuick(); renderHome();
+  chDays(0); renderKidAges(); refreshAcct(); renderQuick(); renderHome();
 }
 function setLang(l) {
   LANG = l; try { localStorage.setItem("udhetimi_lang", l); } catch {}
@@ -950,7 +971,14 @@ async function doNewPass() {
 async function doLogout() { await sb.auth.signOut(); closeModal("authBg"); toast(t("logged_out")); if (view === "mine") loadMine(); }
 
 // ================== FORMA ==================
-let days = 3;
+let days = 3, group = { adults: 2, kids: 0 };
+function chGroup(k, d) {
+  group[k] = Math.max(k === "adults" ? 1 : 0, Math.min(k === "adults" ? 12 : 8, group[k] + d));
+  document.getElementById(k + "V").textContent = group[k];
+  document.getElementById("kidAgesBox").style.display = group.kids ? "block" : "none";
+}
+function renderKidAges() { document.querySelectorAll("#kidAges .chip").forEach(c => c.textContent = c.dataset.v.replace("-", "–") + " " + t("yrs")); }
+document.getElementById("kidAges").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) c.classList.toggle("on"); });
 function chDays(d) { days = Math.max(1, Math.min(7, days + d)); document.getElementById("daysV").textContent = t("days_n", days); }
 document.querySelectorAll(".seg").forEach(seg => seg.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -965,6 +993,8 @@ function readForm() {
     pace: segVal("pace"), transport: segVal("transport"), budget: segVal("budget"), lang: segVal("lang"),
     interests: [...document.querySelectorAll("#interests .chip.on")].map(c => c.dataset.v),
     notes: document.getElementById("notes").value.trim(),
+    adults: group.adults, kids: group.kids,
+    kidAges: group.kids ? [...document.querySelectorAll("#kidAges .chip.on")].map(c => c.dataset.v) : [],
   };
 }
 
@@ -1266,6 +1296,8 @@ function openPlanHeader() {
   cap.style.display = row.caption && row.is_public ? "block" : "none"; cap.textContent = row.caption || "";
   document.getElementById("rTitle").textContent = p.title || p.city?.name;
   document.getElementById("rSummary").textContent = p.summary || "";
+  const rq = p.request || {};
+  document.getElementById("rGroup").textContent = rq.adults ? t("grp", rq.adults, rq.kids || 0) + (rq.kids && rq.kidAges?.length ? ` (${rq.kidAges.map(a => a.replace("-", "–")).join(", ")} ${t("yrs")})` : "") : "";
   const by = document.getElementById("rBy");
   by.innerHTML = mode === "shared" && row.author_name
     ? `<a onclick="openProfile('${esc(row.user_id)}')">${esc(t("plan_by", row.author_name))}</a>` + (row.saves ? " · " + esc(t("saved_times", row.saves)) : "")
@@ -1387,6 +1419,8 @@ function fillForm(r) {
   for (const n of ["pace", "transport", "budget", "lang"]) if (r[n]) document.querySelectorAll(`.seg[data-name="${n}"] button`).forEach(b => b.classList.toggle("on", b.dataset.v === r[n]));
   if (r.interests) document.querySelectorAll("#interests .chip").forEach(c => c.classList.toggle("on", r.interests.includes(c.dataset.v)));
   document.getElementById("notes").value = r.notes || "";
+  group = { adults: r.adults || 2, kids: r.kids || 0 }; chGroup("adults", 0); chGroup("kids", 0);
+  document.querySelectorAll("#kidAges .chip").forEach(c => c.classList.toggle("on", (r.kidAges || []).includes(c.dataset.v)));
 }
 function planText() {
   const lines = [plan.title, plan.summary, ""];
