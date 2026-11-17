@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Udhëtimi">
-<meta name="theme-color" content="#0b7a75">
+<meta name="theme-color" content="#13233A">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Udhëtimi — plani yt i qytetit</title>
 <meta property="og:title" content="Udhëtimi — plani yt i qytetit">
 <meta property="og:description" content="Plani yt i qytetit ditë për ditë · Your city plan, day by day · Dein Stadtplan, Tag für Tag">
@@ -128,13 +130,80 @@
   .likebtn.on{background:#fdecea;border-color:#f5c2c0;color:#b42318}
   .by a{color:var(--acc);font-weight:600;cursor:pointer;text-decoration:none}
   .pcard .likes{color:#b42318;font-size:13px;white-space:nowrap}
+
+  /* ===== Premium layer ===== */
+  :root{--ink:#13233A;--paper:#F5F5F1;--brass:#A8823A;--brass2:#C9A962;--harbor:#1F5F66;--slate:#5E6B78;
+    --bg:var(--paper);--txt:#1A2433;--mut:var(--slate);--acc:var(--harbor);--acc2:#E7EFEE;--line:#E2E2DB;--warm:#8A5A2B;
+    --serif:"Bodoni Moda",Didot,"Bodoni 72",Georgia,serif;--sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+  html,body{font-family:var(--sans);font-size:15.5px;-webkit-font-smoothing:antialiased;line-height:1.5}
+  ::selection{background:var(--brass2);color:var(--ink)}
+  :focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .top{background:var(--ink);border-bottom:0;color:#F5F5F1}
+  .topin{padding:14px 18px 10px}
+  .brand{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:.2px;color:#F5F5F1}
+  .brand .mark{width:22px;height:22px;color:var(--brass2)}
+  .langsw{background:rgba(255,255,255,.07)}
+  .langsw button{color:rgba(245,245,241,.6);font-weight:600;letter-spacing:.3px}
+  .langsw button.on{background:rgba(255,255,255,.14);color:#fff}
+  .acct{background:transparent;border:1px solid rgba(201,169,98,.55);color:var(--brass2);font-weight:600}
+  .nav{gap:22px;padding:0 18px;justify-content:flex-start}
+  .nav button{flex:none;background:none;border-radius:0;padding:10px 0 12px;color:rgba(245,245,241,.55);font-weight:500;font-size:14.5px;border-bottom:2px solid transparent}
+  .nav button.on{background:none;box-shadow:none;color:#fff;border-bottom-color:var(--brass2)}
+  .wrap{padding-top:0}
+  h1{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1.08;letter-spacing:-.4px;margin:26px 0 6px;color:var(--ink)}
+  .lead{color:var(--slate);font-size:15.5px;margin-bottom:22px}
+  .hero{position:relative;overflow:hidden;background:var(--ink);color:#F5F5F1;margin:0 -16px 22px;padding:30px 22px 34px;border-radius:0 0 26px 26px}
+  .hero h1{color:#F7F3E8;font-size:clamp(38px,9vw,56px);margin:6px 0 12px;max-width:11ch;position:relative}
+  .hero .lead{color:rgba(245,245,241,.72);margin:0;max-width:34ch;position:relative}
+  .meridians{position:absolute;inset:0;width:100%;height:100%;color:var(--brass2);opacity:.28}
+  @media(min-width:760px){.hero{margin:0 0 26px;border-radius:0 0 30px 30px;padding:44px 40px 46px}}
+  .card{border-radius:20px;padding:22px;box-shadow:0 1px 0 rgba(19,35,58,.04),0 12px 32px -18px rgba(19,35,58,.18);border:1px solid #ECECE6}
+  label{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.1px;margin:20px 0 8px}
+  input,select,textarea{border-radius:10px;border-color:var(--line);background:#FBFBF9;transition:border-color .15s,background .15s}
+  input:focus,textarea:focus{border-color:var(--brass);background:#fff}
+  #city{font-family:var(--serif);font-size:22px;padding:14px 14px}
+  #city::placeholder{color:#A3A9B0}
+  .stepper button{border-radius:50%;width:42px;height:42px;background:#fff;color:var(--ink);font-size:20px}
+  .stepper b{font-family:var(--serif);font-weight:500;font-size:26px;color:var(--ink)}
+  .chip{border-color:var(--line);color:var(--ink);padding:8px 14px;font-size:14px;transition:background .15s,color .15s}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#F7F3E8}
+  .seg{background:#EEEEE8;border-radius:11px}
+  .seg button{color:var(--slate);border-radius:8px;font-weight:500}
+  .seg button.on{color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(19,35,58,.12)}
+  .go{background:var(--ink);color:#F7F3E8;border-radius:14px;font-weight:600;font-size:16.5px;letter-spacing:.2px;padding:17px;box-shadow:inset 0 0 0 1px rgba(201,169,98,.45),0 10px 24px -12px rgba(19,35,58,.6);margin-top:22px}
+  .go:hover{background:#1A2E4A}
+  .go.sec{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+  .spin{border-color:#E9E3D3;border-top-color:var(--brass)}
+  #loadMsg{font-family:var(--serif);font-weight:500;font-size:20px;color:var(--ink)}
+  .rhead h2{font-family:var(--serif);font-weight:500;font-size:32px;line-height:1.1;color:var(--ink)}
+  .dayhead h3{font-family:var(--serif);font-weight:500;font-size:24px;color:var(--ink)}
+  .btn2{border-radius:11px;font-weight:600;color:var(--ink)}
+  .btn2.pri{background:var(--ink);border-color:var(--ink);color:#F7F3E8}
+  .daytabs button{font-weight:600;color:var(--ink);border-color:var(--line)}
+  #map{border-radius:20px;box-shadow:0 12px 32px -18px rgba(19,35,58,.3)}
+  .num{font-family:var(--serif);font-weight:600;font-size:15px;box-shadow:0 0 0 3px #fff}
+  .stop:not(:last-child)::before{border-left:1px solid #D8D6CC}
+  .sbody .nm{font-family:var(--serif);font-weight:600;font-size:18.5px;color:var(--ink)}
+  .sbody .tip{color:var(--harbor)}
+  .gm{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .pcard{border:1px solid #ECECE6;box-shadow:0 10px 26px -20px rgba(19,35,58,.25)}
+  .pcard .badge{background:var(--ink);color:var(--brass2);font-family:var(--serif);font-weight:600}
+  .pcard .t b{font-family:var(--serif);font-weight:600;font-size:17px;color:var(--ink)}
+  .tabsm button.on{background:var(--ink);border-color:var(--ink);color:#F7F3E8}
+  .tog input:checked+span{background:var(--ink)}
+  .modal h3,.pfmain h2{font-family:var(--serif);font-weight:500;color:var(--ink)}
+  .modal h3{font-size:26px}
+  .note{background:#F2EEE3;color:#4F4126}
+  .note a,.note button.link,.by a{color:#7C5F26}
+  .toast{background:var(--ink)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01s!important}}
 </style>
 </head>
 <body>
 
 <div class="top">
   <div class="topin">
-    <div class="brand" onclick="go('create')">🧭 <span id="brandName">Udhëtimi</span></div>
+    <div class="brand" onclick="go('create')"><svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 3.5 14.2 12 12 20.5 9.8 12Z" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="#13233A"/></svg><span id="brandName">Udhëtimi</span></div>
     <div class="langsw" id="langSw"><button data-l="sq">SQ</button><button data-l="en">EN</button><button data-l="de">DE</button></div>
     <button class="acct" id="acctBtn" onclick="acctClick()">Hyr</button>
   </div>
@@ -149,8 +218,11 @@
 
 <!-- ============ KRIJO ============ -->
 <section class="view on" id="v-create">
-  <h1 data-i18n="h_where"></h1>
-  <p class="lead" data-i18n="lead"></p>
+  <div class="hero">
+    <svg class="meridians" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width=".6"><ellipse cx="320" cy="250" rx="60" ry="200"/><ellipse cx="320" cy="250" rx="120" ry="200"/><ellipse cx="320" cy="250" rx="180" ry="200"/><ellipse cx="320" cy="250" rx="240" ry="200"/><path d="M60 150h520M80 100h500M120 55h460M180 18h400"/></g></svg>
+    <h1 data-i18n="h_where"></h1>
+    <p class="lead" data-i18n="lead"></p>
+  </div>
   <div class="card">
     <label for="city" data-i18n="city"></label>
     <input id="city" data-i18n-ph="city_ph" autocomplete="off">
@@ -181,7 +253,7 @@
     <div class="seg" data-name="budget"><button data-v="ulet" data-i18n="b_ulet"></button><button data-v="mesem" class="on" data-i18n="b_mesem"></button><button data-v="larte" data-i18n="b_larte"></button></div>
 
     <label data-i18n="plang"></label>
-    <div class="seg" data-name="lang"><button data-v="sq" class="on">🇦🇱 Shqip</button><button data-v="en">🇬🇧 English</button><button data-v="de">🇩🇪 Deutsch</button></div>
+    <div class="seg" data-name="lang"><button data-v="sq" class="on">Shqip</button><button data-v="en">English</button><button data-v="de">Deutsch</button></div>
 
     <label for="notes" data-i18n="notes"></label>
     <textarea id="notes" data-i18n-ph="notes_ph"></textarea>
@@ -473,7 +545,8 @@ function applyLang() {
   document.documentElement.lang = LANG;
   document.getElementById("brandName").textContent = APP_NAME;
   document.title = APP_NAME;
-  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  const EMO = /^(?:[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]\uFE0F?\u200D?)+\s*/u;
+  document.querySelectorAll("[data-i18n]").forEach(el => { const v = t(el.dataset.i18n); el.textContent = typeof v === "string" && el.closest(".chips,.nav,.seg,.go,.tabsm,.actions") ? v.replace(EMO, "") : v; });
   document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
   document.querySelectorAll("#langSw button").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
   document.querySelectorAll('.seg[data-name="lang"] button').forEach(b => b.classList.toggle("on", b.dataset.v === LANG));
@@ -489,7 +562,7 @@ function setLang(l) {
 }
 document.getElementById("langSw").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.l); });
 
-const COLORS = ["#0b7a75", "#c2410c", "#7c3aed", "#0369a1", "#be185d", "#15803d", "#a16207"];
+const COLORS = ["#1F5F66", "#A8823A", "#7A3B52", "#2E4A7D", "#5B6B2F", "#8A5A2B", "#3E6E8E"];
 const LOCAL_KEY = "udhetimi_plans_v1";
 const sb = (SUPABASE_URL.startsWith("http") && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 let user = null;
@@ -742,7 +815,7 @@ async function loadExplore() {
 
 // ================== PROFILI ==================
 let pfUser = null;
-const AV_COLORS = ["#0b7a75", "#c2410c", "#7c3aed", "#0369a1", "#be185d", "#15803d", "#a16207"];
+const AV_COLORS = ["#1F5F66", "#A8823A", "#7A3B52", "#2E4A7D", "#5B6B2F", "#8A5A2B", "#3E6E8E"];
 const avColor = id => AV_COLORS[[...String(id)].reduce((s, c) => s + c.charCodeAt(0), 0) % AV_COLORS.length];
 const initials = n => String(n || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
 async function openProfile(id) {
@@ -884,7 +957,7 @@ function renderActions() {
 function selectDay(i) {
   document.querySelectorAll("#dayTabs button").forEach(b => {
     const on = +b.dataset.i === i; b.classList.toggle("on", on);
-    b.style.background = on ? (i < 0 ? "#1f2933" : COLORS[i % COLORS.length]) : "#fff";
+    b.style.background = on ? (i < 0 ? "#13233A" : COLORS[i % COLORS.length]) : "#fff";
     b.style.borderColor = on ? b.style.background : "";
   });
   layer.clearLayers();
