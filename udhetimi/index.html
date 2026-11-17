@@ -353,6 +353,11 @@
   .stepper.sm b{min-width:34px;font-size:22px}
   .rgrp{color:var(--mut);font-size:14px;margin-top:6px}
   .rgrp:empty{display:none}
+  .accx{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:14px}
+  .accx a{color:var(--mut)}
+  .accx .link{border:0;background:none;color:#B42318;font:inherit;font-size:14px;cursor:pointer;padding:0;text-decoration:underline}
+  .foot a{color:var(--mut)}
+  html.app .top{padding-top:env(safe-area-inset-top)}
   .tbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .nitem{display:flex;gap:10px;align-items:flex-start;padding:11px 8px;border-bottom:1px solid #EEE3CF;cursor:pointer}
   .nitem:last-child{border-bottom:0}
@@ -501,6 +506,7 @@
   <div class="card cmts" id="cmtCard" style="display:none"><h3 class="cmth" id="cmtH"></h3><div id="cmtList"></div>
     <div class="cmtform" id="cmtForm"><input id="cmtIn" maxlength="500" data-i18n-ph="cm_ph" onkeydown="if(event.key==='Enter')addComment()"><button class="btn2 pri" onclick="addComment()" data-i18n="cm_send"></button></div></div>
   <div class="foot" data-i18n="foot"></div>
+  <div class="foot"><a href="privacy.html" id="privLink" data-i18n="privacy"></a></div>
 </section>
 
 <!-- ============ PLANET E MIA ============ -->
@@ -630,6 +636,9 @@ const APP_URL = "https://tonix92.github.io/tonix92/udhetimi/";
 // Përkthimet: shqip (sq), anglisht (en), gjermanisht (de)
 const I18N = {
   sq: {
+    privacy: "Privatësia", del_acc: "Fshi llogarinë", del_q: "Ta fshijmë llogarinë përgjithmonë?",
+    del_txt: "Do të fshihen menjëherë llogaria, planet, fotot, pëlqimet, komentet dhe ndjekësit e tu. Kjo nuk kthehet më pas.",
+    del_yes: "Po, fshije përgjithmonë", del_no: "Anulo", del_done: "Llogaria u fshi.", del_err: "Fshirja nuk u krye. Provo përsëri pas pak.",
     who_q: "Kush udhëton?", adults: "Të rritur", kids: "Fëmijë", kid_ages: "Moshat e fëmijëve", yrs: "vjeç",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "i rritur" : "të rritur"}${k ? ` · ${k} fëmijë` : ""}`,
     quick: "Ose zgjidh:", home_h: "Plane nga udhëtarët", home_more: "Shiko të gjitha", home_by: a => `nga ${a}`,
@@ -695,6 +704,9 @@ const I18N = {
     locale: "sq-AL",
   },
   en: {
+    privacy: "Privacy", del_acc: "Delete account", del_q: "Delete your account permanently?",
+    del_txt: "Your account, plans, photos, likes, comments and followers will be deleted right away. This can't be undone.",
+    del_yes: "Yes, delete permanently", del_no: "Cancel", del_done: "Your account has been deleted.", del_err: "Deletion didn't go through. Try again in a moment.",
     who_q: "Who's travelling?", adults: "Adults", kids: "Children", kid_ages: "Children's ages", yrs: "yrs",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "adult" : "adults"}${k ? ` · ${k} ${k === 1 ? "child" : "children"}` : ""}`,
     quick: "Or pick one:", home_h: "Plans from travellers", home_more: "See all", home_by: a => `by ${a}`,
@@ -760,6 +772,9 @@ const I18N = {
     locale: "en-GB",
   },
   de: {
+    privacy: "Datenschutz", del_acc: "Konto löschen", del_q: "Konto endgültig löschen?",
+    del_txt: "Dein Konto, deine Pläne, Fotos, Likes, Kommentare und Follower werden sofort gelöscht. Das lässt sich nicht rückgängig machen.",
+    del_yes: "Ja, endgültig löschen", del_no: "Abbrechen", del_done: "Dein Konto wurde gelöscht.", del_err: "Löschen hat nicht geklappt. Versuch es gleich noch einmal.",
     who_q: "Wer reist mit?", adults: "Erwachsene", kids: "Kinder", kid_ages: "Alter der Kinder", yrs: "J.",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "Erwachsene/r" : "Erwachsene"}${k ? ` · ${k} ${k === 1 ? "Kind" : "Kinder"}` : ""}`,
     quick: "Oder wähle:", home_h: "Pläne von Reisenden", home_more: "Alle ansehen", home_by: a => `von ${a}`,
@@ -947,8 +962,27 @@ function showAccount() {
     <div style="color:var(--mut)">${esc(user.email)}</div>
     <button class="go" onclick="closeModal('authBg');openProfile(user.id)">${t("my_profile")}</button>
     <button class="go sec" onclick="closeModal('authBg');go('mine')">${t("my_plans_btn")}</button>
-    <button class="go danger" onclick="doLogout()">${t("logout")}</button>`;
+    <button class="go danger" onclick="doLogout()">${t("logout")}</button>
+    <div class="accx"><a href="privacy.html?lang=${LANG}">${t("privacy")}</a><button class="link" onclick="askDeleteAccount()">${t("del_acc")}</button></div>`;
   openModal("authBg");
+}
+function askDeleteAccount() {
+  document.getElementById("authBody").innerHTML = `<h3>${t("del_q")}</h3>
+    <div style="color:var(--mut)">${t("del_txt")}</div>
+    <button class="go danger" id="delYes" onclick="deleteAccount()">${t("del_yes")}</button>
+    <button class="go sec" onclick="showAccount()">${t("del_no")}</button>`;
+}
+async function deleteAccount() {
+  const b = document.getElementById("delYes"); b.disabled = true;
+  try {
+    const { data: files } = await sb.storage.from("photos").list(user.id, { limit: 1000 });
+    if (files?.length) await sb.storage.from("photos").remove(files.map(f => `${user.id}/${f.name}`));
+    const { error } = await sb.rpc("delete_my_account");
+    if (error) throw error;
+    await sb.auth.signOut().catch(() => {});
+    try { localStorage.removeItem(LOCAL_KEY); } catch {}
+    closeModal("authBg"); toast(t("del_done")); go("create");
+  } catch (e) { b.disabled = false; toast(t("del_err")); }
 }
 const aVal = id => document.getElementById(id)?.value.trim() || "";
 function aErr(m) { const e = document.getElementById("aErr"); e.textContent = m; e.style.display = "block"; }
@@ -1554,7 +1588,7 @@ function openShare() {
   if (!canLink) sub.innerHTML = sb ? `${t("share_need")} <button class="btn2 pri" onclick="closeModal('shareBg');showAuth('signup')">${t("create_acct_btn")}</button><br><br>${t("share_story_only")}` : t("share_story_noacct");
   else sub.textContent = isOwn ? t("share_own") : t("share_other");
   updateShareLinks();
-  document.getElementById("nativeShare").style.display = navigator.share ? "block" : "none";
+  document.getElementById("nativeShare").style.display = navigator.share || IS_APP ? "block" : "none";
   openModal("shareBg");
 }
 function updateShareLinks() {
@@ -1577,7 +1611,8 @@ async function setPublic(v) {
 }
 async function copyLink() { try { await navigator.clipboard.writeText(shareUrl()); toast(t("link_copied")); } catch { document.getElementById("shareLink").select(); } }
 async function nativeShare() {
-  try { await navigator.share({ title: plan.title, text: t("share_text", plan.days.length, plan.city?.name), url: shareUrl() }); } catch {}
+  const d = { title: plan.title, text: t("share_text", plan.days.length, plan.city?.name), url: shareUrl() };
+  try { if (IS_APP && NP().Share) await NP().Share.share({ ...d, dialogTitle: plan.title }); else await navigator.share(d); } catch {}
 }
 
 // ---------- Foto për Story (1080×1920) ----------
@@ -1801,7 +1836,33 @@ function downloadIcs() {
   setInterval(() => { if (user && document.visibilityState === "visible") refreshBell(); }, 60000);
   document.addEventListener("visibilitychange", () => { if (user && document.visibilityState === "visible") refreshBell(); });
 })();
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+// ================== APLIKACIONI (iOS / Android) ==================
+const IS_APP = !!window.Capacitor?.isNativePlatform?.();
+const NP = () => window.Capacitor?.Plugins || {};
+if (IS_APP) {
+  document.documentElement.classList.add("app");
+  // Lidhjet jashtë (Google Maps, Wikipedia, WhatsApp...) hapen në shfletuesin e telefonit
+  document.addEventListener("click", e => {
+    const a = e.target.closest("a[href]"); if (!a) return;
+    const href = a.href;
+    if (/^https?:/i.test(href) && new URL(href).origin !== location.origin) {
+      e.preventDefault();
+      (NP().Browser ? NP().Browser.open({ url: href }) : window.open(href, "_system"));
+    } else if (/privacy\.html/.test(href)) {
+      e.preventDefault(); NP().Browser?.open({ url: APP_URL + "privacy.html?lang=" + LANG });
+    }
+  }, true);
+  NP().StatusBar?.setStyle?.({ style: "LIGHT" }).catch?.(() => {});
+  NP().StatusBar?.setBackgroundColor?.({ color: "#EBDCC2" }).catch?.(() => {});
+  NP().SplashScreen?.hide?.().catch?.(() => {});
+  // Butoni "prapa" në Android
+  NP().App?.addListener?.("backButton", () => {
+    const open = document.querySelector(".modal-bg.on");
+    if (open) return closeModal(open.id);
+    if (view !== "create") return go("create");
+    NP().App.exitApp();
+  });
+} else if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </body>
 </html>
