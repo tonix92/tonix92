@@ -84,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p3.1", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p4.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -172,6 +172,7 @@ export default {
       plan.request = p;
       plan.ai = aiCost(MODEL, plan.usage);
       plan.v = 2;
+      plan.budget = cleanBudget(plan.budget, plan.days.length);
       plan.poi_src = pois.some(x => !String(x.osm || "").startsWith("wiki")) ? "osm" : "wiki";
 
       stat.n++; stat.in += plan.ai.in; stat.out += plan.ai.out; stat.usd = +(stat.usd + plan.ai.usd).toFixed(5);
@@ -417,6 +418,7 @@ Rules:
 - Prioritise famous places (higher "pop") and the traveller's interests. Do not repeat a place.
 - Give realistic visit durations (big museums 2–3h, viewpoints 20–30 min) and travel time between stops.
 - If children are travelling: pick child-friendly stops first, keep museum visits short, add a rest or playground/park break every 2–3 hours, avoid long walks between stops, and mention family/child tickets. For children aged 0–3 add stroller/nap tips; for teenagers prefer interactive and active places.
+- "budget": realistic ESTIMATES in EUR for the WHOLE group per day (entry tickets for the planned stops, food incl. the meals, local transport, parking only when travelling by car, paid activities, other). Numbers only, no text. Match the budget level.
 - Write all human-readable text in ${LANG[p.lang]}. Keep notes short (1–2 sentences) and practical (tickets, best time, queues).
 - Reply with JSON only, no markdown.`;
 
@@ -434,7 +436,7 @@ Places (id|name|type|zone|lat,lon|popularity|...):
 ${list}
 
 Return this JSON shape:
-{"title": "...", "summary": "2 sentences", "days": [{"day": 1, "theme": "short title", "area": "neighbourhood name", "stops": [{"poi": "P1", "name": "display name", "type": "visit|meal|break|walk", "start": "09:00", "duration_min": 90, "travel_min": 10, "note": "...", "tip": "..."}]}], "tips": ["3-5 general tips: transport ticket, city card, safety, etc."], "cost_estimate": "rough daily cost in EUR excluding hotel${p.adults + p.kids > 1 ? ", for the whole group (say so)" : " per person"}"}`;
+{"title": "...", "summary": "2 sentences", "days": [{"day": 1, "theme": "short title", "area": "neighbourhood name", "stops": [{"poi": "P1", "name": "display name", "type": "visit|meal|break|walk", "start": "09:00", "duration_min": 90, "travel_min": 10, "note": "...", "tip": "..."}]}], "tips": ["3-5 general tips: transport ticket, city card, safety, etc."], "budget": {"currency": "EUR", "days": [{"day": 1, "tickets": 0, "food": 0, "transport": 0, "parking": 0, "activities": 0, "other": 0}], "free": ["2-4 free things to do in this city, preferably places from the list"]}, "cost_estimate": "rough daily cost in EUR excluding hotel${p.adults + p.kids > 1 ? ", for the whole group (say so)" : " per person"}"}`;
 
   // Provo deri në 2 herë: nëse përgjigja vjen e prerë ose jo si JSON, kërkohet përsëri
   let plan = null, d = null; const total = {};
@@ -759,6 +761,16 @@ async function finishPlan(env, plan, p, byId, opts = {}) {
   }
 }
 
+// ================== FAZA 4: buxheti ==================
+const BUD_KEYS = ["tickets", "food", "transport", "parking", "activities", "other"];
+function cleanBudget(b, nDays) {
+  if (!b || !Array.isArray(b.days)) return null;
+  const num = v => Math.max(0, Math.min(20000, Math.round(+v || 0)));
+  const days = b.days.slice(0, nDays).map((d, i) => Object.fromEntries([["day", i + 1], ...BUD_KEYS.map(k => [k, num(d?.[k])])]));
+  if (!days.length) return null;
+  return { currency: /^[A-Z]{3}$/.test(b.currency || "") ? b.currency : "EUR", days, free: (Array.isArray(b.free) ? b.free : []).map(x => String(x).slice(0, 160)).slice(0, 5), estimate: true };
+}
+
 // ================== FAZA 3: editori me bisedë dhe "Çfarë të vizitoj tani?" ==================
 
 const bearer = req => (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
@@ -876,7 +888,10 @@ Allowed ops:
 {"op":"break","day":1,"after":2,"name":"...","duration_min":30,"note":"..."}   (rest, coffee or generic meal without a specific place)
 {"op":"theme","day":1,"theme":"..."}
 
-Return: {"ops":[...],"reply":"..."}`;
+Current budget estimate (EUR, whole group): ${old.budget ? JSON.stringify({ days: old.budget.days }) : "none"}
+After your changes ALWAYS return "budget" for the whole updated itinerary: {"currency":"EUR","days":[{"day":1,"tickets":0,"food":0,"transport":0,"parking":0,"activities":0,"other":0}],"free":["2-4 free things to do nearby"]} (whole group, realistic estimates; keep unchanged days as they were).
+
+Return: {"ops":[...],"reply":"...","budget":{...}}`;
     const { out, usage } = await callClaude(env.ANTHROPIC_API_KEY, system, user, 4000);
     if (!out || !Array.isArray(out.ops)) throw new Error(M.badplan);
     const ai = aiCost(MODEL, usage);
@@ -901,10 +916,14 @@ Return: {"ops":[...],"reply":"..."}`;
       else if (o.op === "move" && o._t && days[(o.to_day || 0) - 1]) { const k = arr ? arr.indexOf(o._t) : -1; if (k >= 0) { arr.splice(k, 1); insertAfter(o.to_day, o._a, o._t); } }
       else if (o.op === "theme" && days[o.day - 1]) { days[o.day - 1].theme = String(o.theme || "").slice(0, 80); applied++; }
     }
-    days.forEach(d => { d.stops = d.stops.filter(s => !s._del); d.stops.forEach(s => { delete s._del; delete s.start; }); });
+    const changedStops = applied;
+    const nb = cleanBudget(out.budget, days.length);
+    if (nb && !applied && !old.budget) applied++; // vetëm buxheti (plan i vjetër pa buxhet)
+    days.forEach(d => { d.stops = d.stops.filter(s => !s._del); d.stops.forEach(s => { delete s._del; if (changedStops) delete s.start; }); });
     const plan = { ...old, days };
     delete plan.usage;
-    if (applied) await finishPlan(env, plan, p, byId, { enrichMax: 8, keepOrder: !/rend|organi|order|ordn|optimi|shkurt|distanc|kürz|weg/i.test(msg) });
+    if (nb) plan.budget = { ...nb, my: old.budget?.my };
+    if (changedStops) await finishPlan(env, plan, p, byId, { enrichMax: 8, keepOrder: !/rend|organi|order|ordn|optimi|shkurt|distanc|kürz|weg/i.test(msg) });
     plan.days.forEach(d => d.stops.forEach(s => { if (s.poi && /^S\d/.test(s.poi)) s.poi = null; }));
     plan.ai_edits = { n: (old.ai_edits?.n || 0) + 1, usd: +((old.ai_edits?.usd || 0) + ai.usd).toFixed(5) };
     ctx.waitUntil(addDayStat(env, ai));
