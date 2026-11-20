@@ -20,7 +20,7 @@ workflows:
           npm install --no-audit --no-fund
           WEB_SRC=../udhetimi node scripts/prepare-www.mjs
           npx cap add ios
-          npx capacitor-assets generate --ios --iconBackgroundColor '#1F4E79' --splashBackgroundColor '#EBDCC2'
+          npx capacitor-assets generate --ios --iconBackgroundColor '#1F4E79' --splashBackgroundColor '#F7F2EA' --splashBackgroundColorDark '#161616'
           npx cap sync ios
       - name: Lejet dhe versioni
         script: |
