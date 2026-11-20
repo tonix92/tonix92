@@ -84,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p3.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p3.1", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -272,12 +272,13 @@ async function geocode(city) {
 // ---------- Atraksionet ----------
 // Atraksionet ruhen 30 ditë për çdo qytet, që Overpass të mos pyetet çdo herë
 async function fetchPois(lat, lon, R) {
-  const key = new Request(`https://cache.udhetimi/pois3/${lat.toFixed(3)},${lon.toFixed(3)},${R}`);
+  const key = new Request(`https://cache.udhetimi/pois4/${lat.toFixed(3)},${lon.toFixed(3)},${R}`);
   const hit = await caches.default.match(key);
   if (hit) return hit.json();
   let out = [];
-  let osmOk = true;
-  try { out = await fetchPoisLive(lat, lon, R); } catch (e) { out = []; osmOk = false; }
+  // Overpass nuk arrihet nga Cloudflare (provuar me /status?osm=1), prandaj nuk pyetet: kursen 4 kërkesa
+  let osmOk = false;
+  if (USE_OVERPASS) { osmOk = true; try { out = await fetchPoisLive(lat, lon, R); } catch (e) { out = []; osmOk = false; } }
   if (out.length < 15) {
     if (out.length < 5) osmOk = false;
     const wiki = await fetchWikiPois(lat, lon, R).catch(() => []);
@@ -285,6 +286,7 @@ async function fetchPois(lat, lon, R) {
     out = out.concat(wiki.filter(x => !seen.has(x.wd)));
   }
   // Nga OSM ruhet 30 ditë; kur u përdor vetëm Wikipedia (OSM ra), vetëm 1 ditë
+  if (out.length) await addPopularity(out);
   if (out.length >= 5) await caches.default.put(key, new Response(JSON.stringify(out), { headers: { "Cache-Control": "max-age=" + 86400 * (osmOk ? 30 : 1) } }));
   return out;
 }
@@ -349,7 +351,10 @@ async function fetchWikiPois(lat, lon, R) {
   return out;
 }
 
-async function addPopularity(pois) {
+const USE_OVERPASS = false;
+async function addPopularity(all) {
+  const pois = all.filter(p => p.pop == null && p.wd);
+  if (!pois.length) return;
   const ids = pois.map(p => p.wd);
   const pop = {};
   const batches = [];
@@ -367,6 +372,7 @@ async function addPopularity(pois) {
     if (p.kind === "place_of_worship" || p.kind === "church") p.pop *= 0.8; // shumë kisha të vogla
     if (p.kind === "artwork" || p.kind === "memorial") p.pop *= 0.6;
   }
+  for (const p of all) if (p.pop == null) p.pop = 0;
 }
 
 // ---------- Zonat (k-means) ----------
@@ -663,43 +669,48 @@ function schedule(stops, legsByIdx, dayStart, dayEnd, dt) {
 
 // ---- Të dhënat e OpenStreetMap për vendet e zgjedhura, përmes Nominatim (orari, tarifa, adresa) ----
 // Overpass nuk arrihet nga Cloudflare, ndaj çdo vend i planit kontrollohet veç e veç (1 kërkesë në sekondë).
-async function osmDetails(poi) {
-  const key = new Request(`https://cache.udhetimi/osmd1/${encodeURIComponent(poi.wd || poi.name)}`);
-  const hit = await caches.default.match(key); if (hit) return { ...(await hit.json()), cached: true };
-  let res = null;
+async function osmFetch(poi) {
   try {
     const d = 0.02;
     const u = `https://nominatim.openstreetmap.org/search?format=jsonv2&extratags=1&addressdetails=1&limit=5&bounded=1&accept-language=en&viewbox=${poi.lon - d},${poi.lat + d},${poi.lon + d},${poi.lat - d}&q=${encodeURIComponent(poi.name)}`;
     const r = await fetch(u, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(6000) });
-    if (r.ok) {
-      const arr = await r.json();
-      const best = arr.find(x => poi.wd && x.extratags?.wikidata === poi.wd) || arr.find(x => hav(poi.lat, poi.lon, +x.lat, +x.lon) < 250);
-      res = {};
-      if (best) {
-        const e = best.extratags || {}, a = best.address || {};
-        const street = [a.road || a.pedestrian || a.square || a.footway, a.house_number].filter(Boolean).join(" ");
-        const town = [a.postcode, a.city || a.town || a.village].filter(Boolean).join(" ");
-        res = { matched: poi.wd && e.wikidata === poi.wd ? "wikidata" : "near", oh: e.opening_hours, fee: e.fee, charge: e.charge, addr: [street, town].filter(Boolean).join(", ") || undefined };
-      }
-    }
-  } catch {}
-  if (res) await caches.default.put(key, new Response(JSON.stringify(res), { headers: { "Cache-Control": "max-age=" + 86400 * 30 } }));
-  return res || {};
+    if (!r.ok) return null;
+    const arr = await r.json();
+    const best = arr.find(x => poi.wd && x.extratags?.wikidata === poi.wd) || arr.find(x => hav(poi.lat, poi.lon, +x.lat, +x.lon) < 250);
+    if (!best) return {};
+    const e = best.extratags || {}, a = best.address || {};
+    const street = [a.road || a.pedestrian || a.square || a.footway, a.house_number].filter(Boolean).join(" ");
+    const town = [a.postcode, a.city || a.town || a.village].filter(Boolean).join(" ");
+    return { m: poi.wd && e.wikidata === poi.wd ? "wikidata" : "near", oh: e.opening_hours, fee: e.fee, charge: e.charge, addr: [street, town].filter(Boolean).join(", ") || undefined };
+  } catch { return null; }
 }
-async function enrichPois(list) {
-  for (const [i, poi] of list.entries()) {
-    if (poi.oh || poi.addr) continue;
-    const t = Date.now(), d = await osmDetails(poi);
-    if (d.matched) Object.assign(poi, { oh: d.oh, fee: poi.fee || d.fee, charge: poi.charge || d.charge, addr: d.addr, osm_match: d.matched });
-    if (!d.cached && i < list.length - 1) await new Promise(r => setTimeout(r, Math.max(0, 1100 - (Date.now() - t))));
+// Një objekt i vetëm në cache për çdo zonë (~10 km): pak kërkesa për thirrje (Cloudflare lejon 50)
+async function enrichPois(list, max = 15) {
+  const todo = list.filter(p => p && !p.oh && !p.addr && p.lat != null);
+  if (!todo.length) return;
+  const key = new Request(`https://cache.udhetimi/osmd2/${todo[0].lat.toFixed(1)},${todo[0].lon.toFixed(1)}`);
+  const hit = await caches.default.match(key);
+  const map = hit ? await hit.json() : {};
+  let fetched = 0, changed = false;
+  for (const poi of todo) {
+    const id = poi.wd || poi.name;
+    let d = map[id];
+    if (d === undefined && fetched < max) {
+      const t = Date.now();
+      if (fetched) await new Promise(r => setTimeout(r, Math.max(0, 1100 - (Date.now() - t))));
+      d = await osmFetch(poi); fetched++;
+      if (d) { map[id] = d; changed = true; }
+    }
+    if (d && d.m) Object.assign(poi, { oh: d.oh, fee: poi.fee || d.fee, charge: poi.charge || d.charge, addr: d.addr, osm_match: d.m });
   }
+  if (changed) await caches.default.put(key, new Response(JSON.stringify(map), { headers: { "Cache-Control": "max-age=" + 86400 * 30 } }));
 }
 
 // ---- Zbatimi mbi planin: verifikimi, renditja, rrugët dhe oraret ----
 async function finishPlan(env, plan, p, byId, opts = {}) {
   const dates = tripDates(p.date, p.days);
   const used = [...new Set((plan.days || []).flatMap(d => (d.stops || []).map(s => s.poi)).filter(id => id && byId[id]))].map(id => byId[id]);
-  await enrichPois(used.slice(0, 30));
+  await enrichPois(used, opts.enrichMax ?? 15);
   for (const [i, d] of (plan.days || []).entries()) {
     const dt = dates[i] || null;
     if (dt) { d.date = isoDay(dt); }
@@ -719,10 +730,10 @@ async function finishPlan(env, plan, p, byId, opts = {}) {
     // Mos përsërit të njëjtin vend në të njëjtën ditë
     const seen = new Set(); stops = stops.filter(s => !s.poi || (seen.has(s.poi) ? false : seen.add(s.poi)));
     // Renditja: krahaso renditjen e Claude me atë të optimizuar, mbaj më të mirën
-    const tryOrder = async order => {
+    const tryOrder = async (order, useOrs) => {
       const geoIdx = order.map((s, k) => s.lat != null ? k : -1).filter(k => k >= 0);
       const pts = geoIdx.map(k => order[k]);
-      const legs = await orsRoute(env, pts, p.transport);
+      const legs = useOrs ? await orsRoute(env, pts, p.transport) : null;
       const legsByIdx = new Map();
       for (let j = 1; j < geoIdx.length; j++) {
         const a = pts[j - 1], b = pts[j];
@@ -733,16 +744,18 @@ async function finishPlan(env, plan, p, byId, opts = {}) {
       const sch = schedule(order, legsByIdx, p.start, p.end, dt);
       return { ...sch, legsByIdx, score: sch.warn.length * 120 + sch.over + sch.travelTotal };
     };
-    const a = await tryOrder(stops);
+    const a = await tryOrder(stops, false);
     const alt = opts.keepOrder ? stops : reorderDay(stops);
     const changed = alt.some((s, k) => s !== stops[k]);
-    const b = changed ? await tryOrder(alt) : null;
-    const best = b && b.score + 5 < a.score ? b : a;
+    const b = changed ? await tryOrder(alt, false) : null;
+    let best = b && b.score + 5 < a.score ? b : a;
+    const optimized = best === b;
+    if (env.ORS_KEY) best = await tryOrder(optimized ? alt : stops, true);
     d.stops = best.stops.map(({ _oh, ...s }) => s);
     d.route = [...best.legsByIdx.entries()].filter(([, l]) => l.line).map(([k, l]) => ({ to: k, line: thin(l.line) }));
     d.routed = !!d.route.length;
     if (best.over) d.overtime_min = best.over;
-    d.optimized = best === b;
+    d.optimized = optimized;
   }
 }
 
@@ -827,7 +840,7 @@ async function handleEdit(q, req, env, ctx, H, M) {
     let food = [];
     if (FOOD_RE.test(msg)) {
       const centers = days.map(d => { const g = d.stops.filter(s => s.lat != null); return g.length ? [g.reduce((a, s) => a + s.lat, 0) / g.length, g.reduce((a, s) => a + s.lon, 0) / g.length] : null; }).filter(Boolean);
-      for (const [la, lo] of centers.slice(0, 3)) food.push(...(await nearbyFood(la, lo)));
+      for (const [la, lo] of centers.slice(0, 2)) food.push(...(await nearbyFood(la, lo)));
       food = food.filter((x, i, a) => a.findIndex(y => y.name === x.name) === i).slice(0, 20);
       food.forEach((x, i) => { x.id = "R" + (i + 1); byId[x.id] = x; });
     }
@@ -891,7 +904,7 @@ Return: {"ops":[...],"reply":"..."}`;
     days.forEach(d => { d.stops = d.stops.filter(s => !s._del); d.stops.forEach(s => { delete s._del; delete s.start; }); });
     const plan = { ...old, days };
     delete plan.usage;
-    if (applied) await finishPlan(env, plan, p, byId, { keepOrder: !/rend|organi|order|ordn|optimi|shkurt|distanc|kürz|weg/i.test(msg) });
+    if (applied) await finishPlan(env, plan, p, byId, { enrichMax: 8, keepOrder: !/rend|organi|order|ordn|optimi|shkurt|distanc|kürz|weg/i.test(msg) });
     plan.days.forEach(d => d.stops.forEach(s => { if (s.poi && /^S\d/.test(s.poi)) s.poi = null; }));
     plan.ai_edits = { n: (old.ai_edits?.n || 0) + 1, usd: +((old.ai_edits?.usd || 0) + ai.usd).toFixed(5) };
     ctx.waitUntil(addDayStat(env, ai));
@@ -953,7 +966,7 @@ async function handleNow(q, req, env, ctx, H, M) {
     await addPopularity(pois);
     pois.sort((a, b) => (b.pop || 0) / (1 + b.dist / 800) - (a.pop || 0) / (1 + a.dist / 800));
     pois = pois.slice(0, 24);
-    await enrichPois(pois.slice(0, 12));
+    await enrichPois(pois.slice(0, 12), 10);
     const [y, mo, dd] = date.split("-").map(Number), dt = new Date(Date.UTC(y, mo - 1, dd)), now = toMin(time);
     const open = [];
     for (const x of pois) {
@@ -979,7 +992,7 @@ ${list}`;
     const end = fmtMin(Math.min(23 * 60 + 59, now + minutes));
     const p = { days: 1, date, start: time, end, transport, lang, interests, budget, adults: 1, kids: 0, kidAges: [], city: rn.name };
     const plan = { kind: "now", title: String(out.title || "").slice(0, 120), summary: String(out.summary || "").slice(0, 300), days: [{ day: 1, theme: String(out.title || "").slice(0, 80), stops }], tips: [], city: { name: rn.name, country: rn.country, lat, lon }, request: p, weather: wx };
-    await finishPlan(env, plan, p, byId);
+    await finishPlan(env, plan, p, byId, { enrichMax: 4 });
     plan.ai = aiCost(MODEL, usage); plan.v = 2;
     ctx.waitUntil(addDayStat(env, plan.ai));
     return json(plan, 200, H);
