@@ -91,7 +91,7 @@ export default {
     const cache = caches.default;
 
     // --- 1. A kemi plan të gatshëm për të njëjtën kërkesë? (falas, pa AI) ---
-    const planKey = new Request("https://plans.local/v2/" + await sha(JSON.stringify([p.date,
+    const planKey = new Request("https://plans.local/v3/" + await sha(JSON.stringify([p.date,
       p.city.toLowerCase(), p.days, p.start, p.end, p.pace, p.transport, p.budget, p.lang, [...p.interests].sort(), p.notes.trim().toLowerCase(), p.adults, p.kids, [...p.kidAges].sort()])));
     if (!q.fresh) {
       const hit = await cache.match(planKey);
@@ -247,17 +247,20 @@ async function geocode(city) {
 // ---------- Atraksionet ----------
 // Atraksionet ruhen 30 ditë për çdo qytet, që Overpass të mos pyetet çdo herë
 async function fetchPois(lat, lon, R) {
-  const key = new Request(`https://cache.udhetimi/pois2/${lat.toFixed(3)},${lon.toFixed(3)},${R}`);
+  const key = new Request(`https://cache.udhetimi/pois3/${lat.toFixed(3)},${lon.toFixed(3)},${R}`);
   const hit = await caches.default.match(key);
   if (hit) return hit.json();
   let out = [];
-  try { out = await fetchPoisLive(lat, lon, R); } catch (e) { out = []; }
+  let osmOk = true;
+  try { out = await fetchPoisLive(lat, lon, R); } catch (e) { out = []; osmOk = false; }
   if (out.length < 15) {
+    if (out.length < 5) osmOk = false;
     const wiki = await fetchWikiPois(lat, lon, R).catch(() => []);
     const seen = new Set(out.map(x => x.wd));
     out = out.concat(wiki.filter(x => !seen.has(x.wd)));
   }
-  if (out.length >= 5) await caches.default.put(key, new Response(JSON.stringify(out), { headers: { "Cache-Control": "max-age=" + 86400 * 30 } }));
+  // Nga OSM ruhet 30 ditë; kur u përdor vetëm Wikipedia (OSM ra), vetëm 1 ditë
+  if (out.length >= 5) await caches.default.put(key, new Response(JSON.stringify(out), { headers: { "Cache-Control": "max-age=" + 86400 * (osmOk ? 30 : 1) } }));
   return out;
 }
 
@@ -274,15 +277,16 @@ async function fetchPoisLive(lat, lon, R) {
   nwr["bridge"="yes"]["wikidata"]["name"]${a};
 );
 out center tags qt 900;`;
-  let data, lastErr;
-  for (const ep of OVERPASS.slice(0, 2)) {
-    try {
-      const r = await fetch(ep, { method: "POST", headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" }, body: "data=" + encodeURIComponent(query), signal: AbortSignal.timeout(12000) });
-      if (r.ok) { const d = await r.json(); if (d.elements && d.elements.length) { data = d; break; } lastErr = new Error("Overpass bosh"); continue; }
-      lastErr = new Error("Overpass " + r.status);
-    } catch (e) { lastErr = e; }
-  }
-  if (!data) throw lastErr || new Error("Overpass dështoi");
+  // Të gjithë serverët Overpass pyeten njëkohësisht; fiton përgjigja e parë e vlefshme
+  const ctrl = new AbortController();
+  const ask = async ep => {
+    const r = await fetch(ep, { method: "POST", headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" }, body: "data=" + encodeURIComponent(query), signal: ctrl.signal });
+    if (!r.ok) throw new Error("Overpass " + r.status);
+    const d = await r.json(); if (!d.elements?.length) throw new Error("Overpass bosh");
+    return d;
+  };
+  let data; const timer = setTimeout(() => ctrl.abort(), 20000);
+  try { data = await Promise.any(OVERPASS.map(ask)); } catch { throw new Error("Overpass dështoi"); } finally { clearTimeout(timer); ctrl.abort(); }
   const seen = new Set(), out = [];
   for (const el of data.elements || []) {
     const t = el.tags || {};
