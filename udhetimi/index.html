@@ -88,6 +88,13 @@
   .sbody .note2{font-size:14px;line-height:1.45}
   .sbody .tip{font-size:13px;color:var(--acc);margin-top:4px}
   .travel{font-size:12px;color:var(--mut);margin:-8px 0 10px 44px}
+  .travel a{color:var(--mut);margin-left:6px}
+  .dhint{display:block;color:var(--mut);font-size:12.5px;margin:4px 0 2px}
+  .sinfo{font-size:12.5px;color:var(--mut);margin-top:3px;line-height:1.45}
+  .hb{display:inline-block;font-size:11.5px;font-weight:600;border-radius:999px;padding:1px 8px;margin:3px 6px 0 0}
+  .hb.closed{background:#F6DCD6;color:#9A2F1E}.hb.closes{background:#F8E7C8;color:#8A5A12}.hb.unv{background:#ECE7DD;color:#6B6458}
+  .daywarn{font-size:13px;color:#8A5A12;background:#F8E7C8;border-radius:10px;padding:6px 10px;margin:6px 0 10px}
+  .estnote{font-size:12px;color:var(--mut);margin-top:4px}
   .links a{font-size:12px;color:var(--mut);margin-right:10px}
   .tips li{margin:6px 0;line-height:1.45}
   .foot{color:var(--mut);font-size:12px;text-align:center;margin-top:16px}
@@ -440,6 +447,10 @@
     <label data-i18n="days_q"></label>
     <div class="stepper"><button type="button" onclick="chDays(-1)">−</button><b id="daysV"></b><button type="button" onclick="chDays(1)">+</button></div>
 
+    <label for="tripDate" data-i18n="date_q"></label>
+    <input id="tripDate" type="date">
+    <small class="dhint" data-i18n="date_hint"></small>
+
     <label data-i18n="who_q"></label>
     <div class="grid2 who">
       <div><small data-i18n="adults"></small><div class="stepper sm"><button type="button" onclick="chGroup('adults',-1)">−</button><b id="adultsV">2</b><button type="button" onclick="chGroup('adults',1)">+</button></div></div>
@@ -639,6 +650,7 @@ const I18N = {
     privacy: "Privatësia", del_acc: "Fshi llogarinë", del_q: "Ta fshijmë llogarinë përgjithmonë?",
     del_txt: "Do të fshihen menjëherë llogaria, planet, fotot, pëlqimet, komentet dhe ndjekësit e tu. Kjo nuk kthehet më pas.",
     del_yes: "Po, fshije përgjithmonë", del_no: "Anulo", del_done: "Llogaria u fshi.", del_err: "Fshirja nuk u krye. Provo përsëri pas pak.",
+    date_q: "Kur fillon udhëtimi?", date_hint: "Opsionale: me datë kontrollohen oraret e hapjes për çdo ditë.", h_closed: "I mbyllur atë ditë", h_closes: "Mbyllet para se ta përfundosh vizitën", h_unconf: "orari i pakonfirmuar", h_unknown: "Orari nuk dihet — kontrolloje para se të shkosh", free: "Hyrje falas", fee_yes: "Me pagesë (çmimi nuk dihet)", unverified: "I pakonfirmuar", overtime: m => `Kjo ditë zgjat rreth ${m} min më shumë se koha që zgjodhe.`, est_note: "~ = kohë e vlerësuar, jo e matur.", gm_leg: "Rruga ↗",
     who_q: "Kush udhëton?", adults: "Të rritur", kids: "Fëmijë", kid_ages: "Moshat e fëmijëve", yrs: "vjeç",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "i rritur" : "të rritur"}${k ? ` · ${k} fëmijë` : ""}`,
     quick: "Ose zgjidh:", home_h: "Plane nga udhëtarët", home_more: "Shiko të gjitha", home_by: a => `nga ${a}`,
@@ -707,6 +719,7 @@ const I18N = {
     privacy: "Privacy", del_acc: "Delete account", del_q: "Delete your account permanently?",
     del_txt: "Your account, plans, photos, likes, comments and followers will be deleted right away. This can't be undone.",
     del_yes: "Yes, delete permanently", del_no: "Cancel", del_done: "Your account has been deleted.", del_err: "Deletion didn't go through. Try again in a moment.",
+    date_q: "When does the trip start?", date_hint: "Optional: with a date, opening hours are checked for each day.", h_closed: "Closed that day", h_closes: "Closes before you'd finish the visit", h_unconf: "hours not confirmed", h_unknown: "Hours unknown — check before you go", free: "Free entry", fee_yes: "Paid entry (price unknown)", unverified: "Not confirmed", overtime: m => `This day runs about ${m} min longer than the time you chose.`, est_note: "~ = estimated time, not measured.", gm_leg: "Route ↗",
     who_q: "Who's travelling?", adults: "Adults", kids: "Children", kid_ages: "Children's ages", yrs: "yrs",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "adult" : "adults"}${k ? ` · ${k} ${k === 1 ? "child" : "children"}` : ""}`,
     quick: "Or pick one:", home_h: "Plans from travellers", home_more: "See all", home_by: a => `by ${a}`,
@@ -775,6 +788,7 @@ const I18N = {
     privacy: "Datenschutz", del_acc: "Konto löschen", del_q: "Konto endgültig löschen?",
     del_txt: "Dein Konto, deine Pläne, Fotos, Likes, Kommentare und Follower werden sofort gelöscht. Das lässt sich nicht rückgängig machen.",
     del_yes: "Ja, endgültig löschen", del_no: "Abbrechen", del_done: "Dein Konto wurde gelöscht.", del_err: "Löschen hat nicht geklappt. Versuch es gleich noch einmal.",
+    date_q: "Wann beginnt die Reise?", date_hint: "Optional: Mit Datum werden die Öffnungszeiten für jeden Tag geprüft.", h_closed: "An diesem Tag geschlossen", h_closes: "Schließt, bevor der Besuch endet", h_unconf: "Öffnungszeiten unbestätigt", h_unknown: "Öffnungszeiten unbekannt – vorher prüfen", free: "Eintritt frei", fee_yes: "Eintritt kostenpflichtig (Preis unbekannt)", unverified: "Nicht bestätigt", overtime: m => `Dieser Tag dauert etwa ${m} Min. länger als die gewählte Zeit.`, est_note: "~ = geschätzte Zeit, nicht gemessen.", gm_leg: "Route ↗",
     who_q: "Wer reist mit?", adults: "Erwachsene", kids: "Kinder", kid_ages: "Alter der Kinder", yrs: "J.",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "Erwachsene/r" : "Erwachsene"}${k ? ` · ${k} ${k === 1 ? "Kind" : "Kinder"}` : ""}`,
     quick: "Oder wähle:", home_h: "Pläne von Reisenden", home_more: "Alle ansehen", home_by: a => `von ${a}`,
@@ -1046,7 +1060,7 @@ function readForm() {
     pace: segVal("pace"), transport: segVal("transport"), budget: segVal("budget"), lang: segVal("lang"),
     interests: [...document.querySelectorAll("#interests .chip.on")].map(c => c.dataset.v),
     notes: document.getElementById("notes").value.trim(),
-    adults: group.adults, kids: group.kids,
+    adults: group.adults, kids: group.kids, date: document.getElementById("tripDate").value || null,
     kidAges: group.kids ? [...document.querySelectorAll("#kidAges .chip.on")].map(c => c.dataset.v) : [],
   };
 }
@@ -1401,7 +1415,17 @@ function selectDay(i) {
       s._marker = L.marker([s.lat, s.lon], { icon: L.divIcon({ className: "", html: `<div class="numicon" style="background:${color}">${i < 0 ? (d.day || k + 1) : n}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] }) })
         .bindPopup(`<b>${esc(s.name)}</b><br>${esc(s.start || "")}`).addTo(layer);
     });
-    if (pts.length > 1) L.polyline(pts, { color, weight: 4, opacity: .7, dashArray: "6 8" }).addTo(layer);
+    const lines = new Map((d.route || []).map(r => [r.to, r.line]));
+    let prev = null;
+    d.stops.forEach((s, idx) => {
+      if (s.lat == null) return;
+      if (prev) {
+        const ln = lines.get(idx);
+        if (ln && ln.length > 1) L.polyline(ln, { color, weight: 4, opacity: .8 }).addTo(layer);
+        else L.polyline([[prev.lat, prev.lon], [s.lat, s.lon]], { color, weight: 4, opacity: .7, dashArray: "6 8" }).addTo(layer);
+      }
+      prev = s;
+    });
   }
   if (bounds.length) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
   else if (plan.city) map.setView([plan.city.lat, plan.city.lon], 13);
@@ -1416,22 +1440,45 @@ function renderDay(i) {
     return;
   }
   const d = plan.days[i], color = COLORS[i % COLORS.length];
-  let n = 0;
+  let n = 0, prevGeo = null, anyEst = false;
+  const LEGI = { walking: "🚶", transit: "🚇", driving: "🚗" };
   const stops = d.stops.map((s, idx) => {
     const isMeal = s.type === "meal", hasPt = s.lat != null;
     const label = isMeal ? "🍴" : hasPt ? ++n : "•";
     const end = s.start && s.duration_min ? addMin(s.start, s.duration_min) : "";
-    const travel = idx > 0 && s.travel_min ? `<div class="travel">${tIcon()} ~${s.travel_min} min</div>` : "";
+    let travel = "";
+    if (idx > 0 && s.travel_min) {
+      const est = s.travel_est || !s.travel_mode; anyEst = anyEst || est;
+      const mode = s.travel_mode || { kembe: "walking", publik: "transit", vetura: "driving" }[plan.request?.transport] || "walking";
+      const km = s.travel_m ? ` · ${(s.travel_m / 1000).toFixed(1)} km` : "";
+      const gl = hasPt && prevGeo ? `<a href="https://www.google.com/maps/dir/?api=1&origin=${prevGeo.lat},${prevGeo.lon}&destination=${s.lat},${s.lon}&travelmode=${mode}" target="_blank" rel="noopener">${t("gm_leg")}</a>` : "";
+      travel = `<div class="travel">${s.travel_mode ? LEGI[mode] || tIcon() : tIcon()} ${est ? "~" : ""}${s.travel_min} min${km}${gl}</div>`;
+    }
+    if (hasPt) prevGeo = s;
+    const info = [];
+    if (s.hours_warn === "closed") info.push(`<span class="hb closed">${t("h_closed")}</span>`);
+    else if (s.hours_warn === "closes") info.push(`<span class="hb closes">${t("h_closes")}</span>`);
+    if (s.verified === false && !isMeal) info.push(`<span class="hb unv">${t("unverified")}</span>`);
+    const lines = [];
+    if (s.hours && s.hours !== "closed") lines.push(`🕘 ${esc(s.hours)}`);
+    else if (s.hours_raw && s.hours !== "closed") lines.push(`🕘 ${esc(s.hours_raw)} · ${t("h_unconf")}`);
+    else if (hasPt && s.verified && !s.hours_raw) lines.push(`🕘 ${t("h_unknown")}`);
+    if (s.price) lines.push(`🎟 ${esc(s.price)}`); else if (s.fee === "no") lines.push(`🎟 ${t("free")}`); else if (s.fee === "yes") lines.push(`🎟 ${t("fee_yes")}`);
+    if (s.address) lines.push(`📍 ${esc(s.address)}`);
+    const sinfo = info.length || lines.length ? `<div class="sinfo">${info.join("")}${lines.join("<br>")}</div>` : "";
     const links = hasPt ? `<div class="links"><a href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}" target="_blank" rel="noopener">${t("map")}</a>${s.wiki ? `<a href="${wikiUrl(s.wiki)}" target="_blank" rel="noopener">📖 Wikipedia</a>` : ""}</div>` : "";
     return `${travel}<div class="stop"><div class="num ${isMeal ? "meal" : hasPt ? "" : "other"}" style="background:${color}">${label}</div>
       <div class="sbody" data-idx="${idx}">
         <div class="time">${esc(s.start || "")}${end ? "–" + end : ""}${s.duration_min ? ` · ${fmtDur(s.duration_min)}` : ""}</div>
         <div class="nm">${esc(s.name || "")}</div>
-        ${s.note ? `<div class="note2">${esc(s.note)}</div>` : ""}${s.tip ? `<div class="tip">💡 ${esc(s.tip)}</div>` : ""}${links}
+        ${s.note ? `<div class="note2">${esc(s.note)}</div>` : ""}${s.tip ? `<div class="tip">💡 ${esc(s.tip)}</div>` : ""}${sinfo}${links}
       </div></div>`;
   }).join("");
+  let dateTxt = "";
+  if (d.date) dateTxt = fmtDayDate(d.date);
+  const warn = d.overtime_min ? `<div class="daywarn">${t("overtime", d.overtime_min)}</div>` : "";
   card.innerHTML = `<div class="dayhead"><div><h3 style="color:${color}">${t("day")} ${d.day || i + 1}: ${esc(d.theme || "")}</h3>
-    <div class="area">${esc(d.area || "")}</div></div>${gmapsLink(d)}</div><div>${stops}</div>`;
+    <div class="area">${esc([dateTxt, d.area].filter(Boolean).join(" · "))}</div></div>${gmapsLink(d)}</div>${warn}<div>${stops}</div>${anyEst ? `<div class="estnote">${t("est_note")}</div>` : ""}`;
   card.querySelectorAll(".sbody").forEach(el => el.onclick = e => {
     if (e.target.closest("a")) return;
     const s = d.stops[+el.dataset.idx];
@@ -1441,7 +1488,8 @@ function renderDay(i) {
 function gmapsLink(d) {
   const pts = d.stops.filter(s => s.lat != null);
   if (pts.length < 2) return "";
-  const mode = { kembe: "walking", publik: "walking", vetura: "driving" }[plan.request?.transport] || "walking";
+  if (plan.request?.transport === "publik") return ""; // Google Maps nuk lejon ndalesa të ndërmjetme me transport publik: lidhjet jepen për çdo pjesë
+  const mode = { kembe: "walking", vetura: "driving" }[plan.request?.transport] || "walking";
   const ll = s => `${s.lat},${s.lon}`;
   const way = pts.slice(1, -1).slice(0, 8).map(ll).join("|");
   return `<a class="gm" href="https://www.google.com/maps/dir/?api=1&origin=${ll(pts[0])}&destination=${ll(pts[pts.length - 1])}${way ? "&waypoints=" + encodeURIComponent(way) : ""}&travelmode=${mode}" target="_blank" rel="noopener">${t("gmaps")}</a>`;
@@ -1472,6 +1520,7 @@ function fillForm(r) {
   for (const n of ["pace", "transport", "budget", "lang"]) if (r[n]) document.querySelectorAll(`.seg[data-name="${n}"] button`).forEach(b => b.classList.toggle("on", b.dataset.v === r[n]));
   if (r.interests) document.querySelectorAll("#interests .chip").forEach(c => c.classList.toggle("on", r.interests.includes(c.dataset.v)));
   document.getElementById("notes").value = r.notes || "";
+  document.getElementById("tripDate").value = r.date && r.date >= new Date().toISOString().slice(0, 10) ? r.date : "";
   group = { adults: r.adults || 2, kids: r.kids || 0 }; chGroup("adults", 0); chGroup("kids", 0);
   document.querySelectorAll("#kidAges .chip").forEach(c => c.classList.toggle("on", (r.kidAges || []).includes(c.dataset.v)));
 }
@@ -1681,6 +1730,15 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 function addMin(t, m) { const [h, mi] = t.split(":").map(Number); const v = h * 60 + mi + m; return `${String(Math.floor(v / 60) % 24).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`; }
 function fmtDur(m) { return m >= 60 ? `${Math.floor(m / 60)} ${t("h")}${m % 60 ? " " + (m % 60) + " min" : ""}` : m + " min"; }
 function wikiUrl(w) { const [l, ...t] = w.split(":"); return `https://${l}.wikipedia.org/wiki/${encodeURIComponent(t.join(":").replace(/ /g, "_"))}`; }
+const DNAMES = {
+  sq: [["e diel", "e hënë", "e martë", "e mërkurë", "e enjte", "e premte", "e shtunë"], ["janar", "shkurt", "mars", "prill", "maj", "qershor", "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor"]],
+  en: [["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]],
+  de: [["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"], ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]] };
+function fmtDayDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number), dt = new Date(Date.UTC(y, m - 1, d)), [W, M] = DNAMES[LANG] || DNAMES.en;
+  const w = W[dt.getUTCDay()];
+  return LANG === "en" ? `${w}, ${d} ${M[m - 1]}` : LANG === "de" ? `${w}, ${d}. ${M[m - 1]}` : `${w[0].toUpperCase() + w.slice(1)}, ${d} ${M[m - 1]}`;
+}
 function tIcon() { return { kembe: "🚶", publik: "🚶/🚇", vetura: "🚗" }[plan.request?.transport] || "🚶"; }
 function openModal(id) { document.getElementById(id).classList.add("on"); }
 function closeModal(id) { document.getElementById(id).classList.remove("on"); }
@@ -1779,8 +1837,8 @@ function printPlan() {
   setTimeout(() => window.print(), 60);
 }
 function openCal() {
-  const d = new Date(Date.now() + 86400000);
-  document.getElementById("calDate").value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const d = new Date(Date.now() + 86400000), pd = plan?.days?.[0]?.date || plan?.request?.date;
+  document.getElementById("calDate").value = pd ? pd : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   openModal("calBg");
 }
 function downloadIcs() {
