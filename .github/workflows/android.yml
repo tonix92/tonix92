@@ -1,7 +1,7 @@
-# Ndërton aplikacionin Vianto për Android në cloud.
+# Ndërton aplikacionin Viaro për Android në cloud.
 # Nisja: GitHub → Actions → "Vianto Android" → Run workflow.
 # Rezultati (Artifacts): vianto-test.apk (për ta provuar në telefon) dhe vianto-play.aab (për Google Play).
-name: Vianto Android
+name: Viaro Android
 
 on:
   workflow_dispatch:
@@ -32,7 +32,7 @@ jobs:
           # Leja e vendndodhjes për "Çfarë të vizitoj tani?"
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
           grep -c ACCESS_FINE_LOCATION android/app/src/main/AndroidManifest.xml
-          npx capacitor-assets generate --android --iconBackgroundColor '#1F4E79' --splashBackgroundColor '#F7F2EA' --splashBackgroundColorDark '#161616'
+          npx capacitor-assets generate --android --iconBackgroundColor '#C8202F' --splashBackgroundColor '#F7F2EA' --splashBackgroundColorDark '#161616'
           npx cap sync android
 
       - name: Versioni
