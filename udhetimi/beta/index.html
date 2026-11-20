@@ -104,6 +104,18 @@
   .edrow{display:flex;gap:8px;margin-top:8px}.edrow input{flex:1;min-width:0}
   .edmsg{font-size:14px;line-height:1.45;padding:8px 11px;border-radius:12px;margin-top:8px;max-width:92%}
   .edmsg.me{background:#EDE6D8;margin-left:auto}.edmsg.ai{background:#E4EDF5}
+  .brow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-top:1px solid rgba(0,0,0,.06);font-size:14.5px}
+  .brow input{width:110px;text-align:right}
+  .btot{font-size:16px}.bneg b{color:#9A2F1E}.bpos b{color:#3E6B2E}
+  .bcat{font-size:12.5px;color:var(--mut);margin:-2px 0 4px}
+  .bsub{font-weight:600;font-size:13.5px;margin-top:12px}
+  .offh{font-weight:600;font-size:14px;margin:4px 0 8px}
+  .mynote{font-size:13px;margin-top:4px}.mynote .mn{background:#FFF6D8;border-radius:8px;padding:4px 8px;display:inline-block}
+  .mynote a{font-size:12px;color:var(--mut);cursor:pointer;text-decoration:underline}
+  .locbtn{background:#fff;border:2px solid rgba(0,0,0,.2);border-radius:6px;width:34px;height:34px;font-size:18px;cursor:pointer;line-height:1}
+  #dayCard.fade{animation:vfade .2s ease}
+  @keyframes vfade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){#dayCard.fade{animation:none}}
   .edmsg .undo{margin-left:8px;font-size:12.5px;text-decoration:underline;cursor:pointer;color:var(--mut)}
   .links a{font-size:12px;color:var(--mut);margin-right:10px}
   .tips li{margin:6px 0;line-height:1.45}
@@ -529,8 +541,9 @@
     <div class="edrow"><input id="edIn" maxlength="400" data-i18n-ph="ed_ph" onkeydown="if(event.key==='Enter')sendEdit()"><button class="btn2 pri" id="edBtn" onclick="sendEdit()" data-i18n="ed_send"></button></div>
     <div id="edLog"></div>
   </div>
+  <div class="card bud" id="budCard" style="display:none"></div>
   <div class="card"><b data-i18n="tips"></b><ul class="tips" id="rTips"></ul><div id="rCost" style="color:var(--mut);font-size:14px"></div></div>
-  <div class="card ptools"><b data-i18n="take_h"></b><div class="tbtns"><button class="btn2" onclick="printPlan()" data-i18n="pdf"></button><button class="btn2" onclick="openCal()" data-i18n="cal"></button></div></div>
+  <div class="card ptools"><b data-i18n="take_h"></b><div class="tbtns"><button class="btn2" onclick="printPlan()" data-i18n="pdf"></button><button class="btn2" onclick="openCal()" data-i18n="cal"></button><button class="btn2" id="offBtn"></button></div><div class="dhint" data-i18n="off_hint"></div></div>
   <div class="card cmts" id="cmtCard" style="display:none"><h3 class="cmth" id="cmtH"></h3><div id="cmtList"></div>
     <div class="cmtform" id="cmtForm"><input id="cmtIn" maxlength="500" data-i18n-ph="cm_ph" onkeydown="if(event.key==='Enter')addComment()"><button class="btn2 pri" onclick="addComment()" data-i18n="cm_send"></button></div></div>
   <div class="foot" data-i18n="foot"></div>
@@ -682,6 +695,7 @@ const I18N = {
     del_txt: "Do të fshihen menjëherë llogaria, planet, fotot, pëlqimet, komentet dhe ndjekësit e tu. Kjo nuk kthehet më pas.",
     del_yes: "Po, fshije përgjithmonë", del_no: "Anulo", del_done: "Llogaria u fshi.", del_err: "Fshirja nuk u krye. Provo përsëri pas pak.",
     date_q: "Kur fillon udhëtimi?", date_hint: "Opsionale: me datë kontrollohen oraret e hapjes për çdo ditë.", h_closed: "I mbyllur atë ditë", h_closes: "Mbyllet para se ta përfundosh vizitën", h_unconf: "orari i pakonfirmuar", h_unknown: "Orari nuk dihet — kontrolloje para se të shkosh", free: "Hyrje falas", fee_yes: "Me pagesë (çmimi nuk dihet)", unverified: "I pakonfirmuar", overtime: m => `Kjo ditë zgjat rreth ${m} min më shumë se koha që zgjodhe.`, est_note: "~ = kohë e vlerësuar, jo e matur.", gm_leg: "Rruga ↗",
+    bud_h: "Buxheti", bud_est: "Vlerësim për gjithë grupin — çmimet e vërteta mund të ndryshojnë.", bud_none: "Ky plan nuk ka ende vlerësim buxheti.", bud_calc: "Llogarit buxhetin me AI", bud_msg: "Llogarit buxhetin për këtë plan", bud_total: "Gjithsej", bud_pp: n => `Për person (${n})`, bud_my: "Buxheti yt", bud_left: "Të mbeten", bud_over: "Mbi buxhet", bud_ver: "Çmime nga OpenStreetMap (të verifikuara)", bud_free: "Alternativa falas", bk_tickets: "Bileta", bk_food: "Ushqim", bk_transport: "Transport", bk_parking: "Parkim", bk_activities: "Aktivitete", bk_other: "Të tjera", off_save: "⬇ Ruaj për offline", off_remove: "✓ I ruajtur offline · Hiqe", off_hint: "Plani, oraret, adresat dhe shënimet hapen edhe pa internet. Harta pa internet shfaq vetëm pikat.", off_saved: "Plani u ruajt në këtë pajisje.", off_removed: "U hoq nga pajisja.", off_full: "Nuk ka vend në pajisje.", off_list: "Të ruajtura për offline", off_later: "Pa internet: ndryshimi do të ruhet kur të kthehet lidhja.", off_synced: n => `U sinkronizuan ${n} plane.`, off_mode: "Je pa internet. Këtu janë planet e ruajtura në pajisje.", note_add: "＋ Shënim", note_edit: "Ndrysho shënimin", loc: "Ku jam unë", you_here: "Ti je këtu",
     ed_h: "Ndrysho planin me AI", ed_sub: "Shkruaj çka do të ndryshosh. Ndryshohet vetëm ajo pjesë, pjesa tjetër mbetet.", ed_ph: "p.sh. Largoje muzeun e ditës 2", ed_send: "Dërgo", ed_wait: "Po e ndryshoj planin…", ed_done: "Plani u ndryshua.", ed_none: "Nuk u ndryshua asgjë.", ed_undo: "Zhbëje", ed_undone: "u kthye si ishte", ed_login: "Hyr në llogari për të ndryshuar planin me AI.", ed_ex: ["Bëje ditën e parë më të qetë", "Shto një restorant afër", "Gjej atraksione falas", "Shto aktivitete për fëmijë", "Shkurto distancën e ecjes"], now_h: "Çfarë të vizitoj tani?", now_sub: "Vende të hapura afër teje, për kohën që ke.", now_btn: "Provo", now_q: "Sa kohë ke?", now_time: "Koha e lirë", now_geo: "📍 Përdor vendndodhjen time", now_or: "ose shkruaj ku je", now_ph: "p.sh. Piazza Navona, Romë", now_find: "Gjej", now_wait: "Po kërkoj vende të hapura afër… (rreth 30 sekonda)", now_nogeo: "Nuk e mora vendndodhjen. Shkruaj ku ndodhesh.", wx: (c, r) => `Moti tani: ${c}°C${r ? " · reshje" : ""}`,
     who_q: "Kush udhëton?", adults: "Të rritur", kids: "Fëmijë", kid_ages: "Moshat e fëmijëve", yrs: "vjeç",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "i rritur" : "të rritur"}${k ? ` · ${k} fëmijë` : ""}`,
@@ -752,6 +766,7 @@ const I18N = {
     del_txt: "Your account, plans, photos, likes, comments and followers will be deleted right away. This can't be undone.",
     del_yes: "Yes, delete permanently", del_no: "Cancel", del_done: "Your account has been deleted.", del_err: "Deletion didn't go through. Try again in a moment.",
     date_q: "When does the trip start?", date_hint: "Optional: with a date, opening hours are checked for each day.", h_closed: "Closed that day", h_closes: "Closes before you'd finish the visit", h_unconf: "hours not confirmed", h_unknown: "Hours unknown — check before you go", free: "Free entry", fee_yes: "Paid entry (price unknown)", unverified: "Not confirmed", overtime: m => `This day runs about ${m} min longer than the time you chose.`, est_note: "~ = estimated time, not measured.", gm_leg: "Route ↗",
+    bud_h: "Budget", bud_est: "Estimate for the whole group — real prices may differ.", bud_none: "This plan has no budget estimate yet.", bud_calc: "Estimate the budget with AI", bud_msg: "Estimate the budget for this plan", bud_total: "Total", bud_pp: n => `Per person (${n})`, bud_my: "Your budget", bud_left: "Left", bud_over: "Over budget", bud_ver: "Prices from OpenStreetMap (verified)", bud_free: "Free alternatives", bk_tickets: "Tickets", bk_food: "Food", bk_transport: "Transport", bk_parking: "Parking", bk_activities: "Activities", bk_other: "Other", off_save: "⬇ Save for offline", off_remove: "✓ Saved offline · Remove", off_hint: "The plan, times, addresses and notes open without internet. Offline, the map shows only the pins.", off_saved: "Plan saved on this device.", off_removed: "Removed from this device.", off_full: "Not enough space on this device.", off_list: "Saved for offline", off_later: "No internet: the change will be saved when you're back online.", off_synced: n => `${n} plans synced.`, off_mode: "You're offline. Here are the plans saved on this device.", note_add: "＋ Note", note_edit: "Edit note", loc: "Where am I", you_here: "You are here",
     ed_h: "Change the plan with AI", ed_sub: "Say what to change. Only that part changes; the rest stays.", ed_ph: "e.g. Remove the museum on day 2", ed_send: "Send", ed_wait: "Changing the plan…", ed_done: "The plan was changed.", ed_none: "Nothing was changed.", ed_undo: "Undo", ed_undone: "restored", ed_login: "Log in to change the plan with AI.", ed_ex: ["Make day 1 calmer", "Add a restaurant nearby", "Find free attractions", "Add activities for kids", "Shorten the walking"], now_h: "What to visit now?", now_sub: "Open places near you, for the time you have.", now_btn: "Try it", now_q: "How much time do you have?", now_time: "Free time", now_geo: "📍 Use my location", now_or: "or type where you are", now_ph: "e.g. Piazza Navona, Rome", now_find: "Find", now_wait: "Looking for open places nearby… (about 30 seconds)", now_nogeo: "Couldn't get your location. Type where you are.", wx: (c, r) => `Weather now: ${c}°C${r ? " · rain" : ""}`,
     who_q: "Who's travelling?", adults: "Adults", kids: "Children", kid_ages: "Children's ages", yrs: "yrs",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "adult" : "adults"}${k ? ` · ${k} ${k === 1 ? "child" : "children"}` : ""}`,
@@ -822,6 +837,7 @@ const I18N = {
     del_txt: "Dein Konto, deine Pläne, Fotos, Likes, Kommentare und Follower werden sofort gelöscht. Das lässt sich nicht rückgängig machen.",
     del_yes: "Ja, endgültig löschen", del_no: "Abbrechen", del_done: "Dein Konto wurde gelöscht.", del_err: "Löschen hat nicht geklappt. Versuch es gleich noch einmal.",
     date_q: "Wann beginnt die Reise?", date_hint: "Optional: Mit Datum werden die Öffnungszeiten für jeden Tag geprüft.", h_closed: "An diesem Tag geschlossen", h_closes: "Schließt, bevor der Besuch endet", h_unconf: "Öffnungszeiten unbestätigt", h_unknown: "Öffnungszeiten unbekannt – vorher prüfen", free: "Eintritt frei", fee_yes: "Eintritt kostenpflichtig (Preis unbekannt)", unverified: "Nicht bestätigt", overtime: m => `Dieser Tag dauert etwa ${m} Min. länger als die gewählte Zeit.`, est_note: "~ = geschätzte Zeit, nicht gemessen.", gm_leg: "Route ↗",
+    bud_h: "Budget", bud_est: "Schätzung für die ganze Gruppe – echte Preise können abweichen.", bud_none: "Für diesen Plan gibt es noch keine Budgetschätzung.", bud_calc: "Budget mit KI schätzen", bud_msg: "Schätze das Budget für diesen Plan", bud_total: "Gesamt", bud_pp: n => `Pro Person (${n})`, bud_my: "Dein Budget", bud_left: "Übrig", bud_over: "Über Budget", bud_ver: "Preise aus OpenStreetMap (bestätigt)", bud_free: "Kostenlose Alternativen", bk_tickets: "Tickets", bk_food: "Essen", bk_transport: "Verkehr", bk_parking: "Parken", bk_activities: "Aktivitäten", bk_other: "Sonstiges", off_save: "⬇ Offline speichern", off_remove: "✓ Offline gespeichert · Entfernen", off_hint: "Plan, Zeiten, Adressen und Notizen öffnen sich auch ohne Internet. Offline zeigt die Karte nur die Punkte.", off_saved: "Plan auf diesem Gerät gespeichert.", off_removed: "Vom Gerät entfernt.", off_full: "Nicht genug Speicher auf dem Gerät.", off_list: "Offline gespeichert", off_later: "Kein Internet: Die Änderung wird gespeichert, sobald du wieder online bist.", off_synced: n => `${n} Pläne synchronisiert.`, off_mode: "Du bist offline. Hier sind die auf dem Gerät gespeicherten Pläne.", note_add: "＋ Notiz", note_edit: "Notiz ändern", loc: "Wo bin ich", you_here: "Du bist hier",
     ed_h: "Plan mit KI ändern", ed_sub: "Schreib, was sich ändern soll. Nur dieser Teil ändert sich, der Rest bleibt.", ed_ph: "z. B. Entferne das Museum an Tag 2", ed_send: "Senden", ed_wait: "Plan wird geändert…", ed_done: "Der Plan wurde geändert.", ed_none: "Nichts wurde geändert.", ed_undo: "Rückgängig", ed_undone: "wiederhergestellt", ed_login: "Melde dich an, um den Plan mit KI zu ändern.", ed_ex: ["Tag 1 ruhiger machen", "Ein Restaurant in der Nähe hinzufügen", "Kostenlose Sehenswürdigkeiten finden", "Aktivitäten für Kinder hinzufügen", "Weniger zu Fuß gehen"], now_h: "Was jetzt besuchen?", now_sub: "Geöffnete Orte in deiner Nähe, für deine freie Zeit.", now_btn: "Ausprobieren", now_q: "Wie viel Zeit hast du?", now_time: "Freie Zeit", now_geo: "📍 Meinen Standort verwenden", now_or: "oder gib ein, wo du bist", now_ph: "z. B. Piazza Navona, Rom", now_find: "Suchen", now_wait: "Suche geöffnete Orte in der Nähe… (etwa 30 Sekunden)", now_nogeo: "Standort nicht verfügbar. Gib ein, wo du bist.", wx: (c, r) => `Wetter jetzt: ${c}°C${r ? " · Niederschlag" : ""}`,
     who_q: "Wer reist mit?", adults: "Erwachsene", kids: "Kinder", kid_ages: "Alter der Kinder", yrs: "J.",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "Erwachsene/r" : "Erwachsene"}${k ? ` · ${k} ${k === 1 ? "Kind" : "Kinder"}` : ""}`,
@@ -1197,12 +1213,14 @@ async function loadMine() {
   if (!user) {
     lead.innerHTML = sb ? `${t("mine_lead_out")} <button class="btn2 pri" onclick="showAuth('signup')" style="margin-top:8px">${t("create_acct_btn")}</button>` : t("mine_local");
   } else { lead.textContent = t("mine_lead_in"); box.innerHTML = `<div class="empty">${t("loading")}</div>`;
-    const { data, error } = await sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,photo_url,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
-    if (error) html += `<div class="err" style="display:block">${esc(error.message)}</div>`;
+    const { data, error } = navigator.onLine ? await sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,photo_url,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100) : { data: [], error: { message: t("off_mode") } };
+    if (error) html += `<div class="err" style="display:block">${esc(navigator.onLine ? error.message : t("off_mode"))}</div>`;
+    syncOffline();
     (data || []).forEach(r => html += planCard({ ...r, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` }));
   }
   local.forEach(x => html += planCard({ city: x.plan.city?.name, country: x.plan.city?.country, days: x.plan.days.length, title: x.plan.title,
     local: true, date: fmtDate(x.savedAt), onclick: `openLocal('${x.localId}')` }));
+  html = offlineSection() + html;
   box.innerHTML = html || `<div class="empty">${t("empty_mine")} <br><br><button class="btn2 pri" onclick="go('create')">${t("create_first")}</button></div>`;
 }
 
@@ -1386,6 +1404,8 @@ function openPlan(p, r, m) {
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16, attribution: "© Esri, HERE, Garmin, © OpenStreetMap" }).addTo(map);
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16 }).addTo(map);
     layer = L.layerGroup().addTo(map);
+    const Loc = L.Control.extend({ onAdd() { const b = L.DomUtil.create("button", "locbtn"); b.type = "button"; b.title = t("loc"); b.textContent = "◎"; L.DomEvent.on(b, "click", e => { L.DomEvent.stop(e); locateMe(); }); return b; } });
+    new Loc({ position: "topright" }).addTo(map);
   }
   setTimeout(() => { map.invalidateSize(); selectDay(0); }, 60);
   renderEditor();
@@ -1406,6 +1426,7 @@ function openPlanHeader() {
     : "";
   document.getElementById("rTips").innerHTML = (p.tips || []).map(x => `<li>${esc(x)}</li>`).join("");
   document.getElementById("rCost").textContent = p.cost_estimate ? "💶 " + p.cost_estimate : "";
+  renderBudget(); renderOffBtn();
   if (p.kind === "now" && p.weather) document.getElementById("rGroup").textContent = t("wx", p.weather.temp, p.weather.rain || p.weather.snow);
 }
 function renderTabs() {
@@ -1447,11 +1468,12 @@ function selectDay(i) {
   for (const [d, k] of list) {
     const color = COLORS[k % COLORS.length], pts = [];
     let n = 0;
-    d.stops.forEach(s => {
+    d.stops.forEach((s, idx) => {
       if (s.lat == null) return;
       n++; pts.push([s.lat, s.lon]); bounds.push([s.lat, s.lon]);
       s._marker = L.marker([s.lat, s.lon], { icon: L.divIcon({ className: "", html: `<div class="numicon" style="background:${color}">${i < 0 ? (d.day || k + 1) : n}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] }) })
-        .bindPopup(`<b>${esc(s.name)}</b><br>${esc(s.start || "")}`).addTo(layer);
+        .bindPopup(`<b>${esc(s.name)}</b><br>${esc(s.start || "")}`).addTo(layer)
+        .on("click", () => { if (i >= 0) document.querySelector(`#dayCard .sbody[data-idx="${idx}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }); });
     });
     const lines = new Map((d.route || []).map(r => [r.to, r.line]));
     let prev = null;
@@ -1509,12 +1531,13 @@ function renderDay(i) {
       <div class="sbody" data-idx="${idx}">
         <div class="time">${esc(s.start || "")}${end ? "–" + end : ""}${s.duration_min ? ` · ${fmtDur(s.duration_min)}` : ""}</div>
         <div class="nm">${esc(s.name || "")}</div>
-        ${s.note ? `<div class="note2">${esc(s.note)}</div>` : ""}${s.tip ? `<div class="tip">💡 ${esc(s.tip)}</div>` : ""}${sinfo}${links}
+        ${s.note ? `<div class="note2">${esc(s.note)}</div>` : ""}${s.tip ? `<div class="tip">💡 ${esc(s.tip)}</div>` : ""}${sinfo}${links}${mode === "own" && plan.kind !== "now" ? `<div class="mynote">${s.my_note ? `<span class="mn">📝 ${esc(s.my_note)}</span> ` : ""}<a onclick="editNote(event,${i},${idx})">${t(s.my_note ? "note_edit" : "note_add")}</a></div>` : s.my_note ? `<div class="mynote"><span class="mn">📝 ${esc(s.my_note)}</span></div>` : ""}
       </div></div>`;
   }).join("");
   let dateTxt = "";
   if (d.date) dateTxt = fmtDayDate(d.date);
   const warn = d.overtime_min ? `<div class="daywarn">${t("overtime", d.overtime_min)}</div>` : "";
+  card.classList.remove("fade"); void card.offsetWidth; card.classList.add("fade");
   card.innerHTML = `<div class="dayhead"><div><h3 style="color:${color}">${t("day")} ${d.day || i + 1}: ${esc(d.theme || "")}</h3>
     <div class="area">${esc([dateTxt, d.area].filter(Boolean).join(" · "))}</div></div>${gmapsLink(d)}</div>${warn}<div>${stops}</div>${anyEst ? `<div class="estnote">${t("est_note")}</div>` : ""}`;
   card.querySelectorAll(".sbody").forEach(el => el.onclick = e => {
@@ -1780,8 +1803,11 @@ function updateLocal(id, p) {
   try { const l = localList(); const x = l.find(y => y.localId === id); if (x) { x.plan = strip(p); localStorage.setItem(LOCAL_KEY, JSON.stringify(l)); } } catch {}
 }
 async function persistPlan() {
-  if (row.id && sb && user) { const { error } = await sb.from("plans").update({ data: strip(plan), title: plan.title || null, summary: plan.summary || null, days: plan.days.length }).eq("id", row.id); if (error) toast(t("not_saved") + error.message); }
-  else if (row.localId) updateLocal(row.localId, plan);
+  if (row.id && sb && user && navigator.onLine) {
+    const { error } = await sb.from("plans").update({ data: strip(plan), title: plan.title || null, summary: plan.summary || null, days: plan.days.length }).eq("id", row.id);
+    if (error) { offUpdate(true); toast(isOffline() ? t("off_later") : t("not_saved") + error.message); } else offUpdate(false);
+  } else if (row.id) { offUpdate(true); if (isOffline()) toast(t("off_later")); }
+  else { if (row.localId) updateLocal(row.localId, plan); offUpdate(false); }
 }
 async function sendEdit() {
   const inp = document.getElementById("edIn"), btn = document.getElementById("edBtn"), log = document.getElementById("edLog");
@@ -1841,6 +1867,85 @@ async function runNow(useGeo) {
     openPlan(d, {}, "now");
   } catch (e) { err.textContent = "⚠️ " + (/fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message); err.style.display = "block"; }
   finally { wait.style.display = "none"; document.querySelectorAll("#nowBg button").forEach(b => b.disabled = false); }
+}
+// ---- Faza 4: buxheti ----
+const BUDK = ["tickets", "food", "transport", "parking", "activities", "other"];
+function renderBudget() {
+  const el = document.getElementById("budCard"), b = plan.budget, own = mode === "own";
+  if (!b) {
+    el.style.display = own && plan.kind !== "now" ? "block" : "none";
+    el.innerHTML = `<b>${t("bud_h")}</b><div class="dhint">${t("bud_none")}</div><button class="btn2" style="margin-top:8px" onclick="calcBudget()">${t("bud_calc")}</button>`;
+    return;
+  }
+  el.style.display = "block";
+  const cur = b.currency === "EUR" ? "€" : b.currency + " ", ppl = Math.max(1, (plan.request?.adults || 1) + (plan.request?.kids || 0));
+  const dayTot = d => BUDK.reduce((a, k) => a + (d[k] || 0), 0), total = b.days.reduce((a, d) => a + dayTot(d), 0);
+  const rows = b.days.map(d => `<div class="brow"><span>${t("day")} ${d.day}</span><b>${cur}${dayTot(d)}</b></div><div class="bcat">${BUDK.filter(k => d[k]).map(k => `${t("bk_" + k)} ${cur}${d[k]}`).join(" · ")}</div>`).join("");
+  const ver = plan.days.flatMap(d => d.stops).filter(s => s.price).map(s => `<li>${esc(s.name)}: ${esc(s.price)}</li>`).join("");
+  const freeS = plan.days.flatMap(d => d.stops).filter(s => s.fee === "no").map(s => s.name);
+  const free = [...new Set([...freeS, ...(b.free || [])])].slice(0, 6).map(x => `<li>${esc(x)}</li>`).join("");
+  const my = +b.my || 0, left = my - total;
+  el.innerHTML = `<b>${t("bud_h")}</b><div class="dhint">${t("bud_est")}</div>${rows}
+    <div class="brow btot"><span>${t("bud_total")}</span><b>${cur}${total}</b></div>
+    <div class="brow"><span>${t("bud_pp", ppl)}</span><b>${cur}${Math.round(total / ppl)}</b></div>
+    ${own ? `<div class="brow"><span>${t("bud_my")}</span><input type="number" min="0" step="10" id="budMy" value="${my || ""}" placeholder="0" onchange="setMyBudget(this.value)"></div>
+    ${my ? `<div class="brow ${left < 0 ? "bneg" : "bpos"}"><span>${t(left < 0 ? "bud_over" : "bud_left")}</span><b>${cur}${Math.abs(left)}</b></div>` : ""}` : ""}
+    ${ver ? `<div class="bsub">${t("bud_ver")}</div><ul class="tips">${ver}</ul>` : ""}
+    ${free ? `<div class="bsub">${t("bud_free")}</div><ul class="tips">${free}</ul>` : ""}`;
+}
+async function setMyBudget(v) { if (!plan.budget) return; plan.budget.my = Math.max(0, Math.round(+v || 0)) || undefined; await persistPlan(); renderBudget(); }
+function calcBudget() { document.getElementById("edIn").value = t("bud_msg"); sendEdit(); document.getElementById("aiEd").scrollIntoView({ behavior: "smooth", block: "center" }); }
+
+// ---- Faza 4: offline dhe shënimet ----
+const OFF_KEY = "vianto_offline";
+function offList() { try { return JSON.parse(localStorage.getItem(OFF_KEY)) || []; } catch { return []; } }
+function offStore(l) { try { localStorage.setItem(OFF_KEY, JSON.stringify(l.slice(0, 10))); return true; } catch { toast(t("off_full")); return false; } }
+function offKey() { return row.id || row.localId || row.offKey || null; }
+function isOffline() { const k = offKey(); return !!k && offList().some(x => x.key === k); }
+function saveOffline() {
+  if (!row.id && !row.localId) row.offKey = "X" + Date.now();
+  const k = offKey(), l = offList().filter(x => x.key !== k);
+  l.unshift({ key: k, rowId: row.id || null, localId: row.localId || null, plan: strip(plan), savedAt: Date.now(), dirty: false });
+  if (offStore(l)) { toast(t("off_saved")); renderOffBtn(); }
+}
+function removeOffline() { const k = offKey(); offStore(offList().filter(x => x.key !== k)); toast(t("off_removed")); renderOffBtn(); }
+function offUpdate(dirty) { const k = offKey(), l = offList(), x = l.find(y => y.key === k); if (x) { x.plan = strip(plan); x.dirty = !!dirty; offStore(l); } }
+function renderOffBtn() {
+  const b = document.getElementById("offBtn"); if (!b) return;
+  const on = isOffline(); b.textContent = t(on ? "off_remove" : "off_save"); b.onclick = on ? removeOffline : saveOffline;
+}
+function openOffline(k) { const x = offList().find(y => y.key === k); if (x) openPlan(x.plan, { id: x.rowId || undefined, localId: x.localId || undefined, offKey: x.rowId || x.localId ? undefined : x.key }, "own"); }
+async function syncOffline() {
+  if (!navigator.onLine || !sb || !user) return;
+  const l = offList(); let n = 0;
+  for (const x of l.filter(y => y.dirty && y.rowId)) {
+    const { error } = await sb.from("plans").update({ data: x.plan }).eq("id", x.rowId);
+    if (!error) { x.dirty = false; n++; }
+  }
+  if (n) { offStore(l); toast(t("off_synced", n)); }
+}
+window.addEventListener("online", () => setTimeout(syncOffline, 1500));
+function offlineSection() {
+  const l = offList(); if (!l.length) return "";
+  return `<div class="offh">${t("off_list")}</div>` + l.map(x => planCard({ city: "⬇ " + (x.plan.city?.name || ""), country: x.plan.city?.country, days: x.plan.days.length, title: x.plan.title, local: true, date: fmtDate(x.savedAt), onclick: `openOffline('${x.key}')` })).join("");
+}
+function editNote(ev, di, si) {
+  ev.stopPropagation();
+  const s = plan.days[di].stops[si], box = ev.target.closest(".sbody").querySelector(".mynote");
+  box.innerHTML = `<div class="edrow"><input maxlength="300" data-k="n"><button class="btn2 pri" type="button">${t("save")}</button></div>`;
+  const inp = box.querySelector("input"); inp.value = s.my_note || ""; inp.onclick = e => e.stopPropagation(); inp.focus();
+  const done = async e => { e?.stopPropagation(); s.my_note = inp.value.trim() || undefined; await persistPlan(); renderDay(di); };
+  box.querySelector("button").onclick = done; inp.onkeydown = e => { if (e.key === "Enter") done(e); };
+}
+let meMarker = null;
+function locateMe() {
+  if (!navigator.geolocation) return toast(t("now_nogeo"));
+  navigator.geolocation.getCurrentPosition(p => {
+    const ll = [p.coords.latitude, p.coords.longitude];
+    if (meMarker) meMarker.remove();
+    meMarker = L.circleMarker(ll, { radius: 8, color: "#fff", weight: 3, fillColor: "#2A7DE1", fillOpacity: 1 }).bindPopup(t("you_here")).addTo(map);
+    map.setView(ll, Math.max(map.getZoom(), 15));
+  }, () => toast(t("now_nogeo")), { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
 }
 const DNAMES = {
   sq: [["e diel", "e hënë", "e martë", "e mërkurë", "e enjte", "e premte", "e shtunë"], ["janar", "shkurt", "mars", "prill", "maj", "qershor", "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor"]],
