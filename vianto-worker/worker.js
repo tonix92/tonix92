@@ -38,6 +38,9 @@ const MSG = {
         few: "Für diesen Ort wurden nicht genug Sehenswürdigkeiten gefunden.", fail: "Etwas ist schiefgelaufen: ", badplan: "Der Plan wurde nicht richtig erstellt. Bitte erneut versuchen.",
         busy: "Heute wurden schon sehr viele Pläne erstellt. Versuch es morgen wieder oder stöbere unter \"Entdecken\"." },
 };
+Object.assign(MSG.sq, { edit_login: "Hyr në llogari për të ndryshuar planin me AI.", edit_limit: n => `I ke përdorur të ${n} ndryshimet me AI këtë muaj.`, now_limit: n => `Sot e ke përdorur "Çfarë të vizitoj tani?" ${n} herë. Provo nesër.`, now_where: "Lejo vendndodhjen ose shkruaj ku ndodhesh." });
+Object.assign(MSG.en, { edit_login: "Log in to change the plan with AI.", edit_limit: n => `You've used all ${n} AI edits this month.`, now_limit: n => `You've used "What to visit now?" ${n} times today. Try again tomorrow.`, now_where: "Allow location or type where you are." });
+Object.assign(MSG.de, { edit_login: "Melde dich an, um den Plan mit KI zu ändern.", edit_limit: n => `Du hast alle ${n} KI-Änderungen in diesem Monat genutzt.`, now_limit: n => `Du hast „Was jetzt besuchen?" heute ${n}-mal genutzt. Versuch es morgen wieder.`, now_where: "Erlaube den Standort oder gib ein, wo du bist." });
 const json = (data, status, headers) =>
   new Response(JSON.stringify(data), { status, headers: { ...headers, "Content-Type": "application/json; charset=utf-8" } });
 
@@ -81,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p2.6", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p3.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -98,6 +101,12 @@ export default {
     let q;
     try { q = await req.json(); } catch { return json({ error: MSG.sq.bad }, 400, H); }
     const M = MSG[q?.ui] || MSG[q?.lang] || MSG.sq;
+    const path = new URL(req.url).pathname;
+    if (path === "/edit" || path === "/now") {
+      if (!env.ANTHROPIC_API_KEY) return json({ error: M.nokey }, 500, H);
+      if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
+      return path === "/edit" ? handleEdit(q, req, env, ctx, H, M) : handleNow(q, req, env, ctx, H, M);
+    }
     if (!env.ANTHROPIC_API_KEY) return json({ error: M.nokey }, 500, H);
     if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
     const p = sanitize(q);
@@ -301,7 +310,7 @@ out center tags qt 900;`;
     const d = await r.json(); if (!d.elements?.length) throw new Error("Overpass bosh");
     return d;
   };
-  let data; const timer = setTimeout(() => ctrl.abort(), 45000);
+  let data; const timer = setTimeout(() => ctrl.abort(), 8000);
   try { data = await Promise.any(OVERPASS.map(ask)); } catch { throw new Error("Overpass dështoi"); } finally { clearTimeout(timer); ctrl.abort(); }
   const seen = new Set(), out = [];
   for (const el of data.elements || []) {
@@ -687,7 +696,7 @@ async function enrichPois(list) {
 }
 
 // ---- Zbatimi mbi planin: verifikimi, renditja, rrugët dhe oraret ----
-async function finishPlan(env, plan, p, byId) {
+async function finishPlan(env, plan, p, byId, opts = {}) {
   const dates = tripDates(p.date, p.days);
   const used = [...new Set((plan.days || []).flatMap(d => (d.stops || []).map(s => s.poi)).filter(id => id && byId[id]))].map(id => byId[id]);
   await enrichPois(used.slice(0, 30));
@@ -698,7 +707,7 @@ async function finishPlan(env, plan, p, byId) {
     let stops = (d.stops || []).map(s => {
       const poi = s.poi && byId[s.poi];
       if (!poi) return { ...s, poi: null, lat: undefined, lon: undefined, verified: s.type === "meal" ? undefined : false };
-      const c = { ...s, lat: poi.lat, lon: poi.lon, wiki: poi.wiki, osm: poi.osm, name: s.name || poi.name, verified: true };
+      const c = { ...s, lat: poi.lat, lon: poi.lon, wiki: poi.wiki, osm: poi.osm, wd: poi.wd, name: s.name || poi.name, verified: true };
       if (poi.addr) c.address = poi.addr;
       if (poi.fee) c.fee = poi.fee; if (poi.charge) c.price = poi.charge;
       if (poi.oh) {
@@ -725,7 +734,7 @@ async function finishPlan(env, plan, p, byId) {
       return { ...sch, legsByIdx, score: sch.warn.length * 120 + sch.over + sch.travelTotal };
     };
     const a = await tryOrder(stops);
-    const alt = reorderDay(stops);
+    const alt = opts.keepOrder ? stops : reorderDay(stops);
     const changed = alt.some((s, k) => s !== stops[k]);
     const b = changed ? await tryOrder(alt) : null;
     const best = b && b.score + 5 < a.score ? b : a;
@@ -734,5 +743,248 @@ async function finishPlan(env, plan, p, byId) {
     d.routed = !!d.route.length;
     if (best.over) d.overtime_min = best.over;
     d.optimized = best === b;
+  }
+}
+
+// ================== FAZA 3: editori me bisedë dhe "Çfarë të vizitoj tani?" ==================
+
+const bearer = req => (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+async function callClaude(key, system, user, maxTokens = 6000) {
+  const total = {}; let out = null;
+  for (let attempt = 0; attempt < 2 && !out; attempt++) {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: "user", content: attempt ? user + "\n\nIMPORTANT: reply with ONE valid JSON object only." : user }] }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d?.error?.message || "Claude API " + r.status);
+    for (const k of ["input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"]) total[k] = (total[k] || 0) + (d.usage?.[k] || 0);
+    out = parseJson((d.content || []).filter(c => c.type === "text").map(c => c.text).join(""));
+  }
+  return { out, usage: total };
+}
+async function addDayStat(env, ai) {
+  const key = `d/${new Date().toISOString().slice(0, 10)}`;
+  const st = (await limitGet(env, caches.default, key)) || { n: 0, in: 0, out: 0, usd: 0 };
+  st.calls = (st.calls || 0) + 1; st.in += ai.in; st.out += ai.out; st.usd = +(st.usd + ai.usd).toFixed(5);
+  await limitPut(env, caches.default, key, st);
+  return st;
+}
+
+// Restorante të vërteta afër një pike (OpenStreetMap përmes Nominatim)
+async function nearbyFood(lat, lon) {
+  const key = new Request(`https://cache.udhetimi/food1/${lat.toFixed(3)},${lon.toFixed(3)}`);
+  const hit = await caches.default.match(key); if (hit) return hit.json();
+  const d = 0.007, out = [];
+  try {
+    const u = `https://nominatim.openstreetmap.org/search?format=jsonv2&extratags=1&addressdetails=1&limit=12&bounded=1&accept-language=en&viewbox=${lon - d},${lat + d},${lon + d},${lat - d}&q=restaurant`;
+    const r = await fetch(u, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(6000) });
+    if (r.ok) for (const x of await r.json()) {
+      if (!x.name || x.type !== "restaurant") continue;
+      const e = x.extratags || {}, a = x.address || {};
+      out.push({ name: x.name, lat: +(+x.lat).toFixed(5), lon: +(+x.lon).toFixed(5), kind: "restaurant", cuisine: e.cuisine, oh: e.opening_hours, wd: e.wikidata,
+        addr: [[a.road || a.pedestrian || a.square, a.house_number].filter(Boolean).join(" "), [a.postcode, a.city || a.town || a.village].filter(Boolean).join(" ")].filter(Boolean).join(", ") || undefined,
+        osm: x.osm_type?.[0] + x.osm_id });
+    }
+  } catch {}
+  await caches.default.put(key, new Response(JSON.stringify(out), { headers: { "Cache-Control": "max-age=" + 86400 * 7 } }));
+  return out;
+}
+const FOOD_RE = /restaurant|restorant|ushqim|drek|dark|mëngjes|food|eat|lunch|dinner|essen|mittag|abend|café|kafe|cafe/i;
+
+// ---- /edit: ndryshon vetëm pjesën që kërkon përdoruesi ----
+async function handleEdit(q, req, env, ctx, H, M) {
+  const token = bearer(req);
+  if (!token) return json({ error: M.edit_login, code: "auth" }, 401, H);
+  const old = q.plan, msg = String(q.message || "").replace(/\s+/g, " ").trim().slice(0, 400);
+  if (!msg || !old || !Array.isArray(old.days) || !old.days.length || old.days.length > 7 || JSON.stringify(old).length > 400000) return json({ error: M.bad }, 400, H);
+  const res = await sbRpc(env, token, "reserve_edit_credit");
+  if (!res) return json({ error: M.auth, code: "auth" }, 401, H);
+  if (!res.ok) return json({ error: M.edit_limit(res.limit), code: "edit_month" }, 429, H);
+  const refund = () => sbRpc(env, token, "refund_edit_credit", { rid: res.rid });
+  try {
+    const rq = old.request || {};
+    const p = sanitize({ ...rq, city: old.city?.name || rq.city || "city", days: old.days.length });
+    if (p.error) throw new Error(M.bad);
+    p.date = old.days[0]?.date || rq.date || null;
+    const lang = LANG[q.lang] ? q.lang : p.lang;
+
+    // Vendet ekzistuese marrin ID (S1_0...), kandidatët e rinj C1..., restorantet R1...
+    const byId = {};
+    const days = old.days.map((d, di) => ({ ...d, stops: (d.stops || []).slice(0, 15).map((s, si) => {
+      const c = { ...s }; delete c._marker;
+      if (c.lat != null) { const id = `S${di + 1}_${si}`; c.poi = id; byId[id] = { name: c.name, lat: c.lat, lon: c.lon, wiki: c.wiki, osm: c.osm, wd: c.wd, oh: c.hours_raw, addr: c.address, fee: c.fee, charge: c.price }; }
+      else c.poi = null;
+      return c;
+    }) }));
+    const clat = old.city?.lat ?? days.flatMap(d => d.stops).find(s => s.lat != null)?.lat, clon = old.city?.lon ?? days.flatMap(d => d.stops).find(s => s.lon != null)?.lon;
+    if (clat == null) throw new Error(M.bad);
+    const usedNames = new Set(days.flatMap(d => d.stops.map(s => (s.name || "").toLowerCase())));
+    let cands = (await fetchPois(clat, clon, 6000)).filter(x => !usedNames.has(x.name.toLowerCase()));
+    await addPopularity(cands); cands.sort((a, b) => b.pop - a.pop); cands = cands.slice(0, 45);
+    cands.forEach((x, i) => { x.id = "C" + (i + 1); byId[x.id] = x; });
+    let food = [];
+    if (FOOD_RE.test(msg)) {
+      const centers = days.map(d => { const g = d.stops.filter(s => s.lat != null); return g.length ? [g.reduce((a, s) => a + s.lat, 0) / g.length, g.reduce((a, s) => a + s.lon, 0) / g.length] : null; }).filter(Boolean);
+      for (const [la, lo] of centers.slice(0, 3)) food.push(...(await nearbyFood(la, lo)));
+      food = food.filter((x, i, a) => a.findIndex(y => y.name === x.name) === i).slice(0, 20);
+      food.forEach((x, i) => { x.id = "R" + (i + 1); byId[x.id] = x; });
+    }
+
+    const planTxt = days.map((d, di) => `Day ${di + 1}${d.date ? " (" + d.date + ")" : ""} "${d.theme || ""}":\n` + d.stops.map((s, si) =>
+      `  [${si}] ${s.start || "?"} ${s.name} (${s.type || "visit"}, ${s.duration_min || 60} min${s.lat != null ? `, ${s.lat},${s.lon}` : ""}${s.hours_warn ? ", WARNING " + s.hours_warn : ""})`).join("\n")).join("\n");
+    const candTxt = cands.map(x => `${x.id}|${x.name}|${x.kind}|${x.lat},${x.lon}|pop ${Math.round(x.pop || 0)}`).join("\n");
+    const foodTxt = food.map(x => `${x.id}|${x.name}|restaurant${x.cuisine ? " " + x.cuisine : ""}|${x.lat},${x.lon}${x.oh ? "|hours " + x.oh.slice(0, 60) : ""}`).join("\n");
+    const system = `You edit an existing city itinerary. Change ONLY what the traveller asks; keep every other stop, time and text exactly as it is.
+Rules:
+- New sights may come ONLY from the candidate list (ids C1, C2...). New restaurants ONLY from the restaurant list (ids R1...). Never invent places, addresses or coordinates.
+- If the request cannot be done with these lists, return no ops and explain briefly in "reply".
+- Stops are referenced by day number (1-based) and index [n] as shown.
+- Times are recalculated automatically after your changes, so do not worry about them.
+- Write "reply" and any note/tip in ${LANG[lang]}; reply = 1–2 sentences saying exactly what changed.
+- Reply with JSON only.`;
+    const user = `Traveller request: "${msg}"
+Travellers: ${p.adults} adult(s)${p.kids ? ` + ${p.kids} child(ren)${p.kidAges.length ? " ages " + p.kidAges.join(",") : ""}` : ""}. Daily window ${p.start}–${p.end}. Getting around: ${p.transport}.
+
+Current itinerary:
+${planTxt}
+
+Candidate sights (id|name|type|lat,lon|popularity):
+${candTxt || "(none)"}
+${food.length ? "\nRestaurants nearby (id|name|type|lat,lon|hours):\n" + foodTxt : ""}
+
+Allowed ops:
+{"op":"remove","day":1,"idx":2}
+{"op":"replace","day":1,"idx":2,"id":"C4","duration_min":60,"note":"...","tip":"..."}
+{"op":"add","day":1,"after":2,"id":"C7","duration_min":45,"note":"..."}   (after -1 = at the start; restaurants: "id":"R2")
+{"op":"move","day":1,"idx":3,"to_day":2,"after":1}
+{"op":"duration","day":1,"idx":0,"minutes":45}
+{"op":"break","day":1,"after":2,"name":"...","duration_min":30,"note":"..."}   (rest, coffee or generic meal without a specific place)
+{"op":"theme","day":1,"theme":"..."}
+
+Return: {"ops":[...],"reply":"..."}`;
+    const { out, usage } = await callClaude(env.ANTHROPIC_API_KEY, system, user, 4000);
+    if (!out || !Array.isArray(out.ops)) throw new Error(M.badplan);
+    const ai = aiCost(MODEL, usage);
+
+    // Zbato ndryshimet mbi objektet origjinale (indekset i referohen planit para ndryshimit)
+    const at = (d, i) => days[d - 1]?.stops?.[i];
+    const mk = (id, op) => {
+      const x = byId[id]; if (!x || !/^[CR]\d+$/.test(id)) return null;
+      return { poi: id, name: x.name, type: x.kind === "restaurant" ? "meal" : "visit", duration_min: Math.max(10, Math.min(300, parseInt(op.duration_min) || 60)),
+        note: String(op.note || "").slice(0, 300), tip: String(op.tip || "").slice(0, 200), cuisine: x.cuisine };
+    };
+    const ops = out.ops.slice(0, 30).map(o => ({ ...o, _t: o.idx != null ? at(o.day, o.idx) : null, _a: o.after != null && o.after >= 0 ? at(o.op === "move" ? o.to_day : o.day, o.after) : null }));
+    let applied = 0;
+    const insertAfter = (dn, ref, s) => { const arr = days[dn - 1]?.stops; if (!arr || !s) return; const k = ref ? arr.indexOf(ref) : -1; arr.splice(k + 1, 0, s); applied++; };
+    for (const o of ops) {
+      const arr = days[(o.day || 0) - 1]?.stops;
+      if (o.op === "remove" && o._t) { o._t._del = true; applied++; }
+      else if (o.op === "replace" && o._t && arr) { const s = mk(o.id, o); const k = arr.indexOf(o._t); if (s && k >= 0) { arr[k] = s; applied++; } }
+      else if (o.op === "add") insertAfter(o.day, o._a, mk(o.id, o));
+      else if (o.op === "break") insertAfter(o.day, o._a, { poi: null, type: "break", name: String(o.name || "Pause").slice(0, 80), duration_min: Math.max(10, Math.min(180, parseInt(o.duration_min) || 30)), note: String(o.note || "").slice(0, 300) });
+      else if (o.op === "duration" && o._t) { o._t.duration_min = Math.max(10, Math.min(300, parseInt(o.minutes) || o._t.duration_min)); applied++; }
+      else if (o.op === "move" && o._t && days[(o.to_day || 0) - 1]) { const k = arr ? arr.indexOf(o._t) : -1; if (k >= 0) { arr.splice(k, 1); insertAfter(o.to_day, o._a, o._t); } }
+      else if (o.op === "theme" && days[o.day - 1]) { days[o.day - 1].theme = String(o.theme || "").slice(0, 80); applied++; }
+    }
+    days.forEach(d => { d.stops = d.stops.filter(s => !s._del); d.stops.forEach(s => { delete s._del; delete s.start; }); });
+    const plan = { ...old, days };
+    delete plan.usage;
+    if (applied) await finishPlan(env, plan, p, byId, { keepOrder: !/rend|organi|order|ordn|optimi|shkurt|distanc|kürz|weg/i.test(msg) });
+    plan.days.forEach(d => d.stops.forEach(s => { if (s.poi && /^S\d/.test(s.poi)) s.poi = null; }));
+    plan.ai_edits = { n: (old.ai_edits?.n || 0) + 1, usd: +((old.ai_edits?.usd || 0) + ai.usd).toFixed(5) };
+    ctx.waitUntil(addDayStat(env, ai));
+    if (!applied) await refund();
+    return json({ plan: applied ? plan : null, reply: String(out.reply || "").slice(0, 400), applied, ai, edits: { used: applied ? res.used : res.used - 1, limit: res.limit } }, 200, H);
+  } catch (e) {
+    await refund();
+    return json({ error: M.fail + (e.message || e) }, 502, H);
+  }
+}
+
+// ---- /now: "Çfarë të vizitoj tani?" ----
+async function weatherNow(lat, lon) {
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weather_code&timezone=auto`, { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) return null;
+    const c = (await r.json()).current; if (!c) return null;
+    return { temp: Math.round(c.temperature_2m), rain: c.precipitation > 0.1 || [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(c.weather_code), snow: [71, 73, 75, 77, 85, 86].includes(c.weather_code), code: c.weather_code };
+  } catch { return null; }
+}
+async function reverseName(lat, lon) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=en&lat=${lat}&lon=${lon}`, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(5000) });
+    const j = await r.json(); const a = j.address || {};
+    return { name: a.city || a.town || a.village || a.county || j.name || "", country: a.country || "" };
+  } catch { return { name: "", country: "" }; }
+}
+async function handleNow(q, req, env, ctx, H, M) {
+  const cache = caches.default, day = new Date().toISOString().slice(0, 10);
+  const token = bearer(req);
+  const who = token ? "u" + (await sha(token.split(".")[1] || token)).slice(0, 24) : "ip" + (await sha("vianto|" + (req.headers.get("CF-Connecting-IP") || "anon") + "|" + day)).slice(0, 24);
+  const nKey = `n/${day}/${who}`, used = (await limitGet(env, cache, nKey)) || 0, maxN = token ? 6 : 2;
+  if (used >= maxN) return json({ error: M.now_limit(maxN), code: token ? "now_day" : "guest" }, 429, H);
+  const stat = (await limitGet(env, cache, `d/${day}`)) || { n: 0 };
+  if ((stat.n || 0) + (stat.calls || 0) >= GLOBAL_DAILY_LIMIT * 2) return json({ error: M.busy }, 429, H);
+
+  let lat = parseFloat(q.lat), lon = parseFloat(q.lon), place = null;
+  if (!(Math.abs(lat) <= 90 && Math.abs(lon) <= 180)) {
+    const where = String(q.place || "").trim().slice(0, 100);
+    if (where.length < 2) return json({ error: M.now_where }, 400, H);
+    place = await geocode(where);
+    if (!place) return json({ error: M.nocity(where) }, 404, H);
+    lat = place.lat; lon = place.lon;
+  }
+  const minutes = Math.max(60, Math.min(480, parseInt(q.minutes) || 180));
+  const time = /^\d{2}:\d{2}$/.test(q.time || "") ? q.time : "14:00";
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(q.date || "") ? q.date : day;
+  const lang = LANG[q.lang] ? q.lang : "sq";
+  const transport = ["kembe", "publik", "vetura"].includes(q.transport) ? q.transport : "kembe";
+  const interests = (Array.isArray(q.interests) ? q.interests : []).filter(i => INTERESTS.includes(i)).slice(0, 8);
+  const budget = ["ulet", "mesem", "larte"].includes(q.budget) ? q.budget : "mesem";
+  const maxDist = { kembe: 1800, publik: 4000, vetura: 8000 }[transport] * Math.min(1.5, minutes / 180);
+
+  await limitPut(env, cache, nKey, used + 1);
+  try {
+    const [pois0, wx, rn] = await Promise.all([fetchPois(+lat.toFixed(3), +lon.toFixed(3), 3000), weatherNow(lat, lon), place ? Promise.resolve(place) : reverseName(lat, lon)]);
+    let pois = pois0.map(x => ({ ...x, dist: hav(lat, lon, x.lat, x.lon) })).filter(x => x.dist <= maxDist);
+    if (pois.length < 3) { await limitPut(env, cache, nKey, used); return json({ error: M.few }, 404, H); }
+    await addPopularity(pois);
+    pois.sort((a, b) => (b.pop || 0) / (1 + b.dist / 800) - (a.pop || 0) / (1 + a.dist / 800));
+    pois = pois.slice(0, 24);
+    await enrichPois(pois.slice(0, 12));
+    const [y, mo, dd] = date.split("-").map(Number), dt = new Date(Date.UTC(y, mo - 1, dd)), now = toMin(time);
+    const open = [];
+    for (const x of pois) {
+      const rules = ohParse(x.oh), o = ohOn(rules, dt);
+      if (o.st === "closed") continue;
+      if (o.st === "open") { const sp = o.spans.find(([a, b]) => now < b - 30); if (!sp) continue; x.now = sp[0] > now ? `opens ${fmtMin(sp[0])}` : `open until ${fmtMin(sp[1])}`; }
+      else x.now = "hours unknown";
+      open.push(x);
+    }
+    if (open.length < 2) { await limitPut(env, cache, nKey, used); return json({ error: M.few }, 404, H); }
+    open.forEach((x, i) => { x.id = "C" + (i + 1); });
+    const list = open.map(x => `${x.id}|${x.name}|${x.kind}|${Math.round(x.dist)} m away|pop ${Math.round(x.pop || 0)}|${x.now}${x.fee ? "|fee " + x.fee : ""}`).join("\n");
+    const system = `You recommend what to visit RIGHT NOW. Pick 3–5 places ONLY from the list (by id), in a sensible walking order starting near the traveller, that fit in the free time including travel. Never invent places. Prefer "open until" places; use "hours unknown" places only if needed and say to check hours. ${wx?.rain || wx?.snow ? "It is raining/snowing: prefer indoor places." : ""}
+Write text in ${LANG[lang]}. Reply JSON only: {"title":"...","summary":"1 sentence","stops":[{"id":"C1","duration_min":45,"note":"why now, 1 sentence","tip":"..."}]}`;
+    const user = `Local time ${time}, date ${date} (${WD[dt.getUTCDay()]}). Free time: ${minutes} min. Getting around: ${transport}. Budget: ${budget}. Interests: ${interests.map(i => INTEREST_NAMES[i]).join(", ") || "highlights"}.${wx ? ` Weather: ${wx.temp}°C${wx.rain ? ", rain" : ""}${wx.snow ? ", snow" : ""}.` : ""}
+Places (id|name|type|distance|popularity|hours now):
+${list}`;
+    const { out, usage } = await callClaude(env.ANTHROPIC_API_KEY, system, user, 2500);
+    if (!out || !Array.isArray(out.stops) || !out.stops.length) throw new Error(M.badplan);
+    const byId = Object.fromEntries(open.map(x => [x.id, x]));
+    const stops = out.stops.filter(s => byId[s.id]).slice(0, 6).map(s => ({ poi: s.id, name: byId[s.id].name, type: "visit", duration_min: Math.max(10, Math.min(180, parseInt(s.duration_min) || 45)), note: String(s.note || "").slice(0, 300), tip: String(s.tip || "").slice(0, 200) }));
+    if (!stops.length) throw new Error(M.badplan);
+    const end = fmtMin(Math.min(23 * 60 + 59, now + minutes));
+    const p = { days: 1, date, start: time, end, transport, lang, interests, budget, adults: 1, kids: 0, kidAges: [], city: rn.name };
+    const plan = { kind: "now", title: String(out.title || "").slice(0, 120), summary: String(out.summary || "").slice(0, 300), days: [{ day: 1, theme: String(out.title || "").slice(0, 80), stops }], tips: [], city: { name: rn.name, country: rn.country, lat, lon }, request: p, weather: wx };
+    await finishPlan(env, plan, p, byId);
+    plan.ai = aiCost(MODEL, usage); plan.v = 2;
+    ctx.waitUntil(addDayStat(env, plan.ai));
+    return json(plan, 200, H);
+  } catch (e) {
+    await limitPut(env, cache, nKey, used);
+    return json({ error: M.fail + (e.message || e) }, 502, H);
   }
 }
