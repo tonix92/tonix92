@@ -1,19 +1,38 @@
 {
-  "name": "Vianto — plani yt i qytetit",
-  "short_name": "Vianto",
+  "name": "Viaro — plani yt i qytetit",
+  "short_name": "Viaro",
   "description": "Plani yt i qytetit ditë për ditë · Your city plan, day by day · Dein Stadtplan, Tag für Tag",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F3E6D0",
-  "theme_color": "#1F4E79",
+  "background_color": "#F7F2EA",
+  "theme_color": "#C8202F",
   "lang": "sq",
-  "categories": ["travel", "lifestyle", "social"],
+  "categories": [
+    "travel",
+    "lifestyle",
+    "social"
+  ],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

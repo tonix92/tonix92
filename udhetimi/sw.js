@@ -1,5 +1,5 @@
-// Vianto service worker: e bën aplikacionin të instalueshëm dhe të hapet edhe me internet të dobët.
-const CACHE = "vianto-v1";
+// Viaro service worker: e bën aplikacionin të instalueshëm dhe të hapet edhe me internet të dobët.
+const CACHE = "viaro-v2";
 const CORE = ["./", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 const CDN = ["fonts.googleapis.com", "fonts.gstatic.com", "unpkg.com", "cdn.jsdelivr.net"];
 
