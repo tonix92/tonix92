@@ -81,7 +81,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p2.4", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p2.5", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -652,9 +652,45 @@ function schedule(stops, legsByIdx, dayStart, dayEnd, dt) {
   return { stops: res, warn, over: over > 30 ? over : 0, travelTotal };
 }
 
+// ---- Të dhënat e OpenStreetMap për vendet e zgjedhura, përmes Nominatim (orari, tarifa, adresa) ----
+// Overpass nuk arrihet nga Cloudflare, ndaj çdo vend i planit kontrollohet veç e veç (1 kërkesë në sekondë).
+async function osmDetails(poi) {
+  const key = new Request(`https://cache.udhetimi/osmd1/${encodeURIComponent(poi.wd || poi.name)}`);
+  const hit = await caches.default.match(key); if (hit) return { ...(await hit.json()), cached: true };
+  let res = null;
+  try {
+    const d = 0.02;
+    const u = `https://nominatim.openstreetmap.org/search?format=jsonv2&extratags=1&addressdetails=1&limit=5&bounded=1&accept-language=en&viewbox=${poi.lon - d},${poi.lat + d},${poi.lon + d},${poi.lat - d}&q=${encodeURIComponent(poi.name)}`;
+    const r = await fetch(u, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(6000) });
+    if (r.ok) {
+      const arr = await r.json();
+      const best = arr.find(x => poi.wd && x.extratags?.wikidata === poi.wd) || arr.find(x => hav(poi.lat, poi.lon, +x.lat, +x.lon) < 250);
+      res = {};
+      if (best) {
+        const e = best.extratags || {}, a = best.address || {};
+        const street = [a.road || a.pedestrian || a.square || a.footway, a.house_number].filter(Boolean).join(" ");
+        const town = [a.postcode, a.city || a.town || a.village].filter(Boolean).join(" ");
+        res = { matched: poi.wd && e.wikidata === poi.wd ? "wikidata" : "near", oh: e.opening_hours, fee: e.fee, charge: e.charge, addr: [street, town].filter(Boolean).join(", ") || undefined };
+      }
+    }
+  } catch {}
+  if (res) await caches.default.put(key, new Response(JSON.stringify(res), { headers: { "Cache-Control": "max-age=" + 86400 * 30 } }));
+  return res || {};
+}
+async function enrichPois(list) {
+  for (const [i, poi] of list.entries()) {
+    if (poi.oh || poi.addr) continue;
+    const t = Date.now(), d = await osmDetails(poi);
+    if (d.matched) Object.assign(poi, { oh: d.oh, fee: poi.fee || d.fee, charge: poi.charge || d.charge, addr: d.addr, osm_match: d.matched });
+    if (!d.cached && i < list.length - 1) await new Promise(r => setTimeout(r, Math.max(0, 1100 - (Date.now() - t))));
+  }
+}
+
 // ---- Zbatimi mbi planin: verifikimi, renditja, rrugët dhe oraret ----
 async function finishPlan(env, plan, p, byId) {
   const dates = tripDates(p.date, p.days);
+  const used = [...new Set((plan.days || []).flatMap(d => (d.stops || []).map(s => s.poi)).filter(id => id && byId[id]))].map(id => byId[id]);
+  await enrichPois(used.slice(0, 30));
   for (const [i, d] of (plan.days || []).entries()) {
     const dt = dates[i] || null;
     if (dt) { d.date = isoDay(dt); }
