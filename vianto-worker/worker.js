@@ -1,4 +1,4 @@
-// Vianto — Cloudflare Worker
+// Viaro — Cloudflare Worker
 // Vendos çelësin si Secret me emrin ANTHROPIC_API_KEY (Settings → Variables and Secrets)
 
 const ALLOWED_ORIGINS = ["https://tonix92.github.io"]; // faqet që lejohen ta përdorin
@@ -95,7 +95,7 @@ export default {
         }));
         return json(out, 200, H);
       }
-      return new Response("Vianto API OK", { headers: H });
+      return new Response("Viaro API OK", { headers: H });
     }
     if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: H });
     let q;
@@ -194,9 +194,9 @@ const APP_URL = "https://tonix92.github.io/tonix92/udhetimi/";
 async function sharePage(id, env) {
   const appLink = `${APP_URL}?p=${id}`;
   const OG = {
-    sq: { t: (d, c) => `${d} ditë në ${c}`, def: "Plan udhëtimi", desc: "Shiko këtë plan udhëtimi ditë për ditë, krijuar me Vianto.", by: a => ` — nga ${a}`, open: "Po hapet plani…", click: "Kliko këtu nëse nuk hapet" },
-    en: { t: (d, c) => `${d} days in ${c}`, def: "Travel plan", desc: "See this day-by-day travel plan, made with Vianto.", by: a => ` — by ${a}`, open: "Opening the plan…", click: "Click here if it doesn't open" },
-    de: { t: (d, c) => `${d} Tage in ${c}`, def: "Reiseplan", desc: "Sieh dir diesen Tag-für-Tag-Reiseplan an, erstellt mit Vianto.", by: a => ` — von ${a}`, open: "Plan wird geöffnet…", click: "Hier klicken, falls er sich nicht öffnet" },
+    sq: { t: (d, c) => `${d} ditë në ${c}`, def: "Plan udhëtimi", desc: "Shiko këtë plan udhëtimi ditë për ditë, krijuar me Viaro.", by: a => ` — nga ${a}`, open: "Po hapet plani…", click: "Kliko këtu nëse nuk hapet" },
+    en: { t: (d, c) => `${d} days in ${c}`, def: "Travel plan", desc: "See this day-by-day travel plan, made with Viaro.", by: a => ` — by ${a}`, open: "Opening the plan…", click: "Click here if it doesn't open" },
+    de: { t: (d, c) => `${d} Tage in ${c}`, def: "Reiseplan", desc: "Sieh dir diesen Tag-für-Tag-Reiseplan an, erstellt mit Viaro.", by: a => ` — von ${a}`, open: "Plan wird geöffnet…", click: "Hier klicken, falls er sich nicht öffnet" },
   };
   let L = OG.sq, title = L.def, desc = L.desc, img = null;
   if (env.SUPABASE_URL && env.SUPABASE_KEY) {
@@ -217,7 +217,7 @@ async function sharePage(id, env) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(title)}</title>
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Vianto">
+<meta property="og:site_name" content="Viaro">
 <meta property="og:title" content="${e(title)}">
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:image" content="${e(img || APP_URL + "og.png")}">
