@@ -6,7 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Vianto">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%22112%22 fill=%22%231F4E79%22/%3E%3Cpath d=%22M378.76 132.25Q383.71000000000004 132.25 383.71000000000004 137.2V147.1Q383.71000000000004 152.04999999999998 378.76 152.04999999999998Q369.52000000000004 152.04999999999998 364.07500000000005 161.125Q358.63 170.2 354.01 182.73999999999998L283.06000000000006 375.79Q281.74 379.75 277.45000000000005 379.75H237.52000000000004Q233.56 379.75 231.91000000000003 375.79L157.66000000000003 182.73999999999998Q152.71 169.86999999999998 147.59500000000003 160.95999999999998Q142.48000000000002 152.04999999999998 133.24 152.04999999999998Q128.29000000000002 152.04999999999998 128.29000000000002 147.1V137.2Q128.29000000000002 132.25 133.24 132.25H234.55Q239.5 132.25 239.5 137.2V147.1Q239.5 152.04999999999998 234.55 152.04999999999998Q224.32000000000002 152.04999999999998 216.565 158.48499999999999Q208.81 164.92 208.81 174.82Q208.81 178.45 211.78000000000003 186.04L267.88 333.22L321.01 182.73999999999998Q322.33000000000004 178.78 322.33000000000004 174.48999999999998Q322.33000000000004 164.92 314.57500000000005 158.48499999999999Q306.82000000000005 152.04999999999998 296.59000000000003 152.04999999999998Q291.64 152.04999999999998 291.64 147.1V137.2Q291.64 132.25 296.59000000000003 132.25Z%22 fill=%22%23FBF5EA%22/%3E%3Ccircle cx=%22266%22 cy=%22198%22 r=%2228%22 fill=%22%23E3C25A%22/%3E%3C/svg%3E">
-<meta name="theme-color" content="#1F4E79">
+<meta name="theme-color" content="#F6F0E5">
+<script>try{var th=localStorage.getItem("vianto_theme");if(th!=="dark"&&th!=="light")th=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=th}catch(e){}</script>
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -439,6 +440,355 @@
   @media(min-width:460px){.nav{margin:4px auto 0}}
   .nav button{flex:1;padding:9px 8px;border-radius:999px;border:0!important;color:#7A6E5C;font-size:14px}
   .nav button.on{background:#fff;color:var(--sea);font-weight:700;box-shadow:0 3px 10px -3px rgba(31,78,121,.3)}
+  /* =====================================================================
+     Redesign v3 — paleta: Navy #214F78 · Cream #F6F0E5 · Terracotta #B65B37
+     Olive #788747 · White #FFFFFF · Text #453D32. Kjo shtresë mbizotëron
+     shtresat e mëparshme; logjika nuk preket.
+     ===================================================================== */
+  :root{
+    --navy:#214F78;--navy-2:#2B6293;--navy-d:#173A5A;--cream:#F6F0E5;--terra:#B65B37;--terra-d:#9C4A2B;--olive:#788747;--white:#FFFFFF;--text:#453D32;
+    --surface:#FFFFFF;--surface-2:#FBF8F2;--surface-3:#F1E9DB;--line:#E8DECD;--line-2:#DCCFB8;--mut:#7B7062;
+    --on-navy:#F6F0E5;--link:var(--terra);--sun:#E3C25A;
+    --sh-1:0 1px 2px rgba(69,61,50,.06);--sh-2:0 1px 2px rgba(69,61,50,.05),0 10px 28px -16px rgba(69,61,50,.30);--sh-3:0 18px 40px -22px rgba(33,79,120,.45);
+    --r-xl:22px;--r-lg:18px;--r-md:12px;--r-sm:9px;
+    /* emrat e vjetër që përdoren nëpër kod */
+    --bg:var(--cream);--txt:var(--text);--acc:var(--navy);--acc2:#E6EEF5;--sea:var(--navy);--sea2:var(--navy-2);--ink:var(--navy);
+    --plaster:var(--surface);--sand:var(--cream);--brass:var(--terra);--brass2:var(--sun);--lemon:var(--sun);--warm:var(--terra);
+    --hdr-h:56px;--tab-h:62px;color-scheme:light}
+  html[data-theme=dark]{
+    --navy:#8DB3D9;--navy-2:#A9C7E6;--navy-d:#0B1520;--cream:#0E1826;--terra:#D27A55;--terra-d:#E08C68;--olive:#A2B26C;--text:#ECE3D2;
+    --surface:#15233A;--surface-2:#1A2B45;--surface-3:#223552;--line:#283C58;--line-2:#34496A;--mut:#A99E8D;
+    --on-navy:#F6F0E5;--acc2:#1E3350;
+    --sh-1:0 1px 2px rgba(0,0,0,.3);--sh-2:0 1px 2px rgba(0,0,0,.25),0 12px 30px -18px rgba(0,0,0,.7);--sh-3:0 18px 40px -22px rgba(0,0,0,.8);color-scheme:dark}
+
+  html,body{background-color:var(--cream);color:var(--text)}
+  body{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cg fill='none' stroke='%23214F78' stroke-width='1.6' opacity='.16' stroke-linecap='round' stroke-linejoin='round'%3E %3Cg transform='translate%2820 10%29'%3E%3Cpath d='M40 0v8M37 8h6l2 30h-10zM35 38h10l6 34H29zM27 72h26M29 72q-8 30-20 48M51 72q8 30 20 48M9 120h12q19-30 38 0h12M33 50h14M24 98h32'/%3E%3C/g%3E %3Cg transform='translate%28130 50%29'%3E%3Cpath d='M0 70V30q0-14 60-14t60 14v40zM0 30q60 10 120 0M0 50q60 10 120 0'/%3E%3Cpath d='M12 70V58q4-6 8 0v12M32 70V60q4-6 8 0v10M52 70V61q4-6 8 0v9M72 70V61q4-6 8 0v9M92 70V60q4-6 8 0v10M12 42v-6q4-5 8 0v6M32 44v-6q4-5 8 0v6M52 45v-6q4-5 8 0v6M72 45v-6q4-5 8 0v6M92 44v-6q4-5 8 0v6'/%3E%3C/g%3E %3Cg transform='translate%28300 10%29'%3E%3Cpath d='M30 0l-8 22h16zM22 22h16v10H22zM18 32h24v18H18zM20 50h20v70H20zM14 120h32'/%3E%3Ccircle cx='30' cy='41' r='6'/%3E%3Cpath d='M30 41v-4M30 41l3 2M25 62h10M25 80h10M25 98h10'/%3E%3C/g%3E %3Cg transform='translate%2840 180%29'%3E%3Cg transform='rotate%285 30 120%29'%3E%3Cpath d='M14 20h32v100H14zM16 10h28v10H16zM20 4h20v6H20zM14 40h32M14 60h32M14 80h32M14 100h32'/%3E%3Cpath d='M20 26v10M30 26v10M40 26v10M20 66v10M30 66v10M40 66v10'/%3E%3C/g%3E%3Cpath d='M0 124h70'/%3E%3C/g%3E %3Cg transform='translate%28150 200%29'%3E%3Cpath d='M0 100h130M4 100V40h122v60M0 40h130M0 30h130v10H0zM40 30V18h50v12M56 18v-8h18v8M60 10q5-8 10 0'/%3E%3Cpath d='M16 40v60M30 40v60M48 40v60M62 40v60M68 40v60M82 40v60M100 40v60M114 40v60'/%3E%3C/g%3E %3Cg transform='translate%28305 180%29'%3E%3Cpath d='M0 90h100M6 90V44h88v46M0 44l50-26 50 26zM20 44l30-16 30 16'/%3E%3Cpath d='M14 44v46M28 44v46M42 44v46M58 44v46M72 44v46M86 44v46'/%3E%3C/g%3E %3Cg transform='translate%2825 330%29'%3E%3Cpath d='M30 80V30h20v50M26 80h28M30 30l10-12 10 12M36 80V64h8v16'/%3E%3Cpath d='M40 22L12 -4M40 22l28-26M40 22l-26 26M40 22l26 26'/%3E%3Cpath d='M12 -4l-4 8 26 22M68 -4l4 8-26 22M14 48l-6-6 24-22M66 48l6-6-24-22'/%3E%3C/g%3E %3Cg transform='translate%28150 320%29'%3E%3Cpath d='M0 92h120M10 92V40l6-34 6 34v52M30 92V30l7-30 7 30v62M52 92V20l8-24 8 24v72M76 92V30l7-30 7 30v62M98 92V40l6-34 6 34v52'/%3E%3Cpath d='M60 50v42M56 70h8M60 92V82q-6 0-6 10M60 82q6 0 6 10'/%3E%3C/g%3E %3Cg transform='translate%28300 320%29'%3E%3Cpath d='M10 92h100M20 92V56h80v36M30 56q30-50 60 0M44 34q16-14 32 0M60 22v-8M4 92V20M116 92V20M4 20l0-10 0 0M116 20v-10M2 30h4M114 30h4'/%3E%3Cpath d='M4 10l-2 8h4zM116 10l-2 8h4zM36 92V74q4-6 8 0v18M56 92V72q4-6 8 0v20M76 92V74q4-6 8 0v18'/%3E%3C/g%3E %3C/g%3E%3C/svg%3E ") 0 0/420px 420px,var(--cream);background-attachment:fixed;min-height:100vh}
+  html[data-theme=dark] body{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cg fill='none' stroke='%23EDE4D3' stroke-width='1.6' opacity='.06' stroke-linecap='round' stroke-linejoin='round'%3E %3Cg transform='translate%2820 10%29'%3E%3Cpath d='M40 0v8M37 8h6l2 30h-10zM35 38h10l6 34H29zM27 72h26M29 72q-8 30-20 48M51 72q8 30 20 48M9 120h12q19-30 38 0h12M33 50h14M24 98h32'/%3E%3C/g%3E %3Cg transform='translate%28130 50%29'%3E%3Cpath d='M0 70V30q0-14 60-14t60 14v40zM0 30q60 10 120 0M0 50q60 10 120 0'/%3E%3Cpath d='M12 70V58q4-6 8 0v12M32 70V60q4-6 8 0v10M52 70V61q4-6 8 0v9M72 70V61q4-6 8 0v9M92 70V60q4-6 8 0v10M12 42v-6q4-5 8 0v6M32 44v-6q4-5 8 0v6M52 45v-6q4-5 8 0v6M72 45v-6q4-5 8 0v6M92 44v-6q4-5 8 0v6'/%3E%3C/g%3E %3Cg transform='translate%28300 10%29'%3E%3Cpath d='M30 0l-8 22h16zM22 22h16v10H22zM18 32h24v18H18zM20 50h20v70H20zM14 120h32'/%3E%3Ccircle cx='30' cy='41' r='6'/%3E%3Cpath d='M30 41v-4M30 41l3 2M25 62h10M25 80h10M25 98h10'/%3E%3C/g%3E %3Cg transform='translate%2840 180%29'%3E%3Cg transform='rotate%285 30 120%29'%3E%3Cpath d='M14 20h32v100H14zM16 10h28v10H16zM20 4h20v6H20zM14 40h32M14 60h32M14 80h32M14 100h32'/%3E%3Cpath d='M20 26v10M30 26v10M40 26v10M20 66v10M30 66v10M40 66v10'/%3E%3C/g%3E%3Cpath d='M0 124h70'/%3E%3C/g%3E %3Cg transform='translate%28150 200%29'%3E%3Cpath d='M0 100h130M4 100V40h122v60M0 40h130M0 30h130v10H0zM40 30V18h50v12M56 18v-8h18v8M60 10q5-8 10 0'/%3E%3Cpath d='M16 40v60M30 40v60M48 40v60M62 40v60M68 40v60M82 40v60M100 40v60M114 40v60'/%3E%3C/g%3E %3Cg transform='translate%28305 180%29'%3E%3Cpath d='M0 90h100M6 90V44h88v46M0 44l50-26 50 26zM20 44l30-16 30 16'/%3E%3Cpath d='M14 44v46M28 44v46M42 44v46M58 44v46M72 44v46M86 44v46'/%3E%3C/g%3E %3Cg transform='translate%2825 330%29'%3E%3Cpath d='M30 80V30h20v50M26 80h28M30 30l10-12 10 12M36 80V64h8v16'/%3E%3Cpath d='M40 22L12 -4M40 22l28-26M40 22l-26 26M40 22l26 26'/%3E%3Cpath d='M12 -4l-4 8 26 22M68 -4l4 8-26 22M14 48l-6-6 24-22M66 48l6-6-24-22'/%3E%3C/g%3E %3Cg transform='translate%28150 320%29'%3E%3Cpath d='M0 92h120M10 92V40l6-34 6 34v52M30 92V30l7-30 7 30v62M52 92V20l8-24 8 24v72M76 92V30l7-30 7 30v62M98 92V40l6-34 6 34v52'/%3E%3Cpath d='M60 50v42M56 70h8M60 92V82q-6 0-6 10M60 82q6 0 6 10'/%3E%3C/g%3E %3Cg transform='translate%28300 320%29'%3E%3Cpath d='M10 92h100M20 92V56h80v36M30 56q30-50 60 0M44 34q16-14 32 0M60 22v-8M4 92V20M116 92V20M4 20l0-10 0 0M116 20v-10M2 30h4M114 30h4'/%3E%3Cpath d='M4 10l-2 8h4zM116 10l-2 8h4zM36 92V74q4-6 8 0v18M56 92V72q4-6 8 0v20M76 92V74q4-6 8 0v18'/%3E%3C/g%3E %3C/g%3E%3C/svg%3E ") 0 0/420px 420px,radial-gradient(1200px 600px at 80% -10%,#16304E 0%,transparent 60%),var(--cream);background-attachment:fixed}
+  ::selection{background:#E7C9B8;color:#2A2018}
+  :focus-visible{outline:2px solid var(--terra);outline-offset:2px}
+  a{color:var(--link)}
+
+  /* ---------- Header: një rresht, i ngjitur, kompakt ---------- */
+  .top{position:sticky!important;top:0;z-index:60;background:color-mix(in srgb,var(--cream) 96%,transparent)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)!important;padding:env(safe-area-inset-top) 0 0!important;box-shadow:none!important;color:var(--navy)}
+  .topin{max-width:1160px;height:var(--hdr-h);padding:0 16px!important;gap:8px}
+  .brand{margin-right:auto}
+  .brand .wm{height:26px!important}
+  .brand .wm g{fill:var(--navy)}
+  html[data-theme=dark] .brand .wm g{fill:#F1E7D6}
+  .langsw{background:var(--surface-3)!important;box-shadow:none!important;border-radius:999px;padding:3px}
+  .langsw button{font-size:11.5px!important;letter-spacing:.4px;padding:5px 8px!important;color:var(--mut)!important;font-weight:700;min-width:30px}
+  .langsw button.on{background:var(--surface)!important;color:var(--navy)!important;box-shadow:var(--sh-1)}
+  .thm,.bell{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line)!important;background:var(--surface)!important;color:var(--navy)!important;display:grid;place-items:center;cursor:pointer;padding:0}
+  .thm svg{width:18px;height:18px}
+  .thm .i-sun{display:none}
+  html[data-theme=dark] .thm .i-sun{display:block}
+  html[data-theme=dark] .thm .i-moon{display:none}
+  .acct{display:inline-flex;align-items:center;gap:7px;height:36px;border:0!important;background:var(--navy)!important;color:var(--on-navy)!important;border-radius:999px;padding:0 14px!important;font-weight:700!important;font-size:13.5px!important;max-width:150px}
+  html[data-theme=dark] .acct{background:var(--surface-3)!important;color:var(--text)!important}
+  .acct.in{background:var(--surface)!important;color:var(--navy)!important;border:1px solid var(--line)!important;padding:0 12px 0 3px!important}
+  .acct .ava{flex:none;width:28px;height:28px;border-radius:50%;background:var(--terra);color:#fff;display:grid;place-items:center;font-size:12.5px;font-weight:700}
+  .acct .an{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:420px){.acct.in .an{display:none}.acct.in{padding:0 3px!important;width:36px;justify-content:center}.langsw button{padding:5px 6px!important;min-width:26px}}
+
+  /* Navigimi: shirit poshtë në telefon, brenda header-it në desktop */
+  .nav{position:fixed!important;left:0;right:0;bottom:0;z-index:58;margin:0!important;max-width:none!important;display:flex;gap:0!important;padding:6px 10px calc(6px + env(safe-area-inset-bottom))!important;border-radius:0!important;
+    background:color-mix(in srgb,var(--surface) 92%,transparent)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);box-shadow:0 -8px 24px -18px rgba(69,61,50,.35)}
+  .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px!important;border-radius:12px!important;background:none!important;box-shadow:none!important;color:var(--mut)!important;font-size:11.5px!important;font-weight:600!important;min-height:48px}
+  .nav button::before{content:"";width:22px;height:22px;background:currentColor;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+  .nav button.on{color:var(--navy)!important}
+  .nav button.on::before{background:var(--terra)}
+  .nav button[data-v=create]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.5 2.5M15.2 15.2l2.5 2.5M6.3 17.7l2.5-2.5M15.2 8.8l2.5-2.5'/%3E%3C/svg%3E")}
+  .nav button[data-v=mine]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h12v18l-6-4-6 4z'/%3E%3C/svg%3E")}
+  .nav button[data-v=explore]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M15.5 8.5l-2 5-5 2 2-5z'/%3E%3C/svg%3E")}
+  .wrap{padding:6px 16px calc(var(--tab-h) + 28px + env(safe-area-inset-bottom))!important}
+  .toast{top:calc(var(--hdr-h) + 12px + env(safe-area-inset-top))!important;background:var(--navy-d)!important;color:#F6F0E5;border-radius:12px;box-shadow:var(--sh-2)}
+  @media(min-width:760px){
+    .top{display:flex;justify-content:center;background:color-mix(in srgb,var(--cream) 86%,transparent)!important;-webkit-backdrop-filter:saturate(1.4) blur(14px)!important;backdrop-filter:saturate(1.4) blur(14px)!important}
+    .topin{display:contents}
+    .top{gap:10px;padding-left:max(20px,calc((100% - 1160px)/2))!important;padding-right:max(20px,calc((100% - 1160px)/2))!important;height:calc(var(--hdr-h) + 8px);align-items:center}
+    .brand{margin-right:28px;order:0}
+    .nav{order:1;position:static!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;-webkit-backdrop-filter:none;backdrop-filter:none;margin-right:auto!important;gap:4px!important}
+    .nav button{flex:none;flex-direction:row;gap:7px;font-size:14px!important;padding:8px 14px!important;min-height:0;border-radius:999px!important}
+    .nav button::before{width:17px;height:17px}
+    .nav button.on{background:var(--surface)!important;box-shadow:var(--sh-1)!important}
+    .langsw{order:2}.thm{order:3}.bell{order:4}.acct{order:5}
+    .wrap{padding-bottom:48px!important}
+  }
+
+  /* ---------- Tipografia ---------- */
+  html,body{font-size:15.5px;line-height:1.5}
+  h1{color:var(--navy)!important;font-size:30px;margin:18px 0 4px}
+  .lead{color:var(--mut)!important;margin-bottom:16px}
+  h1,.rhead h2,.dayhead h3,.sbody .nm,.pcard .t b,.modal h3,.pfmain h2,#loadMsg,.stepper b,.hfh h2,.cmth,.hcard b,.fcover span{color:var(--navy)}
+  label{color:var(--text)!important;font-size:13.5px!important;font-weight:600!important;margin:16px 0 7px!important;letter-spacing:0}
+  label:first-child{margin-top:0!important}
+  .dhint,.who small{color:var(--mut)!important}
+
+  /* ---------- Hero ---------- */
+  .hero{margin:10px 0 14px!important;padding:24px 22px 30px!important;border-radius:var(--r-xl)!important;min-height:0!important;box-shadow:var(--sh-3)}
+  .hero h1{color:#F6F0E5!important;font-size:clamp(30px,8.4vw,48px)!important;margin:2px 0 8px!important}
+  .hero .lead{color:rgba(246,240,229,.82)!important;font-size:15px;margin:0!important}
+  html[data-theme=dark] .hero{filter:saturate(.9) brightness(.92)}
+  @media(min-width:760px){.hero{padding:40px 40px 44px!important}}
+
+  /* ---------- Kartat ---------- */
+  .card,.pcard,.post,.hcard,.uchip,.exf{background:var(--surface)!important;border:1px solid var(--line)!important;box-shadow:var(--sh-2)!important;color:var(--text)}
+  .card{border-radius:var(--r-lg)!important;padding:18px!important;margin-bottom:12px}
+  .pcard,.post,.hcard{border-radius:var(--r-lg)!important}
+  .nowcard{background:linear-gradient(135deg,var(--surface) 0%,var(--surface-2) 100%)!important}
+  .nowcard b{color:var(--navy)}
+  .note{background:var(--surface-3)!important;color:var(--text)!important;border:1px solid var(--line)!important;border-radius:var(--r-md)}
+  .empty{color:var(--mut)}
+
+  /* ---------- Fushat ---------- */
+  input,select,textarea{background:var(--surface-2)!important;border:1px solid var(--line)!important;color:var(--text)!important;border-radius:var(--r-md)!important;padding:11px 13px;min-height:46px}
+  input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--mut) 75%,transparent)}
+  input:focus,textarea:focus,select:focus{border-color:var(--navy)!important;background:var(--surface)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--navy) 16%,transparent)}
+  #city{font-size:20px!important;padding:12px 14px!important;color:var(--navy)!important}
+  textarea{min-height:64px;height:64px;line-height:1.45}
+  #notes{background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237B7062' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4l10-10-4-4L4 16zM13.5 6.5l4 4'/%3E%3C/svg%3E") 12px 13px/17px no-repeat!important;padding-left:38px!important}
+  .stepper{gap:8px}
+  .stepper button{width:40px!important;height:40px!important;border-radius:50%!important;border:1px solid var(--line-2)!important;background:var(--surface)!important;color:var(--navy)!important;font-size:19px!important;display:grid;place-items:center;padding:0}
+  .stepper button:active{background:var(--surface-3)!important}
+  .stepper b{font-size:22px!important;min-width:64px!important}
+  .stepper.sm b{min-width:30px!important;font-size:20px!important}
+  .grid2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+  .fdd{align-items:end}
+  .fdd input{min-width:0;max-width:100%;width:100%}
+  input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-width:0}
+  .who{margin-bottom:14px}
+  .fdd label{min-height:1.3em}
+
+  /* Kategoritë (interesat): olive kur zgjidhen */
+  .chip{border:1px solid var(--line)!important;background:var(--surface)!important;color:var(--text)!important;border-radius:999px!important;padding:7px 12px!important;font-size:13.5px!important;font-weight:500;transition:background .15s,color .15s,border-color .15s}
+  .chip.on{background:var(--navy)!important;border-color:var(--navy)!important;color:#fff!important}
+  html[data-theme=dark] .chip.on{color:#0E1826!important}
+  #interests{gap:7px}
+  #interests .chip:nth-child(n){--c:var(--olive);color:var(--text)!important;background:var(--surface)!important;border-color:var(--line)!important}
+  #interests .chip:nth-child(n).on{background:var(--olive)!important;border-color:var(--olive)!important;color:#fff!important}
+  html[data-theme=dark] #interests .chip:nth-child(n).on{color:#11180A!important}
+  #interests .chip.on::before{content:"✓ ";font-weight:700}
+
+  /* Segmentet */
+  .seg{background:var(--surface-3)!important;border-radius:var(--r-md)!important;padding:3px!important;gap:3px}
+  .seg button{color:var(--mut)!important;border-radius:var(--r-sm)!important;padding:9px 6px!important;font-weight:600!important;font-size:13.5px!important}
+  .seg button.on{background:var(--navy)!important;color:#fff!important;box-shadow:0 2px 8px -3px rgba(33,79,120,.5)!important}
+  html[data-theme=dark] .seg button.on{color:#0E1826!important}
+  /* Buxheti: tre pllaka */
+  .seg[data-name=budget]{background:none!important;padding:0!important;gap:8px}
+  .seg[data-name=budget] button{background:var(--surface)!important;border:1px solid var(--line)!important;padding:12px 6px!important;border-radius:var(--r-md)!important;color:var(--text)!important}
+  .seg[data-name=budget] button.on{background:color-mix(in srgb,var(--terra) 9%,var(--surface))!important;border-color:var(--terra)!important;color:var(--terra)!important;box-shadow:inset 0 0 0 1px var(--terra)!important}
+  /* Gjuha e planit: pilula të vogla */
+  .seg[data-name=lang]{background:none!important;padding:0!important;gap:6px;justify-content:flex-start}
+  .seg[data-name=lang] button{flex:none;border:1px solid var(--line)!important;background:var(--surface)!important;color:var(--text)!important;border-radius:999px!important;padding:7px 14px!important}
+  .seg[data-name=lang] button.on{background:var(--navy)!important;border-color:var(--navy)!important;color:#fff!important}
+  html[data-theme=dark] .seg[data-name=lang] button.on{color:#0E1826!important}
+  .quick .ql{color:var(--mut)!important}
+  .quick button{background:var(--surface)!important;border:1px solid var(--line)!important;color:var(--navy)!important;padding:5px 11px!important;font-size:13px!important}
+
+  /* ---------- Butonat ---------- */
+  .go{position:relative;background:var(--terra)!important;color:#fff!important;border-radius:14px!important;font-size:16.5px!important;font-weight:700!important;padding:16px!important;min-height:56px;margin-top:20px!important;
+    box-shadow:0 12px 26px -12px color-mix(in srgb,var(--terra) 85%,transparent)!important;transition:transform .12s,background .15s}
+  .go:hover{background:var(--terra-d)!important}
+  .go:active{transform:translateY(1px)}
+  html[data-theme=dark] .go{color:#1A0E08!important}
+  html[data-theme=dark] .go.sec{color:var(--navy)!important}
+  .go.danger{background:color-mix(in srgb,#B42318 10%,var(--surface))!important;color:#B42318!important;box-shadow:none!important}
+  html[data-theme=dark] .go.danger{color:#F2A08F!important}
+  .go:disabled{opacity:1!important;cursor:progress}
+  .go.busy{background:color-mix(in srgb,var(--terra) 78%,var(--surface))!important;box-shadow:none!important}
+  .go.busy::before{content:"";display:inline-block;width:16px;height:16px;margin:-3px 10px 0 0;vertical-align:middle;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:s .8s linear infinite}
+  .go.sec{background:var(--surface)!important;color:var(--navy)!important;box-shadow:inset 0 0 0 1px var(--line)!important}
+  .btn2{background:var(--surface)!important;border:1px solid var(--line)!important;color:var(--navy)!important;border-radius:11px!important;padding:9px 13px!important;font-size:13.5px!important;font-weight:600!important;white-space:nowrap}
+  .btn2:hover{border-color:var(--line-2)!important}
+  .btn2.pri,.tabsm button.on{background:var(--navy)!important;border-color:var(--navy)!important;color:#fff!important}
+  html[data-theme=dark] .btn2.pri,html[data-theme=dark] .tabsm button.on{color:#0E1826!important}
+  .btn2:disabled{opacity:.55}
+  .tabsm button{background:var(--surface)!important;border:1px solid var(--line)!important;color:var(--text)!important;border-radius:999px!important;font-size:13.5px}
+  .link{color:var(--terra)!important}
+  .quota{color:var(--mut)!important}
+  .quota button.link,.quota.none{color:var(--terra)!important}
+  .qdots i{background:var(--line-2)!important}.qdots i.on{background:var(--olive)!important}
+
+  /* ---------- Krijimi: ngarkimi dhe gabimi ---------- */
+  .loading{padding:24px 20px!important;text-align:center}
+  .lmk{color:var(--navy)!important;margin-bottom:8px}
+  .lmk svg{width:84px!important;height:84px!important}
+  .lmk span{color:var(--terra)!important;font-size:14px}
+  #loadMsg{display:block;font-size:19px!important;color:var(--navy)!important;min-height:1.4em}
+  .lprog{height:6px;border-radius:999px;background:var(--surface-3);overflow:hidden;margin:16px 0 14px}
+  .lprog i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--olive),var(--terra));transition:width .45s ease}
+  .lsteps{list-style:none;margin:0 auto;padding:0;max-width:340px;text-align:left;display:grid;gap:7px}
+  .lsteps li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mut)}
+  .lsteps li::before{content:"";flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line-2);box-sizing:border-box}
+  .lsteps li.now{color:var(--text);font-weight:600}
+  .lsteps li.now::before{border-color:var(--terra);border-top-color:transparent;animation:s .9s linear infinite}
+  .lsteps li.done{color:var(--text)}
+  .lsteps li.done::before{border:0;background:var(--olive) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/12px no-repeat}
+  .lsub{margin-top:14px;font-size:13px;color:var(--mut)}
+  .err{background:color-mix(in srgb,var(--terra) 9%,var(--surface))!important;color:var(--text)!important;border:1px solid color-mix(in srgb,var(--terra) 35%,var(--line));border-radius:var(--r-md)!important;padding:14px!important;font-size:14px}
+  .err b.eh{display:flex;align-items:center;gap:8px;color:var(--terra);font-size:15px;margin-bottom:3px}
+  .err b.eh::before{content:"!";flex:none;width:20px;height:20px;border-radius:50%;background:var(--terra);color:#fff;display:grid;place-items:center;font-size:13px}
+  .err .eb{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .err .eb .btn2.pri{background:var(--terra)!important;border-color:var(--terra)!important}
+
+  /* ---------- Faqja kryesore: plane nga udhëtarët ---------- */
+  .hcard .hc{background:var(--navy)!important}
+  html[data-theme=dark] .hcard .hc{background:#1C3A5C!important}
+  .hcard small,.pcard .t small,.post header small,.pdate{color:var(--mut)!important}
+  .hfh .link{color:var(--terra)!important}
+
+  /* ---------- Rezultati ---------- */
+  .wrap:has(#v-plan.on){max-width:1160px}
+  .actions{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;margin:8px -16px 12px!important;padding:2px 16px 4px;gap:7px!important}
+  .actions::-webkit-scrollbar{display:none}
+  .rhead{padding:0!important;overflow:hidden}
+  .rhead>*:not(.rcover):not(.rphoto){margin-left:18px;margin-right:18px}
+  .rhead h2{font-size:clamp(26px,6.5vw,36px)!important;line-height:1.1;margin-top:16px!important}
+  .rhead p#rSummary{color:var(--text)!important;opacity:.86;margin-top:8px!important}
+  .rhead .by,.rgrp{margin-bottom:0}
+  .rhead>:last-child{margin-bottom:18px}
+  .rphoto{width:100%!important;margin:0 0 4px!important;border-radius:0!important}
+  .rcover{position:relative;height:clamp(150px,34vw,260px);background:linear-gradient(160deg,var(--navy-2),var(--navy-d));overflow:hidden}
+  html[data-theme=dark] .rcover{background:linear-gradient(160deg,#21456C,#0B1520)}
+  .rcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+  .rcover img.ok{opacity:1}
+  .rcover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,24,38,0) 45%,rgba(14,24,38,.55) 100%);pointer-events:none}
+  .rcover .rct{position:absolute;left:18px;bottom:14px;z-index:1;color:#F6F0E5;font-family:var(--serif);font-size:clamp(22px,6vw,30px);line-height:1.05;text-shadow:0 1px 12px rgba(0,0,0,.35)}
+  .rcover .rct small{display:block;font-family:var(--sans);font-size:13px;opacity:.85;margin-top:3px;text-shadow:none}
+  .rcover .rcr{position:absolute;right:10px;bottom:8px;z-index:1;font-size:10.5px;color:rgba(246,240,229,.8);text-decoration:none}
+  .rcover.nophoto{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100' preserveAspectRatio='xMidYMid slice'%3E%3Cg fill='none' stroke='%23F6F0E5' stroke-width='.5' opacity='.18'%3E%3Cellipse cx='160' cy='120' rx='40' ry='90'/%3E%3Cellipse cx='160' cy='120' rx='80' ry='90'/%3E%3Cellipse cx='160' cy='120' rx='120' ry='90'/%3E%3Cpath d='M0 80h200M0 55h200M0 30h200'/%3E%3C/g%3E%3C/svg%3E") center/cover,linear-gradient(160deg,var(--navy-2),var(--navy-d))}
+  html[data-theme=dark] .rcover.nophoto{background-color:#173A5A}
+  .rmeta{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .rmeta span{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--text);background:var(--surface-3);border-radius:999px;padding:4px 10px}
+  .rmeta span.k{background:color-mix(in srgb,var(--olive) 16%,var(--surface));color:color-mix(in srgb,var(--olive) 70%,var(--text))}
+  .ic{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+
+  .daytabs{position:sticky;top:calc(var(--hdr-h) + env(safe-area-inset-top));z-index:20;margin:0 -16px 10px;padding:8px 16px!important;gap:7px!important;
+    background:color-mix(in srgb,var(--cream) 90%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  .daytabs button{background:var(--surface)!important;border:1px solid var(--line)!important;color:var(--text)!important;border-radius:999px!important;padding:7px 14px!important;font-size:13.5px;line-height:1.15;text-align:left}
+  .daytabs button small{display:block;font-size:11px;font-weight:500;color:var(--mut)}
+  .daytabs button.on{background:var(--dc,var(--navy))!important;border-color:var(--dc,var(--navy))!important;color:#fff!important}
+  .daytabs button.on small{color:rgba(255,255,255,.8)}
+  #map{height:clamp(240px,58vw,340px)!important;border-radius:var(--r-lg)!important;border:1px solid var(--line)!important;box-shadow:var(--sh-2)!important;margin-bottom:12px}
+  html[data-theme=dark] .leaflet-tile-pane{filter:brightness(.72) contrast(1.08) saturate(.7) hue-rotate(-8deg)}
+  html[data-theme=dark] .leaflet-container{background:#1A2B45}
+  html[data-theme=dark] .leaflet-popup-content-wrapper,html[data-theme=dark] .leaflet-popup-tip{background:var(--surface);color:var(--text)}
+  html[data-theme=dark] .leaflet-bar a,html[data-theme=dark] .locbtn{background:var(--surface);color:var(--text);border-color:var(--line)}
+  .leaflet-control-attribution{font-size:10px}
+  .numicon{border-width:2.5px!important;box-shadow:0 2px 6px rgba(0,0,0,.35)!important;font-family:var(--sans)!important}
+
+  /* Dita: koka me statistika */
+  #dayCard{padding:18px 16px!important}
+  .dayhead{align-items:flex-start;flex-wrap:wrap;gap:10px!important;margin-bottom:12px!important}
+  .dayhead>div:first-child{flex:1 1 220px;min-width:0}
+  .dayhead h3{font-size:clamp(21px,5.6vw,26px)!important;line-height:1.15;color:var(--dc,var(--navy))!important}
+  html[data-theme=dark] .dayhead h3,html[data-theme=dark] .dall b{color:color-mix(in srgb,var(--dc,#8DB3D9) 45%,#fff)!important}
+  .dayhead .area{color:var(--mut)!important;font-size:13.5px;margin-top:2px}
+  .dstats{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .dstats span{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--text);background:var(--surface-3);border-radius:999px;padding:4px 10px}
+  .gm{flex:none;display:inline-flex;align-items:center;gap:6px;background:var(--surface)!important;border:1px solid var(--line)!important;color:var(--navy)!important;border-radius:999px!important;padding:7px 12px!important;font-size:12.5px!important}
+  .daywarn{background:color-mix(in srgb,#C08A2B 14%,var(--surface))!important;color:var(--text)!important;border:1px solid color-mix(in srgb,#C08A2B 35%,var(--line))}
+  .dall{padding:12px 0;border-top:1px solid var(--line)}
+  .dall:first-child{border-top:0;padding-top:0}
+  .dall b{display:block;color:var(--dc);font-family:var(--serif);font-weight:400;font-size:17px}
+  .dall div{color:var(--mut);font-size:13.5px;margin-top:2px}
+
+  /* Timeline */
+  .stop{display:grid!important;grid-template-columns:44px 30px minmax(0,1fr);gap:0 8px;padding-bottom:0!important;position:relative}
+  .stop::before{display:none!important}
+  .tl-time{padding-top:9px;text-align:right;line-height:1.15}
+  .tl-time b{display:block;font-size:13.5px;color:var(--text);font-variant-numeric:tabular-nums}
+  .tl-time small{display:block;font-size:11.5px;color:var(--mut);font-variant-numeric:tabular-nums;margin-top:2px}
+  .tl-dot{position:relative;display:flex;justify-content:center}
+  .tl-dot::after{content:"";position:absolute;top:40px;bottom:-6px;left:50%;border-left:2px solid color-mix(in srgb,var(--dc) 28%,var(--line))}
+  .stop:last-of-type .tl-dot::after{display:none}
+  .num{position:relative;z-index:1;margin-top:6px;width:30px!important;height:30px!important;font-family:var(--sans)!important;font-weight:700!important;font-size:13.5px!important;background:var(--dc,var(--navy))!important;box-shadow:0 0 0 3px var(--surface)!important}
+  .num.meal{background:var(--terra)!important}
+  .num.other{background:#A79F92!important}
+  .num svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .scard{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin:2px 0 12px;transition:border-color .15s,box-shadow .15s;overflow:hidden}
+  .scard:hover{border-color:var(--line-2);box-shadow:var(--sh-1)}
+  .stop.meal .scard{background:color-mix(in srgb,var(--terra) 6%,var(--surface));border-color:color-mix(in srgb,var(--terra) 28%,var(--line))}
+  .sph{float:right;width:76px;height:76px;margin:0 0 6px 10px;border-radius:11px;overflow:hidden;background:var(--surface-3)}
+  .sph:empty{display:none}
+  .sph img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s}
+  .sph img.ok{opacity:1}
+  .sbody .nm{font-size:17.5px!important;line-height:1.2;margin:0 0 3px!important}
+  .sdur{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--olive);margin-bottom:4px}
+  .sbody .note2{font-size:14px;color:var(--text);opacity:.9}
+  .sbody .tip{color:var(--olive)!important;font-size:13px}
+  .sinfo{clear:both;display:flex;flex-direction:column;gap:3px;color:var(--mut)!important;margin-top:7px!important}
+  .sinfo .row{display:flex;align-items:flex-start;gap:6px}
+  .sinfo .row .ic{margin-top:2px;vertical-align:0}
+  .hb{margin:0 6px 2px 0!important}
+  .hb.closed{background:color-mix(in srgb,#B42318 14%,var(--surface))!important;color:#B42318!important}
+  .hb.closes{background:color-mix(in srgb,#C08A2B 18%,var(--surface))!important;color:#8A5A12!important}
+  .hb.unv{background:var(--surface-3)!important;color:var(--mut)!important}
+  html[data-theme=dark] .hb.closed{color:#F2A08F!important}
+  html[data-theme=dark] .hb.closes{color:#E6C07A!important}
+  .links{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .links a,.mynote>a{display:inline-flex;align-items:center;gap:5px;font-size:12.5px!important;font-weight:600;color:var(--navy)!important;text-decoration:none!important;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 10px;margin:0!important;cursor:pointer}
+  .links{clear:both}
+  .links .mynote{display:contents}
+  .links .mynote .mn{flex-basis:100%;order:-1;border-radius:8px;padding:5px 9px}
+  .mynote .mn{background:color-mix(in srgb,var(--sun) 22%,var(--surface))!important;color:var(--text)}
+  .travel{display:grid;grid-template-columns:44px 30px minmax(0,1fr);gap:0 8px;margin:0!important;font-size:12.5px!important;color:var(--mut)!important}
+  .travel .tl-dot::after{top:-6px;bottom:-6px;border-left-style:dashed}
+  .travel .tleg{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 10px}
+  .travel .tchip{display:inline-flex;align-items:center;gap:5px;background:var(--surface-3);border-radius:999px;padding:3px 9px;color:var(--text);font-weight:600}
+  .travel a{color:var(--terra)!important;font-weight:600;text-decoration:none;margin:0!important}
+  .estnote,.phcred{font-size:11.5px;color:var(--mut);margin-top:6px}
+  .phcred a{color:var(--mut)}
+
+  /* Editori, buxheti, këshillat */
+  .aied b,.bud b,.ptools>b,.card>b{color:var(--navy)}
+  .edmsg.me{background:var(--surface-3)!important;color:var(--text)}
+  .edmsg.ai{background:color-mix(in srgb,var(--navy) 10%,var(--surface))!important;color:var(--text)}
+  .brow{border-top-color:var(--line)!important}
+  .bneg b{color:#B42318!important}.bpos b{color:var(--olive)!important}
+  .tips li::marker{color:var(--terra)}
+
+  /* Desktop: harta ngjitur në të djathtë */
+  @media(min-width:1024px){
+    #v-plan.on{display:grid;grid-template-columns:minmax(0,1fr) 440px;column-gap:24px;align-items:start}
+    #v-plan>*{grid-column:1}
+    #v-plan #map{grid-column:2;grid-row:1/span 40;position:sticky;top:calc(var(--hdr-h) + 24px);height:calc(100vh - var(--hdr-h) - 56px)!important;margin:0}
+    .actions{margin:8px 0 12px!important;padding:2px 0 4px;flex-wrap:wrap!important}
+    .daytabs{margin:0 0 10px;padding:8px 0!important}
+  }
+
+  /* ---------- Zbulo, planet e mia, profili, modalet ---------- */
+  .pcard .badge{background:var(--navy)!important;color:#F6F0E5!important}
+  .pill{background:var(--surface-3)!important;color:var(--mut)!important}
+  .pill.pub{background:color-mix(in srgb,var(--olive) 18%,var(--surface))!important;color:var(--olive)!important}
+  .exbar input{margin:0}
+  .exf label{color:var(--mut)!important;margin:0!important}
+  .uchip b,.post header a,.cmt b,.uhead,.pact button,.pcap b{color:var(--navy)!important}
+  .pact button:hover{background:var(--surface-3)!important}
+  .pact .see{color:var(--terra)!important}
+  .pimg{background:var(--surface-3)!important}
+  .fcover{background:radial-gradient(circle at 82% 22%,var(--sun) 0 30px,transparent 31px),linear-gradient(170deg,var(--navy-2),var(--navy-d))!important}
+  html[data-theme=dark] .fcover{background:radial-gradient(circle at 82% 22%,#C9A84A 0 30px,transparent 31px),linear-gradient(170deg,#21456C,#0B1520)!important}
+  .fcover span,.fcover small{color:#F6F0E5!important}
+  .cmt{border-top-color:var(--line)!important}
+  .nitem{border-bottom-color:var(--line)!important}
+  .nitem.unread{background:var(--surface-3)!important}
+  .modal-bg{background:rgba(14,24,38,.5)!important;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .modal{background:var(--surface)!important;color:var(--text)}
+  .modal .x{color:var(--mut)!important}
+  .switch{background:var(--surface-2)!important;border:1px solid var(--line)}
+  .switch small{color:var(--mut)!important}
+  .tog span{background:var(--line-2)!important}
+  .tog input:checked+span{background:var(--olive)!important}
+  .photopick{border-color:var(--line-2)!important;color:var(--navy)!important}
+  .sharegrid a,.sharegrid button{color:var(--text)!important}
+  .foot,.foot a{color:var(--mut)!important}
+  .accx a{color:var(--mut)!important}
+  .likebtn.on{background:color-mix(in srgb,#C2412D 12%,var(--surface))!important;border-color:color-mix(in srgb,#C2412D 40%,var(--line))!important;color:#C2412D!important}
+  html[data-theme=dark] .pcard .t b,html[data-theme=dark] .hcard b{color:var(--navy)}
+  @media (prefers-reduced-motion:reduce){.lprog i,.rcover img,.sph img{transition:none}.lsteps li.now::before,.go.busy::before{animation:none}}
 </style>
 </head>
 <body>
@@ -447,6 +797,7 @@
   <div class="topin">
     <div class="brand" onclick="go('create')" role="link" aria-label="Vianto"><svg class="wm" viewBox="-10 -98.0 362 120" aria-hidden="true"><g fill="#FBF5EA"><path d="M76.4 -75.0Q77.9 -75.0 77.9 -73.5V-70.5Q77.9 -69.0 76.4 -69.0Q73.60000000000001 -69.0 71.95 -66.25Q70.3 -63.5 68.9 -59.7L47.400000000000006 -1.2000000000000002Q47.0 0.0 45.7 0.0H33.6Q32.4 0.0 31.900000000000002 -1.2000000000000002L9.4 -59.7Q7.9 -63.6 6.3500000000000005 -66.3Q4.800000000000001 -69.0 2.0 -69.0Q0.5 -69.0 0.5 -70.5V-73.5Q0.5 -75.0 2.0 -75.0H32.7Q34.2 -75.0 34.2 -73.5V-70.5Q34.2 -69.0 32.7 -69.0Q29.6 -69.0 27.25 -67.05000000000001Q24.900000000000002 -65.10000000000001 24.900000000000002 -62.1Q24.900000000000002 -61.0 25.8 -58.7L42.800000000000004 -14.100000000000001L58.900000000000006 -59.7Q59.300000000000004 -60.900000000000006 59.300000000000004 -62.2Q59.300000000000004 -65.10000000000001 56.95 -67.05000000000001Q54.6 -69.0 51.5 -69.0Q50.0 -69.0 50.0 -70.5V-73.5Q50.0 -75.0 51.5 -75.0Z"/><path d="M110.10000000000001 -6.0Q111.60000000000001 -6.0 111.60000000000001 -4.5V-1.5Q111.60000000000001 0.0 109.9 0.0H81.60000000000001Q79.9 0.0 79.9 -1.5V-4.5Q79.9 -6.0 81.4 -6.0H81.60000000000001Q85.30000000000001 -6.0 87.05000000000001 -8.75Q88.80000000000001 -11.5 88.80000000000001 -15.5V-26.1Q88.80000000000001 -28.400000000000002 88.45000000000002 -30.700000000000003Q88.10000000000001 -33.0 86.9 -34.7Q85.7 -36.4 82.9 -36.7Q81.7 -36.800000000000004 81.7 -38.0V-41.400000000000006Q81.7 -42.0 82.1 -42.25Q82.5 -42.5 83.2 -42.7Q91.10000000000001 -45.300000000000004 95.35000000000001 -48.050000000000004Q99.60000000000001 -50.800000000000004 101.60000000000001 -52.900000000000006Q101.80000000000001 -53.1 102.0 -53.1H102.30000000000001Q102.5 -53.1 102.5 -52.900000000000006V-15.600000000000001Q102.5 -11.600000000000001 104.30000000000001 -8.8Q106.10000000000001 -6.0 109.80000000000001 -6.0Z"/><path d="M166.4 -18.5Q166.4 -14.9 167.5 -12.05Q168.60000000000002 -9.200000000000001 172.3 -8.700000000000001Q173.5 -8.6 173.5 -7.4V-4.1000000000000005Q173.5 -2.7 172.0 -2.7Q167.10000000000002 -2.7 163.85000000000002 -2.1500000000000004Q160.60000000000002 -1.6 158.25 -0.75Q155.9 0.1 153.60000000000002 1.1Q153.20000000000002 1.3 152.9 1.3H152.60000000000002Q152.4 1.3 152.4 0.9Q152.4 0.5 152.60000000000002 -1.05Q152.8 -2.6 153.05 -4.55Q153.3 -6.5 153.5 -7.9Q153.0 -6.6000000000000005 151.35000000000002 -4.4Q149.70000000000002 -2.2 146.55 -0.45000000000000007Q143.4 1.3 138.3 1.3Q134.9 1.3 131.05 -0.09999999999999998Q127.20000000000002 -1.5 123.80000000000001 -4.6Q120.4 -7.7 118.25 -12.75Q116.10000000000001 -17.8 116.10000000000001 -25.1Q116.10000000000001 -34.4 119.45000000000002 -40.150000000000006Q122.80000000000001 -45.900000000000006 128.15 -48.60000000000001Q133.5 -51.300000000000004 139.5 -51.300000000000004Q144.4 -51.300000000000004 148.5 -49.800000000000004Q152.60000000000002 -48.300000000000004 155.70000000000002 -45.5Q158.3 -46.6 160.15 -47.55Q162.0 -48.5 163.3 -49.5Q163.8 -49.900000000000006 164.35000000000002 -50.300000000000004Q164.9 -50.7 165.60000000000002 -51.1Q165.9 -51.300000000000004 166.10000000000002 -51.300000000000004H166.20000000000002Q166.4 -51.300000000000004 166.4 -51.1ZM152.4 -34.2Q152.10000000000002 -36.2 150.95000000000002 -38.650000000000006Q149.8 -41.1 147.5 -42.85Q145.20000000000002 -44.6 141.3 -44.6Q136.5 -44.6 133.8 -42.25Q131.10000000000002 -39.900000000000006 130.05 -36.2Q129.0 -32.5 129.0 -28.3Q129.0 -18.7 132.85000000000002 -13.1Q136.70000000000002 -7.5 142.8 -7.5Q146.4 -7.5 148.45 -9.05Q150.5 -10.600000000000001 151.4 -12.200000000000001Q152.3 -13.8 152.4 -14.100000000000001Z"/><path d="M232.9 -32.6V-15.5Q232.9 -10.0 234.65 -8.0Q236.4 -6.0 239.3 -6.0H240.10000000000002Q241.60000000000002 -6.0 241.60000000000002 -4.5V-1.5Q241.60000000000002 0.0 240.10000000000002 0.0H213.5Q212.0 0.0 212.0 -1.5V-4.5Q212.0 -6.0 213.5 -6.0H214.2Q216.3 -6.0 217.60000000000002 -8.0Q218.9 -10.0 218.9 -15.5V-32.6Q218.9 -37.4 217.4 -39.95Q215.9 -42.5 211.7 -42.5Q209.2 -42.5 206.7 -41.25Q204.2 -40.0 202.3 -38.05Q200.4 -36.1 199.5 -33.9V-15.5Q199.5 -11.5 201.25 -8.75Q203.0 -6.0 205.9 -6.0H206.1Q207.6 -6.0 207.6 -4.5V-1.5Q207.6 0.0 206.1 0.0H178.0Q176.5 0.0 176.5 -1.5V-4.5Q176.5 -6.0 178.0 -6.0H178.2Q181.9 -6.0 183.7 -8.75Q185.5 -11.5 185.5 -15.5V-28.1Q185.5 -30.8 185.15 -33.300000000000004Q184.8 -35.800000000000004 183.55 -37.550000000000004Q182.3 -39.300000000000004 179.5 -39.6Q178.4 -39.7 178.4 -40.900000000000006V-44.300000000000004Q178.4 -45.300000000000004 179.8 -45.6Q187.0 -46.7 192.15 -49.0Q197.3 -51.300000000000004 199.3 -52.7Q199.8 -53.1 200.1 -53.1H200.2Q200.4 -53.1 200.4 -52.900000000000006Q200.4 -52.7 200.3 -52.1L198.6 -39.800000000000004Q200.0 -42.1 202.3 -44.75Q204.6 -47.400000000000006 208.0 -49.35000000000001Q211.4 -51.300000000000004 215.9 -51.300000000000004Q221.3 -51.300000000000004 224.7 -49.7Q228.1 -48.1 229.85 -45.400000000000006Q231.6 -42.7 232.25 -39.400000000000006Q232.9 -36.1 232.9 -32.6Z"/><path d="M282.8 -7.2Q283.1 -6.800000000000001 283.1 -6.300000000000001Q283.1 -5.7 282.3 -5.2L279.3 -3.3000000000000003Q276.6 -1.6 272.8 -0.15000000000000002Q269.0 1.3 265.20000000000005 1.3Q262.20000000000005 1.3 259.55000000000007 -0.09999999999999998Q256.90000000000003 -1.5 255.3 -4.8500000000000005Q253.70000000000002 -8.200000000000001 253.70000000000002 -14.100000000000001V-32.6Q253.70000000000002 -35.300000000000004 253.40000000000003 -37.95Q253.10000000000002 -40.6 251.55 -42.3Q250.00000000000003 -44.0 246.40000000000003 -44.0Q244.90000000000003 -44.0 244.90000000000003 -45.5V-48.5Q244.90000000000003 -50.0 246.40000000000003 -50.0H253.70000000000002V-56.7Q253.70000000000002 -58.0 254.60000000000002 -58.5Q256.8 -59.7 260.4 -61.85Q264.0 -64.0 266.8 -66.8Q267.0 -67.0 267.3 -67.0H267.5Q267.70000000000005 -67.0 267.70000000000005 -66.7V-50.0H281.1Q282.6 -50.0 282.6 -48.5V-44.2Q282.6 -42.7 281.1 -42.7H267.70000000000005V-14.100000000000001Q267.70000000000005 -10.200000000000001 268.90000000000003 -8.75Q270.1 -7.300000000000001 271.90000000000003 -7.300000000000001Q273.6 -7.300000000000001 275.5 -8.25Q277.40000000000003 -9.200000000000001 279.0 -10.200000000000001Q279.70000000000005 -10.600000000000001 280.1 -10.600000000000001Q280.70000000000005 -10.600000000000001 281.20000000000005 -9.8Z"/><path d="M312.20000000000005 -51.300000000000004Q317.90000000000003 -51.300000000000004 322.75 -49.050000000000004Q327.6 -46.800000000000004 331.1 -42.95Q334.6 -39.1 336.55 -34.35Q338.5 -29.6 338.5 -24.5Q338.5 -17.1 335.0 -11.25Q331.5 -5.4 325.8 -2.0500000000000003Q320.1 1.3 313.40000000000003 1.3Q307.70000000000005 1.3 302.90000000000003 -0.9Q298.1 -3.1 294.55 -6.8500000000000005Q291.0 -10.600000000000001 289.05 -15.450000000000001Q287.1 -20.3 287.1 -25.6Q287.1 -32.9 290.5 -38.7Q293.90000000000003 -44.5 299.6 -47.900000000000006Q305.3 -51.300000000000004 312.20000000000005 -51.300000000000004ZM316.5 -6.800000000000001Q318.40000000000003 -6.800000000000001 320.70000000000005 -7.800000000000001Q323.0 -8.8 324.75 -11.3Q326.5 -13.8 326.5 -18.2Q326.5 -21.700000000000003 325.15 -25.950000000000003Q323.8 -30.200000000000003 321.45000000000005 -34.150000000000006Q319.1 -38.1 315.95000000000005 -40.650000000000006Q312.8 -43.2 309.1 -43.2Q305.0 -43.2 302.0 -40.150000000000006Q299.0 -37.1 299.0 -31.8Q299.0 -28.400000000000002 300.35 -24.1Q301.70000000000005 -19.8 304.05000000000007 -15.850000000000001Q306.40000000000003 -11.9 309.6 -9.350000000000001Q312.8 -6.800000000000001 316.5 -6.800000000000001Z"/></g><circle cx="95.8" cy="-65.2" r="7.8" fill="#E3C25A"/></svg><span id="brandName" class="sr">Vianto</span></div>
     <div class="langsw" id="langSw"><button data-l="en">EN</button><button data-l="de">DE</button><button data-l="sq">SQ</button></div>
+    <button class="thm" id="thmBtn" type="button" onclick="toggleTheme()"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button>
     <button class="bell" id="bellBtn" onclick="openNotifs()" style="display:none"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4zM10 20.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="bdg" id="bellN"></span></button>
     <button class="acct" id="acctBtn" onclick="acctClick()">Hyr</button>
   </div>
@@ -472,11 +823,10 @@
     <input id="city" data-i18n-ph="city_ph" autocomplete="off">
     <div class="quick" id="quickCities"></div>
 
-    <label data-i18n="days_q"></label>
-    <div class="stepper"><button type="button" onclick="chDays(-1)">−</button><b id="daysV"></b><button type="button" onclick="chDays(1)">+</button></div>
-
-    <label for="tripDate" data-i18n="date_q"></label>
-    <input id="tripDate" type="date">
+    <div class="grid2 fdd">
+      <div><label data-i18n="days_q"></label><div class="stepper"><button type="button" onclick="chDays(-1)" aria-label="−">−</button><b id="daysV"></b><button type="button" onclick="chDays(1)" aria-label="+">+</button></div></div>
+      <div><label for="tripDate" data-i18n="date_q"></label><input id="tripDate" type="date"></div>
+    </div>
     <small class="dhint" data-i18n="date_hint"></small>
 
     <label data-i18n="who_q"></label>
@@ -523,8 +873,10 @@
   </div>
   <div class="loading card" id="loading">
     <div class="lmk" aria-hidden="true"><svg id="lmkSvg" viewBox="0 0 100 100"></svg><span id="lmkName"></span></div>
-    <b id="loadMsg"></b>
-    <div style="color:var(--mut);font-size:14px;margin-top:6px" data-i18n="load_sub"></div>
+    <b id="loadMsg" aria-live="polite"></b>
+    <div class="lprog" role="progressbar" aria-valuemin="0" aria-valuemax="100"><i id="lBar"></i></div>
+    <ol class="lsteps" id="lSteps"></ol>
+    <div class="lsub"><span data-i18n="load_sub"></span> · <span id="lTime">0 s</span></div>
   </div>
   <div class="hfeed" id="homeFeed" style="display:none">
     <div class="hfh"><h2 data-i18n="home_h"></h2><button class="link" onclick="go('explore')" data-i18n="home_more"></button></div>
@@ -536,7 +888,7 @@
 <section class="view" id="v-plan">
   <div class="note" id="saveNote" style="display:none"></div>
   <div class="actions" id="planActions"></div>
-  <div class="card rhead"><img id="rPhoto" class="rphoto" alt="" style="display:none"><p id="rCaption" class="rcap" style="display:none"></p><h2 id="rTitle"></h2><p id="rSummary"></p><div class="rgrp" id="rGroup"></div><div class="by" id="rBy"></div></div>
+  <div class="card rhead"><div class="rcover nophoto" id="rCover"><img id="rCoverImg" alt=""><div class="rct" id="rCoverT"></div><a class="rcr" id="rCoverCr" target="_blank" rel="noopener" style="display:none">Foto: Wikipedia</a></div><img id="rPhoto" class="rphoto" alt="" style="display:none"><p id="rCaption" class="rcap" style="display:none"></p><h2 id="rTitle"></h2><p id="rSummary"></p><div class="rmeta" id="rMeta"></div><div class="rgrp" id="rGroup"></div><div class="by" id="rBy"></div></div>
   <div class="daytabs" id="dayTabs"></div>
   <div id="map"></div>
   <div class="card" id="dayCard"></div>
@@ -730,7 +1082,7 @@ const I18N = {
     budget: "Buxheti", b_ulet: "€ I ulët", b_mesem: "€€ Mesatar", b_larte: "€€€ I lartë",
     plang: "Gjuha e planit", notes: "Dëshira të tjera (opsionale)",
     notes_ph: "p.sh. Mbërrij ditën e parë në 14:00. Dua ta shoh perëndimin e diellit.",
-    go: "✨ Krijo planin", load_sub: "Zakonisht zgjat 15–40 sekonda",
+    go: "✨ Krijo planin", load_sub: "Zakonisht zgjat 15–40 sekonda", creating: "Po krijohet plani…", retry: "Provo përsëri", err_h: "Plani nuk u krijua", ld_steps: ["Po kërkoj atraksionet e qytetit", "Po kontrolloj oraret dhe popullaritetin", "Po i rendit sipas zonave dhe rrugës", "Po e shkruaj itinerarin ditë për ditë"], ph_credit: "Fotot: Wikipedia", theme_d: "Pamja e errët", theme_l: "Pamja e çelët", d_stops: n => `${n} ${n === 1 ? "ndalesë" : "ndalesa"}`,
     loads: ["Po kërkoj atraksionet…", "Po shoh cilat janë më të njohurat…", "Po i ndaj sipas zonave…", "Po e shkruaj planin ditë për ditë…", "Edhe pak…"],
     q_left: (l, n) => `Të kanë mbetur ${l} nga ${n} plane këtë muaj.`, q_none: d => `I ke përdorur planet e këtij muaji. Të rejat vijnë më ${d}.`, q_guest: "Pa llogari: 1 plan provë në ditë.", q_guest_link: "Hyr falas për 5 plane në muaj",
     need_city: "Shkruaj qytetin.", no_conn: "Nuk u lidh me serverin. Kontrollo internetin.", bad_resp: "Përgjigje e pavlefshme nga serveri.",
@@ -801,7 +1153,7 @@ const I18N = {
     budget: "Budget", b_ulet: "€ Low", b_mesem: "€€ Medium", b_larte: "€€€ High",
     plang: "Plan language", notes: "Anything else? (optional)",
     notes_ph: "e.g. I arrive on day one at 2 pm. I'd love to catch the sunset.",
-    go: "✨ Create my plan", load_sub: "Usually takes 15–40 seconds",
+    go: "✨ Create my plan", load_sub: "Usually takes 15–40 seconds", creating: "Creating your plan…", retry: "Try again", err_h: "The plan couldn't be created", ld_steps: ["Finding the city's attractions", "Checking opening hours and popularity", "Ordering them by area and route", "Writing your day-by-day itinerary"], ph_credit: "Photos: Wikipedia", theme_d: "Dark mode", theme_l: "Light mode", d_stops: n => `${n} ${n === 1 ? "stop" : "stops"}`,
     loads: ["Finding attractions…", "Checking which are the most famous…", "Grouping them by area…", "Writing your day-by-day plan…", "Almost there…"],
     q_left: (l, n) => `You have ${l} of ${n} plans left this month.`, q_none: d => `You've used this month's plans. New ones arrive on ${d}.`, q_guest: "Without an account: 1 trial plan a day.", q_guest_link: "Log in free for 5 plans a month",
     need_city: "Enter a city.", no_conn: "Couldn't reach the server. Check your connection.", bad_resp: "Invalid response from the server.",
@@ -872,7 +1224,7 @@ const I18N = {
     budget: "Budget", b_ulet: "€ Günstig", b_mesem: "€€ Mittel", b_larte: "€€€ Gehoben",
     plang: "Sprache des Plans", notes: "Sonstige Wünsche (optional)",
     notes_ph: "z. B. Ich komme am ersten Tag um 14 Uhr an. Ich möchte den Sonnenuntergang sehen.",
-    go: "✨ Plan erstellen", load_sub: "Dauert meist 15–40 Sekunden",
+    go: "✨ Plan erstellen", load_sub: "Dauert meist 15–40 Sekunden", creating: "Plan wird erstellt…", retry: "Erneut versuchen", err_h: "Der Plan konnte nicht erstellt werden", ld_steps: ["Sehenswürdigkeiten der Stadt suchen", "Öffnungszeiten und Beliebtheit prüfen", "Nach Vierteln und Route ordnen", "Deinen Tagesplan schreiben"], ph_credit: "Fotos: Wikipedia", theme_d: "Dunkler Modus", theme_l: "Heller Modus", d_stops: n => `${n} ${n === 1 ? "Stopp" : "Stopps"}`,
     loads: ["Suche Sehenswürdigkeiten…", "Prüfe, welche am bekanntesten sind…", "Teile sie nach Vierteln auf…", "Schreibe deinen Tagesplan…", "Gleich fertig…"],
     q_left: (l, n) => `Du hast diesen Monat noch ${l} von ${n} Plänen.`, q_none: d => `Deine Pläne für diesen Monat sind aufgebraucht. Neue gibt es am ${d}.`, q_guest: "Ohne Konto: 1 Testplan pro Tag.", q_guest_link: "Kostenlos anmelden für 5 Pläne im Monat",
     need_city: "Bitte eine Stadt eingeben.", no_conn: "Keine Verbindung zum Server. Prüfe dein Internet.", bad_resp: "Ungültige Antwort vom Server.",
@@ -929,7 +1281,7 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
   document.querySelectorAll("#langSw button").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
   document.querySelectorAll('.seg[data-name="lang"] button').forEach(b => b.classList.toggle("on", b.dataset.v === LANG));
-  chDays(0); renderKidAges(); refreshAcct(); renderQuick(); renderHome(); fillExTypes();
+  chDays(0); renderKidAges(); refreshAcct(); renderQuick(); renderHome(); fillExTypes(); applyThemeMeta();
 }
 function setLang(l) {
   LANG = l; try { localStorage.setItem("udhetimi_lang", l); } catch {}
@@ -941,7 +1293,7 @@ function setLang(l) {
 }
 document.getElementById("langSw").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.l); });
 
-const COLORS = ["#1F4E79", "#B9603B", "#6B7A3A", "#C08A2B", "#9E4A6A", "#2F7C7A", "#4A6A9A"];
+const COLORS = ["#214F78", "#B65B37", "#788747", "#C08A2B", "#9E4A6A", "#2F7C7A", "#4A6A9A"];
 const LOCAL_KEY = "udhetimi_plans_v1";
 const sb = (SUPABASE_URL.startsWith("http") && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 let user = null;
@@ -984,7 +1336,9 @@ async function loadMyProfile() {
 }
 function refreshAcct() {
   const b = document.getElementById("acctBtn");
-  b.textContent = user ? displayName(user) : t("login");
+  if (user) { const nm = displayName(user) || "?"; b.innerHTML = `<span class="ava">${esc(nm.trim().charAt(0).toUpperCase())}</span><span class="an">${esc(nm)}</span>`; b.title = nm; }
+  else { b.textContent = t("login"); b.removeAttribute("title"); }
+  b.classList.toggle("in", !!user);
   refreshQuota(); refreshBell();
 }
 // ---- Kufiri mujor: 5 plane për llogari, rifillon më 1 të muajit ----
@@ -1128,17 +1482,18 @@ function readForm() {
   };
 }
 
+let planBusy = false, lastReq = null;
 async function makePlan(req) {
+  if (planBusy) return;                                   // parandalon shtypjen e dyfishtë
   req = req || readForm();
   const err = document.getElementById("err"); err.style.display = "none";
   if (!req.city) { err.textContent = t("need_city"); err.style.display = "block"; return; }
+  planBusy = true; lastReq = req;
   go("create");
-  const btn = document.getElementById("goBtn"); btn.disabled = true;
-  const load = document.getElementById("loading"); load.style.display = "block"; startLmk();
+  const btn = document.getElementById("goBtn"), goTxt = btn.textContent; btn.disabled = true; btn.classList.add("busy"); btn.textContent = t("creating");
+  const load = document.getElementById("loading"); load.style.display = "block"; startLmk(); loadStart();
   load.scrollIntoView({ behavior: "smooth", block: "center" });
-  const msgs = t("loads");
-  let mi = 0; const msgEl = document.getElementById("loadMsg"); msgEl.textContent = msgs[0];
-  const tick = setInterval(() => { mi = Math.min(mi + 1, msgs.length - 1); msgEl.textContent = msgs[mi]; }, 6000);
+  let ok = false;
   try {
     const headers = { "Content-Type": "application/json" };
     if (sb && user) { const { data: ses } = await sb.auth.getSession(); if (ses?.session?.access_token) headers.Authorization = "Bearer " + ses.session.access_token; }
@@ -1148,12 +1503,43 @@ async function makePlan(req) {
     if (data.code === "guest") setTimeout(() => showAuth("signup"), 900);
     if (data.code === "auth") setTimeout(() => showAuth("login"), 900);
     if (!r.ok || data.error) throw new Error(data.error || "Gabim " + r.status);
+    loadStop(true); ok = true;
     const row = await storePlan(data);
     openPlan(data, row, "own");
   } catch (e) {
-    err.textContent = "⚠️ " + (/fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message);
+    const msg = /fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message;
+    err.innerHTML = `<b class="eh">${esc(t("err_h"))}</b><div>${esc(msg)}</div><div class="eb"><button class="btn2 pri" type="button" onclick="retryPlan()">${esc(t("retry"))}</button></div>`;
     err.style.display = "block";
-  } finally { clearInterval(tick); stopLmk(); load.style.display = "none"; btn.disabled = false; }
+    err.scrollIntoView({ behavior: "smooth", block: "center" });
+  } finally {
+    if (!ok) loadStop(false);
+    stopLmk(); load.style.display = "none";
+    btn.disabled = false; btn.classList.remove("busy"); btn.textContent = goTxt; planBusy = false;
+  }
+}
+function retryPlan() { if (lastReq) makePlan(lastReq); }
+// ---- Progresi i ngarkimit: hapat dhe shiriti (vlerësim sipas kohës, jo matje e serverit) ----
+let ldTimer = null, ldT0 = 0;
+function loadStart() {
+  const steps = t("ld_steps"), ol = document.getElementById("lSteps");
+  ol.innerHTML = steps.map(x => `<li>${esc(x)}</li>`).join("");
+  ldT0 = Date.now(); clearInterval(ldTimer);
+  const at = [0, 7, 16, 26];
+  const upd = () => {
+    const sec = (Date.now() - ldT0) / 1000;
+    let k = 0; at.forEach((a, j) => { if (sec >= a) k = j; });
+    ol.querySelectorAll("li").forEach((li, j) => { li.className = j < k ? "done" : j === k ? "now" : ""; });
+    document.getElementById("loadMsg").textContent = steps[k];
+    const pct = Math.min(94, 94 * (1 - Math.exp(-sec / 16)));
+    document.getElementById("lBar").style.width = pct.toFixed(1) + "%";
+    document.querySelector(".lprog")?.setAttribute("aria-valuenow", Math.round(pct));
+    document.getElementById("lTime").textContent = Math.floor(sec) + " s";
+  };
+  upd(); ldTimer = setInterval(upd, 500);
+}
+function loadStop(done) {
+  clearInterval(ldTimer); ldTimer = null;
+  if (done) { document.getElementById("lBar").style.width = "100%"; document.querySelectorAll("#lSteps li").forEach(li => li.className = "done"); }
 }
 
 // ---- Ngarkimi: simbole qytetesh që vizatohen një nga një ----
@@ -1343,7 +1729,7 @@ async function loadUserSearch(s) {
 
 // ================== PROFILI ==================
 let pfUser = null;
-const AV_COLORS = ["#1F4E79", "#B9603B", "#6B7A3A", "#C08A2B", "#9E4A6A", "#2F7C7A", "#4A6A9A"];
+const AV_COLORS = ["#214F78", "#B65B37", "#788747", "#C08A2B", "#9E4A6A", "#2F7C7A", "#4A6A9A"];
 const avColor = id => AV_COLORS[[...String(id)].reduce((s, c) => s + c.charCodeAt(0), 0) % AV_COLORS.length];
 const initials = n => String(n || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
 async function openProfile(id) {
@@ -1460,6 +1846,15 @@ function openPlanHeader() {
   ph.style.display = row.photo_url && row.is_public ? "block" : "none"; if (row.photo_url) ph.src = row.photo_url;
   cap.style.display = row.caption && row.is_public ? "block" : "none"; cap.textContent = row.caption || "";
   document.getElementById("rTitle").textContent = p.title || p.city?.name;
+  renderCover();
+  const noEmo = v => String(v || "").replace(/^(?:[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]\uFE0F?\u200D?)+\s*/u, "");
+  const rq0 = p.request || {}, meta = [];
+  if (p.days?.length) meta.push(`<span>${IC("cal")}${esc(t("days_n", p.days.length))}</span>`);
+  if (rq0.pace) meta.push(`<span>${esc(noEmo(t("pace_" + rq0.pace)))}</span>`);
+  if (rq0.transport) meta.push(`<span>${IC({ kembe: "walk", publik: "bus", vetura: "car" }[rq0.transport] || "walk")}${esc(noEmo(t("tr_" + rq0.transport)).replace(/^\+\s*/, ""))}</span>`);
+  if (rq0.budget) meta.push(`<span>${esc(t("b_" + rq0.budget))}</span>`);
+  (rq0.interests || []).slice(0, 4).forEach(k => meta.push(`<span class="k">${esc(noEmo(t("i_" + k)))}</span>`));
+  document.getElementById("rMeta").innerHTML = p.kind === "now" ? "" : meta.join("");
   document.getElementById("rSummary").textContent = p.summary || "";
   const rq = p.request || {};
   document.getElementById("rGroup").textContent = rq.adults ? t("grp", rq.adults, rq.kids || 0) + (rq.kids && rq.kidAges?.length ? ` (${rq.kidAges.map(a => a.replace("-", "–")).join(", ")} ${t("yrs")})` : "") : "";
@@ -1473,7 +1868,7 @@ function openPlanHeader() {
   if (p.kind === "now" && p.weather) document.getElementById("rGroup").textContent = t("wx", p.weather.temp, p.weather.rain || p.weather.snow);
 }
 function renderTabs() {
-  document.getElementById("dayTabs").innerHTML = plan.days.map((d, i) => `<button data-i="${i}">${t("day")} ${d.day || i + 1}</button>`).join("") + `<button data-i="-1">${t("all")}</button>`;
+  document.getElementById("dayTabs").innerHTML = plan.days.map((d, i) => `<button data-i="${i}">${t("day")} ${d.day || i + 1}${d.date ? `<small>${esc(fmtDayDate(d.date).split(",")[0])}</small>` : ""}</button>`).join("") + `<button data-i="-1">${t("all")}</button>`;
   document.querySelectorAll("#dayTabs button").forEach(b => b.onclick = () => selectDay(+b.dataset.i));
 }
 function renderActions() {
@@ -1503,8 +1898,7 @@ function selectDay(i) {
   curDay = i;
   document.querySelectorAll("#dayTabs button").forEach(b => {
     const on = +b.dataset.i === i; b.classList.toggle("on", on);
-    b.style.background = on ? (i < 0 ? "#1F4E79" : COLORS[i % COLORS.length]) : "#fff";
-    b.style.borderColor = on ? b.style.background : "";
+    b.style.setProperty("--dc", +b.dataset.i < 0 ? "#214F78" : COLORS[+b.dataset.i % COLORS.length]);
   });
   layer.clearLayers();
   const list = i < 0 ? plan.days.map((d, k) => [d, k]) : [[plan.days[i], i]];
@@ -1539,57 +1933,152 @@ function selectDay(i) {
 function renderDay(i) {
   const card = document.getElementById("dayCard");
   if (i < 0) {
-    card.innerHTML = plan.days.map((d, k) => `<div style="margin-bottom:12px"><b style="color:${COLORS[k % COLORS.length]}">${t("day")} ${d.day || k + 1}: ${esc(d.theme || "")}</b>
-      <div style="color:var(--mut);font-size:14px">${d.stops.filter(s => s.type !== "meal").map(s => esc(s.name)).join(" → ")}</div></div>`).join("");
+    card.innerHTML = plan.days.map((d, k) => `<div class="dall" style="--dc:${COLORS[k % COLORS.length]}"><b>${t("day")} ${d.day || k + 1}: ${esc(d.theme || "")}</b>
+      <div>${d.stops.filter(s => s.type !== "meal").map(s => esc(s.name)).join(" → ")}</div></div>`).join("");
     return;
   }
   const d = plan.days[i], color = COLORS[i % COLORS.length];
-  let n = 0, prevGeo = null, anyEst = false;
-  const LEGI = { walking: "🚶", transit: "🚇", driving: "🚗" };
+  let n = 0, prevGeo = null, anyEst = false, mvMin = 0, mvM = 0, nPts = 0;
+  const LEGI = { walking: "walk", transit: "bus", driving: "car" };
+  const defIc = { kembe: "walk", publik: "bus", vetura: "car" }[plan.request?.transport] || "walk";
+  const isOwn = mode === "own" && plan.kind !== "now";
   const stops = d.stops.map((s, idx) => {
     const isMeal = s.type === "meal", hasPt = s.lat != null;
-    const label = isMeal ? "🍴" : hasPt ? ++n : "•";
+    if (hasPt && !isMeal) nPts++;
+    const label = isMeal ? IC("fork", "") : hasPt ? ++n : "•";
     const end = s.start && s.duration_min ? addMin(s.start, s.duration_min) : "";
     let travel = "";
     if (idx > 0 && s.travel_min) {
       const est = s.travel_est || !s.travel_mode; anyEst = anyEst || est;
-      const mode = s.travel_mode || { kembe: "walking", publik: "transit", vetura: "driving" }[plan.request?.transport] || "walking";
+      mvMin += +s.travel_min || 0; mvM += +s.travel_m || 0;
+      const tmode = s.travel_mode || { kembe: "walking", publik: "transit", vetura: "driving" }[plan.request?.transport] || "walking";
       const km = s.travel_m ? ` · ${(s.travel_m / 1000).toFixed(1)} km` : "";
-      const gl = hasPt && prevGeo ? `<a href="https://www.google.com/maps/dir/?api=1&origin=${prevGeo.lat},${prevGeo.lon}&destination=${s.lat},${s.lon}&travelmode=${mode}" target="_blank" rel="noopener">${t("gm_leg")}</a>` : "";
-      travel = `<div class="travel">${s.travel_mode ? LEGI[mode] || tIcon() : tIcon()} ${est ? "~" : ""}${s.travel_min} min${km}${gl}</div>`;
+      const gl = hasPt && prevGeo ? `<a href="https://www.google.com/maps/dir/?api=1&origin=${prevGeo.lat},${prevGeo.lon}&destination=${s.lat},${s.lon}&travelmode=${tmode}" target="_blank" rel="noopener">${t("gm_leg")}</a>` : "";
+      travel = `<div class="travel" style="--dc:${color}"><span></span><div class="tl-dot"></div><div class="tleg"><span class="tchip">${IC(s.travel_mode ? LEGI[tmode] || defIc : defIc)}${est ? "~" : ""}${s.travel_min} min${km}</span>${gl}</div></div>`;
     }
     if (hasPt) prevGeo = s;
     const info = [];
     if (s.hours_warn === "closed") info.push(`<span class="hb closed">${t("h_closed")}</span>`);
     else if (s.hours_warn === "closes") info.push(`<span class="hb closes">${t("h_closes")}</span>`);
     if (s.verified === false && !isMeal) info.push(`<span class="hb unv">${t("unverified")}</span>`);
-    const lines = [];
-    if (s.hours && s.hours !== "closed") lines.push(`🕘 ${esc(s.hours)}`);
-    else if (s.hours_raw && s.hours !== "closed") lines.push(`🕘 ${esc(s.hours_raw)} · ${t("h_unconf")}`);
-    else if (hasPt && s.verified && !s.hours_raw) lines.push(`🕘 ${t("h_unknown")}`);
-    if (s.price) lines.push(`🎟 ${esc(s.price)}`); else if (s.fee === "no") lines.push(`🎟 ${t("free")}`); else if (s.fee === "yes") lines.push(`🎟 ${t("fee_yes")}`);
-    if (s.address) lines.push(`📍 ${esc(s.address)}`);
-    const sinfo = info.length || lines.length ? `<div class="sinfo">${info.join("")}${lines.join("<br>")}</div>` : "";
-    const links = hasPt ? `<div class="links"><a href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}" target="_blank" rel="noopener">${t("map")}</a>${s.wiki ? `<a href="${wikiUrl(s.wiki)}" target="_blank" rel="noopener">📖 Wikipedia</a>` : ""}</div>` : "";
-    return `${travel}<div class="stop"><div class="num ${isMeal ? "meal" : hasPt ? "" : "other"}" style="background:${color}">${label}</div>
-      <div class="sbody" data-idx="${idx}">
-        <div class="time">${esc(s.start || "")}${end ? "–" + end : ""}${s.duration_min ? ` · ${fmtDur(s.duration_min)}` : ""}</div>
+    const lines = [], row = (ic, html) => lines.push(`<div class="row">${IC(ic)}<span>${html}</span></div>`);
+    if (s.hours && s.hours !== "closed") row("clock", esc(s.hours));
+    else if (s.hours_raw && s.hours !== "closed") row("clock", `${esc(s.hours_raw)} · ${t("h_unconf")}`);
+    else if (hasPt && s.verified && !s.hours_raw) row("clock", t("h_unknown"));
+    if (s.price) row("ticket", esc(s.price)); else if (s.fee === "no") row("ticket", t("free")); else if (s.fee === "yes") row("ticket", t("fee_yes"));
+    if (s.address) row("pin", esc(s.address));
+    const sinfo = info.length || lines.length ? `<div class="sinfo">${info.length ? `<div>${info.join("")}</div>` : ""}${lines.join("")}</div>` : "";
+    const links = hasPt ? `<a href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}" target="_blank" rel="noopener">${IC("map")}${t("map").replace(/^\S+\s/, "")}</a>${s.wiki ? `<a href="${wikiUrl(s.wiki)}" target="_blank" rel="noopener">${IC("book")}Wikipedia</a>` : ""}` : "";
+    const note = isOwn ? `<div class="mynote">${s.my_note ? `<span class="mn">📝 ${esc(s.my_note)}</span> ` : ""}<a onclick="editNote(event,${i},${idx})">${t(s.my_note ? "note_edit" : "note_add")}</a></div>` : s.my_note ? `<div class="mynote"><span class="mn">📝 ${esc(s.my_note)}</span></div>` : "";
+    return `${travel}<div class="stop${isMeal ? " meal" : ""}" style="--dc:${color}">
+      <div class="tl-time"><b>${esc(s.start || "")}</b>${end ? `<small>${end}</small>` : ""}</div>
+      <div class="tl-dot"><div class="num ${isMeal ? "meal" : hasPt ? "" : "other"}">${label}</div></div>
+      <div class="sbody scard" data-idx="${idx}">
+        ${s.wiki && hasPt ? `<div class="sph" data-ph="${esc(s.wiki)}"></div>` : ""}
+        ${s.duration_min ? `<div class="sdur">${IC("timer")}${fmtDur(s.duration_min)}</div>` : ""}
         <div class="nm">${esc(s.name || "")}</div>
-        ${s.note ? `<div class="note2">${esc(s.note)}</div>` : ""}${s.tip ? `<div class="tip">💡 ${esc(s.tip)}</div>` : ""}${sinfo}${links}${mode === "own" && plan.kind !== "now" ? `<div class="mynote">${s.my_note ? `<span class="mn">📝 ${esc(s.my_note)}</span> ` : ""}<a onclick="editNote(event,${i},${idx})">${t(s.my_note ? "note_edit" : "note_add")}</a></div>` : s.my_note ? `<div class="mynote"><span class="mn">📝 ${esc(s.my_note)}</span></div>` : ""}
+        ${s.note ? `<div class="note2">${esc(s.note)}</div>` : ""}${s.tip ? `<div class="tip">💡 ${esc(s.tip)}</div>` : ""}${sinfo}${links || note ? `<div class="links">${links}${note}</div>` : ""}
       </div></div>`;
   }).join("");
-  let dateTxt = "";
-  if (d.date) dateTxt = fmtDayDate(d.date);
+  const dateTxt = d.date ? fmtDayDate(d.date) : "";
+  const first = d.stops.find(s => s.start), last = [...d.stops].reverse().find(s => s.start);
+  const span = first && last ? `${first.start}–${last.duration_min ? addMin(last.start, last.duration_min) : last.start}` : "";
+  const stats = [`<span>${IC("pin")}${esc(t("d_stops", nPts))}</span>`];
+  if (span) stats.push(`<span>${IC("clock")}${esc(span)}</span>`);
+  if (mvMin) stats.push(`<span>${IC(defIc)}${anyEst ? "~" : ""}${fmtDur(mvMin)}${mvM ? ` · ${(mvM / 1000).toFixed(1)} km` : ""}</span>`);
   const warn = d.overtime_min ? `<div class="daywarn">${t("overtime", d.overtime_min)}</div>` : "";
   card.classList.remove("fade"); void card.offsetWidth; card.classList.add("fade");
-  card.innerHTML = `<div class="dayhead"><div><h3 style="color:${color}">${t("day")} ${d.day || i + 1}: ${esc(d.theme || "")}</h3>
-    <div class="area">${esc([dateTxt, d.area].filter(Boolean).join(" · "))}</div></div>${gmapsLink(d)}</div>${warn}<div>${stops}</div>${anyEst ? `<div class="estnote">${t("est_note")}</div>` : ""}`;
+  card.style.setProperty("--dc", color);
+  card.innerHTML = `<div class="dayhead"><div><h3>${t("day")} ${d.day || i + 1}: ${esc(d.theme || "")}</h3>
+    <div class="area">${esc([dateTxt, d.area].filter(Boolean).join(" · "))}</div><div class="dstats">${stats.join("")}</div></div>${gmapsLink(d)}</div>${warn}<div>${stops}</div>${anyEst ? `<div class="estnote">${t("est_note")}</div>` : ""}<div class="phcred" id="phCred" style="display:none">${esc(t("ph_credit"))}</div>`;
   card.querySelectorAll(".sbody").forEach(el => el.onclick = e => {
     if (e.target.closest("a")) return;
     const s = d.stops[+el.dataset.idx];
     if (s._marker) { map.setView(s._marker.getLatLng(), 16); s._marker.openPopup(); document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "center" }); }
   });
+  fillStopPhotos(card);
 }
+// ---- Ikona të thjeshta (SVG) ----
+const ICP = {
+  clock: "M12 7v5l3 2M21 12a9 9 0 1 1-18 0a9 9 0 0 1 18 0",
+  timer: "M10 2.5h4M12 13.5V9.5M19 13.5a7 7 0 1 1-14 0a7 7 0 0 1 14 0",
+  ticket: "M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4zM14.5 7v10",
+  pin: "M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11zM12 12.3a2.3 2.3 0 1 0 0-4.6a2.3 2.3 0 0 0 0 4.6",
+  walk: "M13.5 5a1.6 1.6 0 1 0 0-3.2a1.6 1.6 0 0 0 0 3.2M9 21l2.5-6.5L14 17v4M7 12l2-4.5 4-.5 2.5 4 2.5 1M11.5 14.5L13 7",
+  bus: "M6.5 17V6.5a3 3 0 0 1 3-3h5a3 3 0 0 1 3 3V17zM6.5 12h11M8.5 20l1-3M15.5 20l-1-3M9.5 14.5h.01M14.5 14.5h.01",
+  car: "M4.5 16.5v-4l2-5.5h11l2 5.5v4zM4.5 16.5V19M19.5 16.5V19M4.5 12.5h15M8 14.5h.01M16 14.5h.01",
+  map: "M9 4.5L3.5 6.5v13l5.5-2 6 2 5.5-2v-13l-5.5 2zM9 4.5v13M15 6.5v13",
+  book: "M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19",
+  cal: "M4 6.5h16v13.5H4zM4 10.5h16M8.5 3.5v4M15.5 3.5v4",
+  fork: "M7.5 3v7.5M5 3v4.5a2.5 2.5 0 0 0 5 0V3M7.5 10.5V21M17 21V3c-2.3 1.3-3.5 4.3-3.5 8.5H17",
+};
+function IC(n, cls = "ic") { return `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${ICP[n] || ""}"/></svg>`; }
+// ---- Fotot nga Wikipedia (vetëm faqja e saktë e atraksionit; pa foto të sajuara) ----
+const PHOTO = new Map();
+async function wikiThumbs(keys, size) {
+  const need = keys.filter(k => !PHOTO.has(k + "|" + size));
+  const byLang = {};
+  need.forEach(k => { const m = /^([a-z][a-z-]{1,11}):(.+)$/.exec(k); if (m) (byLang[m[1]] = byLang[m[1]] || []).push(m[2]); else PHOTO.set(k + "|" + size, null); });
+  await Promise.all(Object.entries(byLang).map(async ([lang, titles]) => {
+    for (let o = 0; o < titles.length; o += 40) {
+      const part = titles.slice(o, o + 40);
+      try {
+        const u = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=${size}&titles=${encodeURIComponent(part.join("|"))}`;
+        const j = await (await fetch(u)).json(), q = j.query || {};
+        const fwd = new Map(); (q.normalized || []).concat(q.redirects || []).forEach(x => fwd.set(x.from, x.to));
+        const pages = {}; Object.values(q.pages || {}).forEach(pg => pages[pg.title] = pg.thumbnail?.source || null);
+        part.forEach(tl => { let x = tl; for (let g = 0; g < 4 && fwd.has(x); g++) x = fwd.get(x); PHOTO.set(`${lang}:${tl}|${size}`, pages[x] || null); });
+      } catch { part.forEach(tl => PHOTO.set(`${lang}:${tl}|${size}`, null)); }
+    }
+  }));
+  return Object.fromEntries(keys.map(k => [k, PHOTO.get(k + "|" + size) || null]));
+}
+async function fillStopPhotos(card) {
+  const boxes = [...card.querySelectorAll(".sph[data-ph]")]; if (!boxes.length || !navigator.onLine) return;
+  const got = await wikiThumbs([...new Set(boxes.map(b => b.dataset.ph))], 240);
+  let any = false;
+  boxes.forEach(b => {
+    const src = got[b.dataset.ph]; if (!src || !b.isConnected) return;
+    const im = new Image(); im.alt = ""; im.loading = "lazy"; im.decoding = "async"; im.referrerPolicy = "no-referrer";
+    im.onload = () => im.classList.add("ok"); im.onerror = () => b.remove();
+    im.src = src; b.appendChild(im); any = true;
+  });
+  const cr = document.getElementById("phCred"); if (any && cr) cr.style.display = "block";
+}
+async function renderCover() {
+  const box = document.getElementById("rCover"), img = document.getElementById("rCoverImg"), cr = document.getElementById("rCoverCr");
+  const c = plan.city || {}, hasPost = row.photo_url && row.is_public;
+  box.style.display = hasPost ? "none" : "block";
+  box.classList.add("nophoto"); img.classList.remove("ok"); img.removeAttribute("src"); cr.style.display = "none";
+  document.getElementById("rCoverT").innerHTML = `${esc(c.name || plan.request?.city || "")}${c.country ? `<small>${esc(c.country)}</small>` : ""}`;
+  if (hasPost || !c.name || c.lat == null || !navigator.onLine) return;
+  const want = plan;
+  try {
+    const titles = [...new Set([c.name, plan.request?.city, c.country ? `${c.name}, ${c.country}` : ""].filter(Boolean))].slice(0, 4);
+    const u = `https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages|coordinates&piprop=thumbnail&pithumbsize=1200&titles=${encodeURIComponent(titles.join("|"))}`;
+    const q = (await (await fetch(u)).json()).query || {};
+    const km = (a, b, x, y) => { const R = 6371, r = Math.PI / 180, dl = (x - a) * r, dn = (y - b) * r; const h = Math.sin(dl / 2) ** 2 + Math.cos(a * r) * Math.cos(x * r) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+    const pg = Object.values(q.pages || {}).find(p => p.thumbnail?.source && p.coordinates?.[0] && km(c.lat, c.lon, p.coordinates[0].lat, p.coordinates[0].lon) < 40);
+    if (!pg || plan !== want) return;
+    img.onload = () => { if (plan !== want) return; img.classList.add("ok"); box.classList.remove("nophoto"); cr.style.display = "block"; };
+    cr.href = `https://en.wikipedia.org/wiki/${encodeURIComponent(pg.title.replace(/ /g, "_"))}`;
+    img.referrerPolicy = "no-referrer"; img.src = pg.thumbnail.source;
+  } catch {}
+}
+// ---- Pamja e errët ----
+function applyThemeMeta() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#0E1826" : "#F6F0E5");
+  const b = document.getElementById("thmBtn"); if (b) { b.title = t(dark ? "theme_l" : "theme_d"); b.setAttribute("aria-label", b.title); }
+  try { NP().StatusBar?.setStyle?.({ style: dark ? "DARK" : "LIGHT" }).catch?.(() => {}); NP().StatusBar?.setBackgroundColor?.({ color: dark ? "#0E1826" : "#F6F0E5" }).catch?.(() => {}); } catch {}
+}
+function toggleTheme() {
+  const nx = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = nx;
+  try { localStorage.setItem("vianto_theme", nx); } catch {}
+  applyThemeMeta();
+}
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => { let sv = null; try { sv = localStorage.getItem("vianto_theme"); } catch {} if (!sv) { document.documentElement.dataset.theme = e.matches ? "dark" : "light"; applyThemeMeta(); } }); } catch {}
 function gmapsLink(d) {
   const pts = d.stops.filter(s => s.lat != null);
   if (pts.length < 2) return "";
@@ -1597,7 +2086,7 @@ function gmapsLink(d) {
   const mode = { kembe: "walking", vetura: "driving" }[plan.request?.transport] || "walking";
   const ll = s => `${s.lat},${s.lon}`;
   const way = pts.slice(1, -1).slice(0, 8).map(ll).join("|");
-  return `<a class="gm" href="https://www.google.com/maps/dir/?api=1&origin=${ll(pts[0])}&destination=${ll(pts[pts.length - 1])}${way ? "&waypoints=" + encodeURIComponent(way) : ""}&travelmode=${mode}" target="_blank" rel="noopener">${t("gmaps")}</a>`;
+  return `<a class="gm" href="https://www.google.com/maps/dir/?api=1&origin=${ll(pts[0])}&destination=${ll(pts[pts.length - 1])}${way ? "&waypoints=" + encodeURIComponent(way) : ""}&travelmode=${mode}" target="_blank" rel="noopener">${IC("map")}${esc(String(t("gmaps")).replace(/^\S+\s/, ""))}</a>`;
 }
 
 // ================== VEPRIMET E PLANIT ==================
@@ -1782,7 +2271,7 @@ async function nativeShare() {
 async function makeStory() {
   const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H;
   const x = c.getContext("2d");
-  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#0b7a75"); g.addColorStop(1, "#0d3b52");
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#2B6293"); g.addColorStop(1, "#173A5A");
   x.fillStyle = g; x.fillRect(0, 0, W, H);
   x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.arc(W - 60, 160, 340, 0, 7); x.fill(); x.beginPath(); x.arc(60, H - 200, 300, 0, 7); x.fill();
   const F = "system-ui,-apple-system,'Segoe UI',sans-serif";
@@ -2181,8 +2670,7 @@ if (IS_APP) {
       e.preventDefault(); NP().Browser?.open({ url: APP_URL + "privacy.html?lang=" + LANG });
     }
   }, true);
-  NP().StatusBar?.setStyle?.({ style: "LIGHT" }).catch?.(() => {});
-  NP().StatusBar?.setBackgroundColor?.({ color: "#EBDCC2" }).catch?.(() => {});
+  applyThemeMeta();
   NP().SplashScreen?.hide?.().catch?.(() => {});
   // Butoni "prapa" në Android
   NP().App?.addListener?.("backButton", () => {
