@@ -148,6 +148,7 @@ export default {
       plan.request = p;
       plan.ai = aiCost(MODEL, plan.usage);
       plan.v = 2;
+      plan.poi_src = pois.some(x => !String(x.osm || "").startsWith("wiki")) ? "osm" : "wiki";
 
       stat.n++; stat.in += plan.ai.in; stat.out += plan.ai.out; stat.usd = +(stat.usd + plan.ai.usd).toFixed(5);
       ctx.waitUntil(Promise.all([
@@ -266,7 +267,7 @@ async function fetchPois(lat, lon, R) {
 
 async function fetchPoisLive(lat, lon, R) {
   const a = `(around:${R},${lat},${lon})`;
-  const query = `[out:json][timeout:25];
+  const query = `[out:json][timeout:40];
 (
   nwr["tourism"~"^(attraction|museum|gallery|viewpoint|zoo|aquarium|theme_park|artwork)$"]["wikidata"]${a};
   nwr["historic"~"^(castle|monument|palace|fort|ruins|city_gate|church|cathedral|archaeological_site|memorial|building|tower|citywalls)$"]["wikidata"]${a};
@@ -285,7 +286,7 @@ out center tags qt 900;`;
     const d = await r.json(); if (!d.elements?.length) throw new Error("Overpass bosh");
     return d;
   };
-  let data; const timer = setTimeout(() => ctrl.abort(), 20000);
+  let data; const timer = setTimeout(() => ctrl.abort(), 45000);
   try { data = await Promise.any(OVERPASS.map(ask)); } catch { throw new Error("Overpass dështoi"); } finally { clearTimeout(timer); ctrl.abort(); }
   const seen = new Set(), out = [];
   for (const el of data.elements || []) {
