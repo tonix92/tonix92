@@ -84,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p4.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p4.1", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -762,6 +762,7 @@ async function finishPlan(env, plan, p, byId, opts = {}) {
 }
 
 // ================== FAZA 4: buxheti ==================
+const TR_EN = { kembe: "on foot", publik: "on foot + public transport", vetura: "car" };
 const BUD_KEYS = ["tickets", "food", "transport", "parking", "activities", "other"];
 function cleanBudget(b, nDays) {
   if (!b || !Array.isArray(b.days)) return null;
@@ -870,7 +871,7 @@ Rules:
 - Write "reply" and any note/tip in ${LANG[lang]}; reply = 1–2 sentences saying exactly what changed.
 - Reply with JSON only.`;
     const user = `Traveller request: "${msg}"
-Travellers: ${p.adults} adult(s)${p.kids ? ` + ${p.kids} child(ren)${p.kidAges.length ? " ages " + p.kidAges.join(",") : ""}` : ""}. Daily window ${p.start}–${p.end}. Getting around: ${p.transport}.
+Travellers: ${p.adults} adult(s)${p.kids ? ` + ${p.kids} child(ren)${p.kidAges.length ? " ages " + p.kidAges.join(",") : ""}` : ""}. Daily window ${p.start}–${p.end}. Getting around: ${TR_EN[p.transport] || "on foot"}.
 
 Current itinerary:
 ${planTxt}
@@ -1000,7 +1001,7 @@ async function handleNow(q, req, env, ctx, H, M) {
     const list = open.map(x => `${x.id}|${x.name}|${x.kind}|${Math.round(x.dist)} m away|pop ${Math.round(x.pop || 0)}|${x.now}${x.fee ? "|fee " + x.fee : ""}`).join("\n");
     const system = `You recommend what to visit RIGHT NOW. Pick 3–5 places ONLY from the list (by id), in a sensible walking order starting near the traveller, that fit in the free time including travel. Never invent places. Prefer "open until" places; use "hours unknown" places only if needed and say to check hours. ${wx?.rain || wx?.snow ? "It is raining/snowing: prefer indoor places." : ""}
 Write text in ${LANG[lang]}. Reply JSON only: {"title":"...","summary":"1 sentence","stops":[{"id":"C1","duration_min":45,"note":"why now, 1 sentence","tip":"..."}]}`;
-    const user = `Local time ${time}, date ${date} (${WD[dt.getUTCDay()]}). Free time: ${minutes} min. Getting around: ${transport}. Budget: ${budget}. Interests: ${interests.map(i => INTEREST_NAMES[i]).join(", ") || "highlights"}.${wx ? ` Weather: ${wx.temp}°C${wx.rain ? ", rain" : ""}${wx.snow ? ", snow" : ""}.` : ""}
+    const user = `Local time ${time}, date ${date} (${WD[dt.getUTCDay()]}). Free time: ${minutes} min. Getting around: ${TR_EN[transport] || "on foot"}. Budget: ${{ ulet: "low", mesem: "medium", larte: "high" }[budget]}. Interests: ${interests.map(i => INTEREST_NAMES[i]).join(", ") || "highlights"}.${wx ? ` Weather: ${wx.temp}°C${wx.rain ? ", rain" : ""}${wx.snow ? ", snow" : ""}.` : ""}
 Places (id|name|type|distance|popularity|hours now):
 ${list}`;
     const { out, usage } = await callClaude(env.ANTHROPIC_API_KEY, system, user, 2500);
