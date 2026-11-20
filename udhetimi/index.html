@@ -95,6 +95,15 @@
   .hb.closed{background:#F6DCD6;color:#9A2F1E}.hb.closes{background:#F8E7C8;color:#8A5A12}.hb.unv{background:#ECE7DD;color:#6B6458}
   .daywarn{font-size:13px;color:#8A5A12;background:#F8E7C8;border-radius:10px;padding:6px 10px;margin:6px 0 10px}
   .estnote{font-size:12px;color:var(--mut);margin-top:4px}
+  .nowcard{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .nowcard small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
+  .nowcard .btn2{white-space:nowrap}
+  .aied small{margin-bottom:8px}
+  .edchips .chip{font-size:12.5px}
+  .edrow{display:flex;gap:8px;margin-top:8px}.edrow input{flex:1;min-width:0}
+  .edmsg{font-size:14px;line-height:1.45;padding:8px 11px;border-radius:12px;margin-top:8px;max-width:92%}
+  .edmsg.me{background:#EDE6D8;margin-left:auto}.edmsg.ai{background:#E4EDF5}
+  .edmsg .undo{margin-left:8px;font-size:12.5px;text-decoration:underline;cursor:pointer;color:var(--mut)}
   .links a{font-size:12px;color:var(--mut);margin-right:10px}
   .tips li{margin:6px 0;line-height:1.45}
   .foot{color:var(--mut);font-size:12px;text-align:center;margin-top:16px}
@@ -439,6 +448,7 @@
     <h1 data-i18n="h_where"></h1>
     <p class="lead" data-i18n="lead"></p>
   </div>
+  <div class="card nowcard"><div><b data-i18n="now_h"></b><small data-i18n="now_sub"></small></div><button class="btn2 pri" onclick="openNow()" data-i18n="now_btn"></button></div>
   <div class="card">
     <label for="city" data-i18n="city"></label>
     <input id="city" data-i18n-ph="city_ph" autocomplete="off">
@@ -512,6 +522,12 @@
   <div class="daytabs" id="dayTabs"></div>
   <div id="map"></div>
   <div class="card" id="dayCard"></div>
+  <div class="card aied" id="aiEd" style="display:none">
+    <b data-i18n="ed_h"></b><small class="dhint" data-i18n="ed_sub"></small>
+    <div class="chips edchips" id="edChips"></div>
+    <div class="edrow"><input id="edIn" maxlength="400" data-i18n-ph="ed_ph" onkeydown="if(event.key==='Enter')sendEdit()"><button class="btn2 pri" id="edBtn" onclick="sendEdit()" data-i18n="ed_send"></button></div>
+    <div id="edLog"></div>
+  </div>
   <div class="card"><b data-i18n="tips"></b><ul class="tips" id="rTips"></ul><div id="rCost" style="color:var(--mut);font-size:14px"></div></div>
   <div class="card ptools"><b data-i18n="take_h"></b><div class="tbtns"><button class="btn2" onclick="printPlan()" data-i18n="pdf"></button><button class="btn2" onclick="openCal()" data-i18n="cal"></button></div></div>
   <div class="card cmts" id="cmtCard" style="display:none"><h3 class="cmth" id="cmtH"></h3><div id="cmtList"></div>
@@ -621,6 +637,20 @@
   </div>
 </div>
 
+<div class="modal-bg" id="nowBg" onclick="if(event.target===this)closeModal('nowBg')">
+  <div class="modal">
+    <button class="x" onclick="closeModal('nowBg')">×</button>
+    <h3 data-i18n="now_h"></h3>
+    <div style="color:var(--mut);font-size:14px" data-i18n="now_q"></div>
+    <label data-i18n="now_time"></label>
+    <div class="seg" data-name="nowmin"><button data-v="60">1h</button><button data-v="120">2h</button><button data-v="180" class="on">3h</button><button data-v="240">4h</button><button data-v="360">6h</button></div>
+    <button class="go" id="nowGeo" onclick="runNow(true)" data-i18n="now_geo"></button>
+    <label for="nowPlace" data-i18n="now_or"></label>
+    <div class="edrow"><input id="nowPlace" data-i18n-ph="now_ph" onkeydown="if(event.key==='Enter')runNow(false)"><button class="btn2" onclick="runNow(false)" data-i18n="now_find"></button></div>
+    <div class="err" id="nowErr" style="display:none"></div>
+    <div class="dhint" id="nowWait" style="display:none" data-i18n="now_wait"></div>
+  </div>
+</div>
 <div class="modal-bg" id="calBg" onclick="if(event.target===this)closeModal('calBg')">
   <div class="modal">
     <button class="x" onclick="closeModal('calBg')">×</button>
@@ -651,6 +681,7 @@ const I18N = {
     del_txt: "Do të fshihen menjëherë llogaria, planet, fotot, pëlqimet, komentet dhe ndjekësit e tu. Kjo nuk kthehet më pas.",
     del_yes: "Po, fshije përgjithmonë", del_no: "Anulo", del_done: "Llogaria u fshi.", del_err: "Fshirja nuk u krye. Provo përsëri pas pak.",
     date_q: "Kur fillon udhëtimi?", date_hint: "Opsionale: me datë kontrollohen oraret e hapjes për çdo ditë.", h_closed: "I mbyllur atë ditë", h_closes: "Mbyllet para se ta përfundosh vizitën", h_unconf: "orari i pakonfirmuar", h_unknown: "Orari nuk dihet — kontrolloje para se të shkosh", free: "Hyrje falas", fee_yes: "Me pagesë (çmimi nuk dihet)", unverified: "I pakonfirmuar", overtime: m => `Kjo ditë zgjat rreth ${m} min më shumë se koha që zgjodhe.`, est_note: "~ = kohë e vlerësuar, jo e matur.", gm_leg: "Rruga ↗",
+    ed_h: "Ndrysho planin me AI", ed_sub: "Shkruaj çka do të ndryshosh. Ndryshohet vetëm ajo pjesë, pjesa tjetër mbetet.", ed_ph: "p.sh. Largoje muzeun e ditës 2", ed_send: "Dërgo", ed_wait: "Po e ndryshoj planin…", ed_done: "Plani u ndryshua.", ed_none: "Nuk u ndryshua asgjë.", ed_undo: "Zhbëje", ed_undone: "u kthye si ishte", ed_login: "Hyr në llogari për të ndryshuar planin me AI.", ed_ex: ["Bëje ditën e parë më të qetë", "Shto një restorant afër", "Gjej atraksione falas", "Shto aktivitete për fëmijë", "Shkurto distancën e ecjes"], now_h: "Çfarë të vizitoj tani?", now_sub: "Vende të hapura afër teje, për kohën që ke.", now_btn: "Provo", now_q: "Sa kohë ke?", now_time: "Koha e lirë", now_geo: "📍 Përdor vendndodhjen time", now_or: "ose shkruaj ku je", now_ph: "p.sh. Piazza Navona, Romë", now_find: "Gjej", now_wait: "Po kërkoj vende të hapura afër… (rreth 30 sekonda)", now_nogeo: "Nuk e mora vendndodhjen. Shkruaj ku ndodhesh.", wx: (c, r) => `Moti tani: ${c}°C${r ? " · reshje" : ""}`,
     who_q: "Kush udhëton?", adults: "Të rritur", kids: "Fëmijë", kid_ages: "Moshat e fëmijëve", yrs: "vjeç",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "i rritur" : "të rritur"}${k ? ` · ${k} fëmijë` : ""}`,
     quick: "Ose zgjidh:", home_h: "Plane nga udhëtarët", home_more: "Shiko të gjitha", home_by: a => `nga ${a}`,
@@ -720,6 +751,7 @@ const I18N = {
     del_txt: "Your account, plans, photos, likes, comments and followers will be deleted right away. This can't be undone.",
     del_yes: "Yes, delete permanently", del_no: "Cancel", del_done: "Your account has been deleted.", del_err: "Deletion didn't go through. Try again in a moment.",
     date_q: "When does the trip start?", date_hint: "Optional: with a date, opening hours are checked for each day.", h_closed: "Closed that day", h_closes: "Closes before you'd finish the visit", h_unconf: "hours not confirmed", h_unknown: "Hours unknown — check before you go", free: "Free entry", fee_yes: "Paid entry (price unknown)", unverified: "Not confirmed", overtime: m => `This day runs about ${m} min longer than the time you chose.`, est_note: "~ = estimated time, not measured.", gm_leg: "Route ↗",
+    ed_h: "Change the plan with AI", ed_sub: "Say what to change. Only that part changes; the rest stays.", ed_ph: "e.g. Remove the museum on day 2", ed_send: "Send", ed_wait: "Changing the plan…", ed_done: "The plan was changed.", ed_none: "Nothing was changed.", ed_undo: "Undo", ed_undone: "restored", ed_login: "Log in to change the plan with AI.", ed_ex: ["Make day 1 calmer", "Add a restaurant nearby", "Find free attractions", "Add activities for kids", "Shorten the walking"], now_h: "What to visit now?", now_sub: "Open places near you, for the time you have.", now_btn: "Try it", now_q: "How much time do you have?", now_time: "Free time", now_geo: "📍 Use my location", now_or: "or type where you are", now_ph: "e.g. Piazza Navona, Rome", now_find: "Find", now_wait: "Looking for open places nearby… (about 30 seconds)", now_nogeo: "Couldn't get your location. Type where you are.", wx: (c, r) => `Weather now: ${c}°C${r ? " · rain" : ""}`,
     who_q: "Who's travelling?", adults: "Adults", kids: "Children", kid_ages: "Children's ages", yrs: "yrs",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "adult" : "adults"}${k ? ` · ${k} ${k === 1 ? "child" : "children"}` : ""}`,
     quick: "Or pick one:", home_h: "Plans from travellers", home_more: "See all", home_by: a => `by ${a}`,
@@ -789,6 +821,7 @@ const I18N = {
     del_txt: "Dein Konto, deine Pläne, Fotos, Likes, Kommentare und Follower werden sofort gelöscht. Das lässt sich nicht rückgängig machen.",
     del_yes: "Ja, endgültig löschen", del_no: "Abbrechen", del_done: "Dein Konto wurde gelöscht.", del_err: "Löschen hat nicht geklappt. Versuch es gleich noch einmal.",
     date_q: "Wann beginnt die Reise?", date_hint: "Optional: Mit Datum werden die Öffnungszeiten für jeden Tag geprüft.", h_closed: "An diesem Tag geschlossen", h_closes: "Schließt, bevor der Besuch endet", h_unconf: "Öffnungszeiten unbestätigt", h_unknown: "Öffnungszeiten unbekannt – vorher prüfen", free: "Eintritt frei", fee_yes: "Eintritt kostenpflichtig (Preis unbekannt)", unverified: "Nicht bestätigt", overtime: m => `Dieser Tag dauert etwa ${m} Min. länger als die gewählte Zeit.`, est_note: "~ = geschätzte Zeit, nicht gemessen.", gm_leg: "Route ↗",
+    ed_h: "Plan mit KI ändern", ed_sub: "Schreib, was sich ändern soll. Nur dieser Teil ändert sich, der Rest bleibt.", ed_ph: "z. B. Entferne das Museum an Tag 2", ed_send: "Senden", ed_wait: "Plan wird geändert…", ed_done: "Der Plan wurde geändert.", ed_none: "Nichts wurde geändert.", ed_undo: "Rückgängig", ed_undone: "wiederhergestellt", ed_login: "Melde dich an, um den Plan mit KI zu ändern.", ed_ex: ["Tag 1 ruhiger machen", "Ein Restaurant in der Nähe hinzufügen", "Kostenlose Sehenswürdigkeiten finden", "Aktivitäten für Kinder hinzufügen", "Weniger zu Fuß gehen"], now_h: "Was jetzt besuchen?", now_sub: "Geöffnete Orte in deiner Nähe, für deine freie Zeit.", now_btn: "Ausprobieren", now_q: "Wie viel Zeit hast du?", now_time: "Freie Zeit", now_geo: "📍 Meinen Standort verwenden", now_or: "oder gib ein, wo du bist", now_ph: "z. B. Piazza Navona, Rom", now_find: "Suchen", now_wait: "Suche geöffnete Orte in der Nähe… (etwa 30 Sekunden)", now_nogeo: "Standort nicht verfügbar. Gib ein, wo du bist.", wx: (c, r) => `Wetter jetzt: ${c}°C${r ? " · Niederschlag" : ""}`,
     who_q: "Wer reist mit?", adults: "Erwachsene", kids: "Kinder", kid_ages: "Alter der Kinder", yrs: "J.",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "Erwachsene/r" : "Erwachsene"}${k ? ` · ${k} ${k === 1 ? "Kind" : "Kinder"}` : ""}`,
     quick: "Oder wähle:", home_h: "Pläne von Reisenden", home_more: "Alle ansehen", home_by: a => `von ${a}`,
@@ -1354,6 +1387,7 @@ function openPlan(p, r, m) {
     layer = L.layerGroup().addTo(map);
   }
   setTimeout(() => { map.invalidateSize(); selectDay(0); }, 60);
+  renderEditor();
 }
 
 function openPlanHeader() {
@@ -1371,6 +1405,7 @@ function openPlanHeader() {
     : "";
   document.getElementById("rTips").innerHTML = (p.tips || []).map(x => `<li>${esc(x)}</li>`).join("");
   document.getElementById("rCost").textContent = p.cost_estimate ? "💶 " + p.cost_estimate : "";
+  if (p.kind === "now" && p.weather) document.getElementById("rGroup").textContent = t("wx", p.weather.temp, p.weather.rain || p.weather.snow);
 }
 function renderTabs() {
   document.getElementById("dayTabs").innerHTML = plan.days.map((d, i) => `<button data-i="${i}">${t("day")} ${d.day || i + 1}</button>`).join("") + `<button data-i="-1">${t("all")}</button>`;
@@ -1397,7 +1432,9 @@ function renderActions() {
   A.innerHTML = h;
 }
 
+let curDay = 0;
 function selectDay(i) {
+  curDay = i;
   document.querySelectorAll("#dayTabs button").forEach(b => {
     const on = +b.dataset.i === i; b.classList.toggle("on", on);
     b.style.background = on ? (i < 0 ? "#1F4E79" : COLORS[i % COLORS.length]) : "#fff";
@@ -1730,6 +1767,80 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 function addMin(t, m) { const [h, mi] = t.split(":").map(Number); const v = h * 60 + mi + m; return `${String(Math.floor(v / 60) % 24).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`; }
 function fmtDur(m) { return m >= 60 ? `${Math.floor(m / 60)} ${t("h")}${m % 60 ? " " + (m % 60) + " min" : ""}` : m + " min"; }
 function wikiUrl(w) { const [l, ...t] = w.split(":"); return `https://${l}.wikipedia.org/wiki/${encodeURIComponent(t.join(":").replace(/ /g, "_"))}`; }
+// ---- Faza 3: editori me bisedë ----
+let prevPlan = null;
+function renderEditor() {
+  const box = document.getElementById("aiEd");
+  box.style.display = mode === "own" && plan.kind !== "now" ? "block" : "none";
+  document.getElementById("edLog").innerHTML = "";
+  document.getElementById("edChips").innerHTML = t("ed_ex").map(x => `<span class="chip" onclick="document.getElementById('edIn').value=this.textContent;document.getElementById('edIn').focus()">${esc(x)}</span>`).join("");
+}
+function updateLocal(id, p) {
+  try { const l = localList(); const x = l.find(y => y.localId === id); if (x) { x.plan = strip(p); localStorage.setItem(LOCAL_KEY, JSON.stringify(l)); } } catch {}
+}
+async function persistPlan() {
+  if (row.id && sb && user) { const { error } = await sb.from("plans").update({ data: strip(plan), title: plan.title || null, summary: plan.summary || null, days: plan.days.length }).eq("id", row.id); if (error) toast(t("not_saved") + error.message); }
+  else if (row.localId) updateLocal(row.localId, plan);
+}
+async function sendEdit() {
+  const inp = document.getElementById("edIn"), btn = document.getElementById("edBtn"), log = document.getElementById("edLog");
+  const msg = inp.value.trim(); if (!msg) return;
+  if (!sb || !user) { toast(t("ed_login")); showAuth("login"); return; }
+  btn.disabled = true; inp.disabled = true;
+  const wait = document.createElement("div"); wait.className = "edmsg ai"; wait.textContent = t("ed_wait");
+  log.insertAdjacentHTML("afterbegin", `<div class="edmsg me">${esc(msg)}</div>`); log.children[0].after(wait);
+  try {
+    const { data: ses } = await sb.auth.getSession();
+    const r = await fetch(API + "/edit", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + ses?.session?.access_token }, body: JSON.stringify({ plan: strip(plan), message: msg, lang: plan.request?.lang || LANG, ui: LANG }) });
+    const d = await r.json().catch(() => ({ error: t("bad_resp") }));
+    if (d.code === "auth") showAuth("login");
+    if (!r.ok || d.error) throw new Error(d.error || "Gabim " + r.status);
+    if (d.plan) {
+      prevPlan = plan; plan = d.plan; await persistPlan();
+      openPlanHeader(); renderTabs(); selectDay(Math.min(curDay, plan.days.length - 1));
+      wait.innerHTML = `${esc(d.reply || t("ed_done"))}<span class="undo" onclick="undoEdit(this)">${t("ed_undo")}</span>`;
+    } else wait.textContent = d.reply || t("ed_none");
+    inp.value = "";
+  } catch (e) { wait.textContent = "⚠️ " + (/fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message); }
+  finally { btn.disabled = false; inp.disabled = false; }
+}
+async function undoEdit(el) {
+  if (!prevPlan) return;
+  plan = prevPlan; prevPlan = null; await persistPlan();
+  openPlanHeader(); renderTabs(); selectDay(Math.min(curDay, plan.days.length - 1));
+  el.replaceWith(document.createTextNode(" · " + t("ed_undone")));
+}
+
+// ---- Faza 3: Çfarë të vizitoj tani? ----
+function openNow() { document.getElementById("nowErr").style.display = "none"; openModal("nowBg"); }
+async function runNow(useGeo) {
+  const err = document.getElementById("nowErr"), wait = document.getElementById("nowWait");
+  err.style.display = "none";
+  const minutes = +(document.querySelector('.seg[data-name="nowmin"] button.on')?.dataset.v || 180);
+  const f = readForm(), nowD = new Date(), pad = n => String(n).padStart(2, "0");
+  const body = { minutes, time: `${pad(nowD.getHours())}:${pad(nowD.getMinutes())}`, date: `${nowD.getFullYear()}-${pad(nowD.getMonth() + 1)}-${pad(nowD.getDate())}`,
+    transport: f.transport, interests: f.interests, budget: f.budget, lang: f.lang || LANG, ui: LANG };
+  if (useGeo) {
+    try {
+      const pos = await new Promise((ok, no) => navigator.geolocation ? navigator.geolocation.getCurrentPosition(ok, no, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }) : no(new Error("geo")));
+      body.lat = +pos.coords.latitude.toFixed(5); body.lon = +pos.coords.longitude.toFixed(5);
+    } catch { err.textContent = t("now_nogeo"); err.style.display = "block"; document.getElementById("nowPlace").focus(); return; }
+  } else {
+    body.place = document.getElementById("nowPlace").value.trim();
+    if (body.place.length < 2) { err.textContent = t("now_nogeo"); err.style.display = "block"; return; }
+  }
+  wait.style.display = "block"; document.querySelectorAll("#nowBg button").forEach(b => b.disabled = true);
+  try {
+    const headers = { "Content-Type": "application/json" };
+    if (sb && user) { const { data: ses } = await sb.auth.getSession(); if (ses?.session?.access_token) headers.Authorization = "Bearer " + ses.session.access_token; }
+    const r = await fetch(API + "/now", { method: "POST", headers, body: JSON.stringify(body) });
+    const d = await r.json().catch(() => ({ error: t("bad_resp") }));
+    if (!r.ok || d.error) throw new Error(d.error || "Gabim " + r.status);
+    closeModal("nowBg");
+    openPlan(d, {}, "now");
+  } catch (e) { err.textContent = "⚠️ " + (/fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message); err.style.display = "block"; }
+  finally { wait.style.display = "none"; document.querySelectorAll("#nowBg button").forEach(b => b.disabled = false); }
+}
 const DNAMES = {
   sq: [["e diel", "e hënë", "e martë", "e mërkurë", "e enjte", "e premte", "e shtunë"], ["janar", "shkurt", "mars", "prill", "maj", "qershor", "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor"]],
   en: [["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]],
