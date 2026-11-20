@@ -81,7 +81,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p2.5", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p2.6", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -497,7 +497,7 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 const toMin = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
 function ohParse(oh) {
   if (!oh) return null;
-  let s = String(oh).replace(/"[^"]*"/g, "").replace(/\|\|/g, ";").trim();
+  let s = String(oh).replace(/"[^"]*"/g, "").replace(/\|\|/g, ";").replace(/,\s+(?=(?:Mo|Tu|We|Th|Fr|Sa|Su|PH|SH)\b)/g, ",").replace(/\s*-\s*(?=\d{1,2}:\d{2})/g, "-").trim();
   if (/^24\/7$/.test(s)) return [{ days: null, months: null, spans: [[0, 1440]] }];
   const rules = [];
   for (let part of s.split(";")) {
