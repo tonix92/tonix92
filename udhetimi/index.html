@@ -152,6 +152,12 @@
   .tabsm{display:flex;gap:6px;margin:12px 0}
   .tabsm button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px;font-weight:600;cursor:pointer}
   .tabsm button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+  .exbar{display:flex;gap:8px;margin-bottom:12px}.exbar input{flex:1;min-width:0}.exbar .btn2{white-space:nowrap}
+  .exf{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin:-4px 0 12px}
+  .exf label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut);font-weight:600;margin:0}
+  .exf select,.exf input{width:100%;padding:9px;font-size:15px}
+  .exf .link{grid-column:1/-1;justify-self:start;background:none;border:0;padding:4px 0;color:var(--acc);font-weight:700;cursor:pointer;font:inherit;font-weight:700}
+  .exmeta{font-size:13px;color:var(--mut);margin:-4px 0 10px}
   .prof{display:flex;gap:14px;align-items:center}
   .avatar{flex:none;width:68px;height:68px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:26px}
   .pfmain{flex:1;min-width:0}
@@ -565,7 +571,15 @@
     <button data-s="top" data-i18n="ex_top"></button>
     <button data-s="following" data-i18n="ex_following"></button>
   </div>
-  <input id="exSearch" data-i18n-ph="ex_ph" style="margin-bottom:12px">
+  <div class="exbar"><input id="exSearch" data-i18n-ph="ex_ph"><button class="btn2" id="exFBtn" onclick="toggleExF()"></button></div>
+  <div class="exf" id="exF" style="display:none">
+    <label><span data-i18n="exf_country"></span><input id="exCountry" data-i18n-ph="exf_country_ph"></label>
+    <label><span data-i18n="exf_days"></span><select id="exDays"><option value="" data-i18n="exf_any"></option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4-7">4–7</option><option value="8+">8+</option></select></label>
+    <label><span data-i18n="budget"></span><select id="exBud"><option value="" data-i18n="exf_any"></option><option value="ulet" data-i18n="b_ulet"></option><option value="mesem" data-i18n="b_mesem"></option><option value="larte" data-i18n="b_larte"></option></select></label>
+    <label><span data-i18n="exf_type"></span><select id="exType"><option value="" data-i18n="exf_any"></option></select></label>
+    <label><span data-i18n="exf_pop"></span><select id="exPop"><option value="likes" data-i18n="exf_likes"></option><option value="saves" data-i18n="exf_saves"></option><option value="comments" data-i18n="exf_cmts"></option></select></label>
+    <button class="link" onclick="clearExF()" data-i18n="exf_clear"></button>
+  </div>
   <div id="exUsers"></div>
   <div id="exList"></div>
 </section>
@@ -724,7 +738,7 @@ const I18N = {
     mine_h: "Planet e mia", mine_lead_in: "Të gjitha planet që ke krijuar ose ruajtur.",
     mine_lead_out: "Hyr ose krijo llogari që t'i ruash planet përgjithmonë dhe t'i ndash.", mine_local: "Planet ruhen në këtë telefon.",
     create_acct_btn: "Krijo llogari", empty_mine: "Ende asnjë plan.", create_first: "✨ Krijo të parin",
-    ex_h: "Zbulo plane", ex_lead: "Plane të ndara nga udhëtarë të tjerë. Ruaje cilindo të pëlqen.", ex_ph: "Kërko qytet ose person…", a_post: "📸 Posto", a_edit_post: "📸 Ndrysho postimin", post_h: "Posto planin", post_edit_h: "Ndrysho postimin", post_sub: "Postimi shfaqet te \"Zbulo\", ku të tjerët mund ta pëlqejnë dhe komentojnë.", post_photo: "Shto një foto nga udhëtimi (opsionale)", post_photo_change: "Ndrysho foton", post_cap_lbl: "Përshkrimi", post_cap_ph: "Si ishte udhëtimi? Ndonjë këshillë për të tjerët?", post_btn: "Posto", post_update: "Ruaj ndryshimet", post_unpost: "Hiq postimin", posting: "Duke postuar…", posted: "U postua!", unposted: "Postimi u hoq.", post_login: "Krijo llogari falas për të postuar planet.", ex_open: "Shiko planin", cm_h: "Komentet", cm_ph: "Shkruaj një koment…", cm_send: "Dërgo", cm_login: "Hyr për të komentuar.", cm_empty: "Ende pa komente. Bëhu i pari!", cm_del: "Fshi", users_h: "Persona", photo_big: "Fotoja është shumë e madhe ose nuk lexohet.",
+    ex_h: "Zbulo udhëtimet", ex_lead: "Plane të ndara nga udhëtarë të tjerë. Filtroji, ruaji ose kopjoji dhe përshtati me AI.", exf_btn: "⚙️ Filtro", exf_country: "Shteti", exf_country_ph: "p.sh. Itali", exf_days: "Ditë", exf_type: "Lloji", exf_pop: "Popullariteti", exf_any: "Të gjitha", exf_likes: "Më të pëlqyerat", exf_saves: "Më të ruajturat", exf_cmts: "Më të komentuarat", exf_clear: "Pastro filtrat", a_copyai: "✨ Kopjo dhe personalizo me AI", need_acct_copyai: "Krijo llogari falas për ta kopjuar dhe personalizuar planin me AI.", copyai_ph: "p.sh. Shto një muze në ditën 2 ose bëje më të lirë…", copyai_ok: "Plani u kopjua. Shkruaj këtu çfarë do të ndryshosh.", exf_found: n => `${n} ${n === 1 ? "plan" : "plane"}`, ex_ph: "Kërko qytet ose person…", a_post: "📸 Posto", a_edit_post: "📸 Ndrysho postimin", post_h: "Posto planin", post_edit_h: "Ndrysho postimin", post_sub: "Postimi shfaqet te \"Zbulo\", ku të tjerët mund ta pëlqejnë dhe komentojnë.", post_photo: "Shto një foto nga udhëtimi (opsionale)", post_photo_change: "Ndrysho foton", post_cap_lbl: "Përshkrimi", post_cap_ph: "Si ishte udhëtimi? Ndonjë këshillë për të tjerët?", post_btn: "Posto", post_update: "Ruaj ndryshimet", post_unpost: "Hiq postimin", posting: "Duke postuar…", posted: "U postua!", unposted: "Postimi u hoq.", post_login: "Krijo llogari falas për të postuar planet.", ex_open: "Shiko planin", cm_h: "Komentet", cm_ph: "Shkruaj një koment…", cm_send: "Dërgo", cm_login: "Hyr për të komentuar.", cm_empty: "Ende pa komente. Bëhu i pari!", cm_del: "Fshi", users_h: "Persona", photo_big: "Fotoja është shumë e madhe ose nuk lexohet.",
     ex_empty: "Ende asnjë plan publik. Bëhu i pari që e ndan!", ex_empty_q: "Asnjë plan për këtë qytet ende.", ex_off: "Kjo pjesë aktivizohet kur të lidhet databaza.",
     loading: "Duke ngarkuar…",
     b_public: "publik", b_private: "privat", b_local: "vetëm në këtë telefon", by: a => `nga ${a}`, days_badge: n => `${n}<br>ditë`,
@@ -795,7 +809,7 @@ const I18N = {
     mine_h: "My plans", mine_lead_in: "All the plans you've created or saved.",
     mine_lead_out: "Log in or create an account to keep your plans forever and share them.", mine_local: "Plans are saved on this device.",
     create_acct_btn: "Create account", empty_mine: "No plans yet.", create_first: "✨ Create your first",
-    ex_h: "Explore plans", ex_lead: "Plans shared by other travellers. Save any you like.", ex_ph: "Search a city or a person…", a_post: "📸 Post", a_edit_post: "📸 Edit post", post_h: "Post your plan", post_edit_h: "Edit post", post_sub: "Your post appears in \"Explore\", where others can like and comment on it.", post_photo: "Add a photo from your trip (optional)", post_photo_change: "Change photo", post_cap_lbl: "Caption", post_cap_ph: "How was the trip? Any tips for others?", post_btn: "Post", post_update: "Save changes", post_unpost: "Remove post", posting: "Posting…", posted: "Posted!", unposted: "Post removed.", post_login: "Create a free account to post your plans.", ex_open: "View plan", cm_h: "Comments", cm_ph: "Write a comment…", cm_send: "Send", cm_login: "Log in to comment.", cm_empty: "No comments yet. Be the first!", cm_del: "Delete", users_h: "People", photo_big: "The photo is too large or can't be read.",
+    ex_h: "Explore trips", ex_lead: "Plans shared by other travellers. Filter them, save them, or copy one and tailor it with AI.", exf_btn: "⚙️ Filters", exf_country: "Country", exf_country_ph: "e.g. Italy", exf_days: "Days", exf_type: "Type", exf_pop: "Popularity", exf_any: "All", exf_likes: "Most liked", exf_saves: "Most saved", exf_cmts: "Most commented", exf_clear: "Clear filters", a_copyai: "✨ Copy and personalise with AI", need_acct_copyai: "Create a free account to copy this plan and personalise it with AI.", copyai_ph: "e.g. Add a museum on day 2 or make it cheaper…", copyai_ok: "Plan copied. Type here what you want to change.", exf_found: n => `${n} ${n === 1 ? "plan" : "plans"}`, ex_ph: "Search a city or a person…", a_post: "📸 Post", a_edit_post: "📸 Edit post", post_h: "Post your plan", post_edit_h: "Edit post", post_sub: "Your post appears in \"Explore\", where others can like and comment on it.", post_photo: "Add a photo from your trip (optional)", post_photo_change: "Change photo", post_cap_lbl: "Caption", post_cap_ph: "How was the trip? Any tips for others?", post_btn: "Post", post_update: "Save changes", post_unpost: "Remove post", posting: "Posting…", posted: "Posted!", unposted: "Post removed.", post_login: "Create a free account to post your plans.", ex_open: "View plan", cm_h: "Comments", cm_ph: "Write a comment…", cm_send: "Send", cm_login: "Log in to comment.", cm_empty: "No comments yet. Be the first!", cm_del: "Delete", users_h: "People", photo_big: "The photo is too large or can't be read.",
     ex_empty: "No public plans yet. Be the first to share one!", ex_empty_q: "No plans for this city yet.", ex_off: "This section turns on once the database is connected.",
     loading: "Loading…",
     b_public: "public", b_private: "private", b_local: "this device only", by: a => `by ${a}`, days_badge: n => `${n}<br>${n === 1 ? "day" : "days"}`,
@@ -866,7 +880,7 @@ const I18N = {
     mine_h: "Meine Pläne", mine_lead_in: "Alle Pläne, die du erstellt oder gespeichert hast.",
     mine_lead_out: "Melde dich an oder erstelle ein Konto, um deine Pläne dauerhaft zu speichern und zu teilen.", mine_local: "Pläne werden auf diesem Gerät gespeichert.",
     create_acct_btn: "Konto erstellen", empty_mine: "Noch keine Pläne.", create_first: "✨ Ersten Plan erstellen",
-    ex_h: "Pläne entdecken", ex_lead: "Von anderen Reisenden geteilte Pläne. Speichere, was dir gefällt.", ex_ph: "Stadt oder Person suchen…", a_post: "📸 Posten", a_edit_post: "📸 Beitrag bearbeiten", post_h: "Plan posten", post_edit_h: "Beitrag bearbeiten", post_sub: "Dein Beitrag erscheint unter \"Entdecken\", wo andere ihn liken und kommentieren können.", post_photo: "Foto von deiner Reise hinzufügen (optional)", post_photo_change: "Foto ändern", post_cap_lbl: "Beschreibung", post_cap_ph: "Wie war die Reise? Tipps für andere?", post_btn: "Posten", post_update: "Änderungen speichern", post_unpost: "Beitrag entfernen", posting: "Wird gepostet…", posted: "Gepostet!", unposted: "Beitrag entfernt.", post_login: "Erstelle ein kostenloses Konto, um Pläne zu posten.", ex_open: "Plan ansehen", cm_h: "Kommentare", cm_ph: "Schreib einen Kommentar…", cm_send: "Senden", cm_login: "Melde dich an, um zu kommentieren.", cm_empty: "Noch keine Kommentare. Sei der Erste!", cm_del: "Löschen", users_h: "Personen", photo_big: "Das Foto ist zu groß oder kann nicht gelesen werden.",
+    ex_h: "Reisen entdecken", ex_lead: "Von anderen Reisenden geteilte Pläne. Filtern, speichern oder kopieren und mit KI anpassen.", exf_btn: "⚙️ Filter", exf_country: "Land", exf_country_ph: "z. B. Italien", exf_days: "Tage", exf_type: "Art", exf_pop: "Beliebtheit", exf_any: "Alle", exf_likes: "Meiste Likes", exf_saves: "Am häufigsten gespeichert", exf_cmts: "Meiste Kommentare", exf_clear: "Filter zurücksetzen", a_copyai: "✨ Kopieren und mit KI anpassen", need_acct_copyai: "Erstelle ein kostenloses Konto, um den Plan zu kopieren und mit KI anzupassen.", copyai_ph: "z. B. Füge an Tag 2 ein Museum hinzu oder mach es günstiger…", copyai_ok: "Plan kopiert. Schreib hier, was du ändern willst.", exf_found: n => `${n} ${n === 1 ? "Plan" : "Pläne"}`, ex_ph: "Stadt oder Person suchen…", a_post: "📸 Posten", a_edit_post: "📸 Beitrag bearbeiten", post_h: "Plan posten", post_edit_h: "Beitrag bearbeiten", post_sub: "Dein Beitrag erscheint unter \"Entdecken\", wo andere ihn liken und kommentieren können.", post_photo: "Foto von deiner Reise hinzufügen (optional)", post_photo_change: "Foto ändern", post_cap_lbl: "Beschreibung", post_cap_ph: "Wie war die Reise? Tipps für andere?", post_btn: "Posten", post_update: "Änderungen speichern", post_unpost: "Beitrag entfernen", posting: "Wird gepostet…", posted: "Gepostet!", unposted: "Beitrag entfernt.", post_login: "Erstelle ein kostenloses Konto, um Pläne zu posten.", ex_open: "Plan ansehen", cm_h: "Kommentare", cm_ph: "Schreib einen Kommentar…", cm_send: "Senden", cm_login: "Melde dich an, um zu kommentieren.", cm_empty: "Noch keine Kommentare. Sei der Erste!", cm_del: "Löschen", users_h: "Personen", photo_big: "Das Foto ist zu groß oder kann nicht gelesen werden.",
     ex_empty: "Noch keine öffentlichen Pläne. Teile als Erste:r!", ex_empty_q: "Noch keine Pläne für diese Stadt.", ex_off: "Dieser Bereich wird aktiv, sobald die Datenbank verbunden ist.",
     loading: "Lädt…",
     b_public: "öffentlich", b_private: "privat", b_local: "nur auf diesem Gerät", by: a => `von ${a}`, days_badge: n => `${n}<br>${n === 1 ? "Tag" : "Tage"}`,
@@ -915,7 +929,7 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
   document.querySelectorAll("#langSw button").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
   document.querySelectorAll('.seg[data-name="lang"] button').forEach(b => b.classList.toggle("on", b.dataset.v === LANG));
-  chDays(0); renderKidAges(); refreshAcct(); renderQuick(); renderHome();
+  chDays(0); renderKidAges(); refreshAcct(); renderQuick(); renderHome(); fillExTypes();
 }
 function setLang(l) {
   LANG = l; try { localStorage.setItem("udhetimi_lang", l); } catch {}
@@ -1240,6 +1254,14 @@ async function loadExplore() {
   loadUserSearch(s);
   let q = sb.from("plans").select("id,user_id,city,country,days,title,author_name,saves,likes,comments,photo_url,caption,created_at,posted_at").eq("is_public", true);
   if (s) q = q.ilike("city", `%${s}%`);
+  const F = exFilters();
+  if (F.country) q = q.ilike("country", `%${F.country}%`);
+  if (F.days === "4-7") q = q.gte("days", 4).lte("days", 7);
+  else if (F.days === "8+") q = q.gte("days", 8);
+  else if (F.days) q = q.eq("days", +F.days);
+  if (F.bud) q = q.eq("data->request->>budget", F.bud);
+  if (F.type) q = q.filter("data->request->interests", "cs", JSON.stringify([F.type]));
+  renderExFBtn(F);
   if (exSort === "following") {
     if (!user) { box.innerHTML = `<div class="empty">${t("follow_login")}<br><br><button class="btn2 pri" onclick="showAuth('signup')">${t("create_acct_btn")}</button></div>`; return; }
     const { data: f } = await sb.from("follows").select("followee").eq("follower", user.id);
@@ -1247,7 +1269,7 @@ async function loadExplore() {
     if (!ids.length) { box.innerHTML = `<div class="empty">${t("follow_none")}</div>`; return; }
     q = q.in("user_id", ids);
   }
-  q = exSort === "top" ? q.order("likes", { ascending: false }).order("created_at", { ascending: false })
+  q = exSort === "top" ? (F.pop === "likes" ? q : q.order(F.pop, { ascending: false })).order("likes", { ascending: false }).order("created_at", { ascending: false })
                        : q.order("posted_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
   const { data, error } = await q.limit(30);
   if (error) { box.innerHTML = `<div class="err" style="display:block">${esc(error.message)}</div>`; return; }
@@ -1258,8 +1280,30 @@ async function loadExplore() {
     likedSet = new Set((lk || []).map(x => x.plan_id));
   }
   feedRows = Object.fromEntries(rows.map(r => [r.id, r]));
-  box.innerHTML = rows.map(r => feedCard(r, likedSet.has(r.id))).join("") || `<div class="empty">${s ? t("ex_empty_q") : t("ex_empty")}</div>`;
+  const nf = F.n + (s ? 1 : 0);
+  box.innerHTML = (nf && rows.length ? `<div class="exmeta">${esc(t("exf_found", rows.length))}</div>` : "")
+    + (rows.map(r => feedCard(r, likedSet.has(r.id))).join("") || `<div class="empty">${nf ? t("ex_empty_q") : t("ex_empty")}${F.n ? `<br><br><button class="btn2" onclick="clearExF()">${t("exf_clear")}</button>` : ""}</div>`);
 }
+var EX_TYPES = ["histori","muze","art","arkitekture","natyre","pamje","ushqim","blerje","nate","femije","fe","fotografi"];
+function exFilters() {
+  const v = id => (document.getElementById(id) || {}).value || "";
+  const F = { country: v("exCountry").replace(/[%_,()]/g, "").trim(), days: v("exDays"), bud: v("exBud"), type: v("exType"), pop: v("exPop") || "likes" };
+  if (!["likes","saves","comments"].includes(F.pop)) F.pop = "likes";
+  if (F.type && !EX_TYPES.includes(F.type)) F.type = "";
+  F.n = [F.country, F.days, F.bud, F.type].filter(Boolean).length;
+  return F;
+}
+function renderExFBtn(F) { const b = document.getElementById("exFBtn"); if (b) b.textContent = t("exf_btn") + (F.n ? ` (${F.n})` : ""); }
+function toggleExF() { const f = document.getElementById("exF"); f.style.display = f.style.display === "none" ? "grid" : "none"; }
+function clearExF() { ["exCountry","exDays","exBud","exType"].forEach(id => { const e = document.getElementById(id); if (e) e.value = ""; }); document.getElementById("exPop").value = "likes"; loadExplore(); }
+function fillExTypes() {
+  if (!EX_TYPES) return;
+  const sel = document.getElementById("exType"); if (!sel) return; const cur = sel.value;
+  sel.innerHTML = `<option value="">${esc(t("exf_any"))}</option>` + EX_TYPES.map(k => `<option value="${k}">${esc(String(t("i_" + k)))}</option>`).join("");
+  sel.value = cur; renderExFBtn(exFilters());
+}
+["exDays","exBud","exType","exPop"].forEach(id => document.getElementById(id).addEventListener("change", () => { if (id === "exPop" && exSort !== "top") { exSort = "top"; document.querySelectorAll("#exTabs button").forEach(x => x.classList.toggle("on", x.dataset.s === "top")); } loadExplore(); }));
+document.getElementById("exCountry").addEventListener("input", () => { clearTimeout(exTimer); exTimer = setTimeout(loadExplore, 350); });
 let feedRows = {};
 const HEART = on => `<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" fill="${on ? "#C2412D" : "none"}" stroke="${on ? "#C2412D" : "currentColor"}" stroke-width="1.8"/></svg>`;
 const BUBBLE = `<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 5.5h16v10.5H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
@@ -1446,7 +1490,8 @@ function renderActions() {
     h += `<button class="btn2" onclick="deletePlan()">🗑️</button>`;
     if (row.localId && sb) { N.innerHTML = `${t("local_note")} <button class="btn2 pri" style="margin-top:8px" onclick="showAuth('signup')">${t("local_btn")}</button>`; N.style.display = "block"; }
   } else {
-    h += `<button class="btn2 pri" onclick="saveCopy()">${t("a_save")}</button>`;
+    h += `<button class="btn2 pri" onclick="copyPersonalize()">${t("a_copyai")}</button>`;
+    h += `<button class="btn2" onclick="saveCopy()">${t("a_save")}</button>`;
     h += `<button class="btn2" onclick="openShare()">${t("a_share2")}</button>`;
     h += `<button class="btn2" onclick="useAsTemplate()">${t("a_similar")}</button>`;
   }
@@ -1563,6 +1608,15 @@ async function saveCopy() {
   if (row.id) sb.rpc("count_save", { plan_id: row.id }).then(() => {}, () => {});
   toast(t("saved_ok"));
   openPlan(plan, data, "own");
+  return true;
+}
+async function copyPersonalize() {
+  if (!user) return showAuth("signup", t("need_acct_copyai"));
+  if (plan.kind === "now") return saveCopy();
+  const ok = await saveCopy(); if (!ok) return;
+  const box = document.getElementById("aiEd"), inp = document.getElementById("edIn");
+  if (!box || box.style.display === "none") return;
+  setTimeout(() => { box.scrollIntoView({ behavior: "smooth", block: "center" }); inp.placeholder = t("copyai_ph"); inp.focus({ preventScroll: true }); toast(t("copyai_ok")); }, 300);
 }
 async function deletePlan() {
   if (!confirmTap("del")) return;
@@ -1796,6 +1850,7 @@ function renderEditor() {
   const box = document.getElementById("aiEd");
   box.style.display = mode === "own" && plan.kind !== "now" ? "block" : "none";
   document.getElementById("edLog").innerHTML = "";
+  document.getElementById("edIn").placeholder = t("ed_ph");
   document.getElementById("edChips").innerHTML = t("ed_ex").map(x => `<span class="chip" onclick="document.getElementById('edIn').value=this.textContent;document.getElementById('edIn').focus()">${esc(x)}</span>`).join("");
 }
 function updateLocal(id, p) {
