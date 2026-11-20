@@ -77,6 +77,21 @@ export default {
     if (req.method === "GET") {
       const m = new URL(req.url).pathname.match(/^\/p\/([0-9a-f-]{36})$/i);
       if (m) return sharePage(m[1], env);
+      const u = new URL(req.url);
+      if (u.pathname === "/status") {
+        // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
+        const day = new Date().toISOString().slice(0, 10);
+        const out = { version: "p2.4", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
+          const t = Date.now();
+          try {
+            const r = await fetch(ep, { method: "POST", headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" }, body: "data=" + encodeURIComponent('[out:json][timeout:20];node["tourism"="museum"]["wikidata"](around:1500,48.2085,16.3721);out tags 20;'), signal: AbortSignal.timeout(25000) });
+            const txt = await r.text(); let n = null; try { n = JSON.parse(txt).elements.length; } catch {}
+            return { ep, status: r.status, ms: Date.now() - t, n, body: n == null ? txt.slice(0, 80) : undefined };
+          } catch (e) { return { ep, error: String(e.message || e), ms: Date.now() - t }; }
+        }));
+        return json(out, 200, H);
+      }
       return new Response("Vianto API OK", { headers: H });
     }
     if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: H });
