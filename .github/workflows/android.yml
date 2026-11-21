@@ -32,6 +32,8 @@ jobs:
           # Leja e vendndodhjes për "Çfarë të vizitoj tani?"
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
           grep -c ACCESS_FINE_LOCATION android/app/src/main/AndroidManifest.xml
+          # Leja për kujtesat e udhëtimit (Android 13+)
+          grep -q POST_NOTIFICATIONS android/app/src/main/AndroidManifest.xml || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
           npx capacitor-assets generate --android --iconBackgroundColor '#C8202F' --splashBackgroundColor '#F7F2EA' --splashBackgroundColorDark '#161616'
           npx cap sync android
 
