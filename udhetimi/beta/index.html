@@ -343,7 +343,7 @@
   .cmt b{color:var(--sea);cursor:pointer}
   .cmt small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
   .cmt small a{color:var(--terra);cursor:pointer}
-  .cmtform{display:flex;gap:8px;margin-top:10px}
+  .cmtform{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .cmtform input{flex:1;margin:0}
   /* ---- Modal postimi ---- */
   .photopick{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin:14px 0 4px;min-height:120px;border:2px dashed #D9C6A4;border-radius:16px;cursor:pointer;color:var(--sea);font-weight:600;padding:10px;text-align:center}
@@ -972,6 +972,23 @@
   .rpnote .undo{font-size:12.5px;text-decoration:underline;cursor:pointer;color:var(--mut);white-space:nowrap}
   .hb.rpl{background:color-mix(in srgb,var(--sun) 35%,var(--surface))!important;color:var(--text)!important}
   @media (max-width:560px){.dayhead{flex-wrap:wrap}.dhbtns{flex-direction:row;width:100%;justify-content:flex-start}}
+  /* Faza 13: raportimi dhe bllokimi */
+  .rlbl{font-weight:600;margin:12px 0 6px}
+  .rreasons{display:grid;gap:6px}
+  .rreasons label{display:flex!important;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line-2,#ddd);border-radius:12px;cursor:pointer;margin:0!important;font-weight:500!important}
+  .rreasons label:has(input:checked){border-color:var(--navy,#214F78);background:color-mix(in srgb,var(--navy,#214F78) 7%,transparent)}
+  .rreasons input,label.rules input{margin:0!important;width:18px!important;height:18px!important;min-height:0!important;padding:0!important;flex:none;accent-color:var(--navy,#214F78)}
+  .rblk{margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2,#ddd);color:var(--mut);font-size:14px}
+  .rblk .go{margin-top:10px}
+  .blist{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:12px 0}
+  .bitem{display:flex;align-items:center;gap:10px}
+  .bitem b{flex:1 1 0;display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bitem .btn2{flex:none!important;width:auto!important;margin:0!important}
+  .bitem .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;flex:none}
+  label.rules{display:flex!important;gap:10px;align-items:flex-start;margin:14px 0 2px!important;font-size:13px!important;font-weight:400!important;color:var(--mut)!important;line-height:1.45;cursor:pointer}
+  label.rules input{margin-top:2px!important}
+  label.rules a,.cmrules a{color:inherit;text-decoration:underline}
+  .cmrules{flex-basis:100%;color:var(--mut);font-size:12px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -1199,9 +1216,14 @@
     </label>
     <label data-i18n="post_cap_lbl"></label>
     <textarea id="postCap" maxlength="600" rows="3" data-i18n-ph="post_cap_ph"></textarea>
+    <label class="rules"><input type="checkbox" id="postRules"><span id="postRulesTxt"></span></label>
     <button class="go" id="postBtn" onclick="postNow()"></button>
     <button class="go sec" id="unpostBtn" onclick="unpost()" data-i18n="post_unpost"></button>
   </div>
+</div>
+
+<div class="modal-bg" id="repBg" onclick="if(event.target===this)closeModal('repBg')">
+  <div class="modal"><button class="x" onclick="closeModal('repBg')">×</button><div id="repBody"></div></div>
 </div>
 
 <div class="modal-bg" id="notifBg" onclick="if(event.target===this)closeModal('notifBg')">
@@ -1585,6 +1607,52 @@ const I18N = {
 };
 
 let LANG = (() => { try { const l = localStorage.getItem("udhetimi_lang"); if (I18N[l]) return l; } catch {} const n = (navigator.language || "").slice(0, 2); return I18N[n] ? n : "sq"; })();
+// ---- Faza 13: raportimi, bllokimi, rregullat ----
+Object.assign(I18N.sq, {
+  rep_btn: "⚑ Raporto", rep_user_btn: "⚑ Raporto ose blloko", rep_short: "Raporto",
+  rep_h_plan: "Raporto këtë plan", rep_h_comment: "Raporto komentin", rep_h_user: "Raporto përdoruesin",
+  rep_why: "Çfarë nuk shkon?", rep_r_spam: "Spam ose reklamë", rep_r_abuse: "Fyerje, urrejtje ose ngacmim", rep_r_sexual: "Përmbajtje seksuale",
+  rep_r_violence: "Dhunë ose kërcënim", rep_r_illegal: "Diçka e paligjshme", rep_r_other: "Tjetër",
+  rep_note: "Shpjegim (opsional)", rep_send: "Dërgo raportin", rep_pick: "Zgjidh një arsye.",
+  rep_done: "Faleminderit. Raportimet i shqyrtojmë brenda 24 orësh. Këtë nuk do ta shohësh më.",
+  rep_limit: "Ke dërguar shumë raportime sot. Provo nesër.", rep_login: "Kyçu për të raportuar ose bllokuar.",
+  blk_btn: n => `🚫 Blloko ${n}`, blk_sub: "Nuk do t'i shohësh më planet dhe komentet e tij. Ai nuk do të mund t'i komentojë planet e tua ose të të ndjekë.",
+  blk_done: "U bllokua.", unblk_btn: "Zhblloko", unblk_done: "U zhbllokua.", blk_is: "Ke bllokuar këtë përdorues.",
+  blk_list: "🚫 Përdoruesit e bllokuar", blk_none: "Nuk ke bllokuar askënd.",
+  rules_ok: u => `Pranoj <a href="${u}" target="_blank" rel="noopener">rregullat e komunitetit</a>: pa fyerje, urrejtje, përmbajtje seksuale, dhunë ose gjëra të paligjshme.`,
+  rules_need: "Prano rregullat e komunitetit për të postuar.",
+  cm_rules: u => `Komentet që shkelin <a href="${u}" target="_blank" rel="noopener">rregullat</a> hiqen.`,
+});
+Object.assign(I18N.en, {
+  rep_btn: "⚑ Report", rep_user_btn: "⚑ Report or block", rep_short: "Report",
+  rep_h_plan: "Report this plan", rep_h_comment: "Report comment", rep_h_user: "Report user",
+  rep_why: "What's wrong?", rep_r_spam: "Spam or advertising", rep_r_abuse: "Insults, hate or harassment", rep_r_sexual: "Sexual content",
+  rep_r_violence: "Violence or threats", rep_r_illegal: "Something illegal", rep_r_other: "Something else",
+  rep_note: "Details (optional)", rep_send: "Send report", rep_pick: "Choose a reason.",
+  rep_done: "Thanks. We review reports within 24 hours. You won't see this again.",
+  rep_limit: "You've sent too many reports today. Try again tomorrow.", rep_login: "Log in to report or block.",
+  blk_btn: n => `🚫 Block ${n}`, blk_sub: "You won't see their plans or comments anymore. They won't be able to comment on your plans or follow you.",
+  blk_done: "Blocked.", unblk_btn: "Unblock", unblk_done: "Unblocked.", blk_is: "You've blocked this user.",
+  blk_list: "🚫 Blocked users", blk_none: "You haven't blocked anyone.",
+  rules_ok: u => `I accept the <a href="${u}" target="_blank" rel="noopener">community rules</a>: no insults, hate, sexual content, violence or anything illegal.`,
+  rules_need: "Accept the community rules to post.",
+  cm_rules: u => `Comments that break the <a href="${u}" target="_blank" rel="noopener">rules</a> are removed.`,
+});
+Object.assign(I18N.de, {
+  rep_btn: "⚑ Melden", rep_user_btn: "⚑ Melden oder blockieren", rep_short: "Melden",
+  rep_h_plan: "Diesen Plan melden", rep_h_comment: "Kommentar melden", rep_h_user: "Nutzer melden",
+  rep_why: "Was ist das Problem?", rep_r_spam: "Spam oder Werbung", rep_r_abuse: "Beleidigung, Hass oder Belästigung", rep_r_sexual: "Sexuelle Inhalte",
+  rep_r_violence: "Gewalt oder Drohungen", rep_r_illegal: "Etwas Illegales", rep_r_other: "Etwas anderes",
+  rep_note: "Details (optional)", rep_send: "Meldung senden", rep_pick: "Wähle einen Grund.",
+  rep_done: "Danke. Wir prüfen Meldungen innerhalb von 24 Stunden. Du siehst diesen Inhalt nicht mehr.",
+  rep_limit: "Du hast heute zu viele Meldungen gesendet. Versuch es morgen wieder.", rep_login: "Melde dich an, um zu melden oder zu blockieren.",
+  blk_btn: n => `🚫 ${n} blockieren`, blk_sub: "Du siehst keine Pläne oder Kommentare mehr von dieser Person. Sie kann deine Pläne nicht mehr kommentieren und dir nicht folgen.",
+  blk_done: "Blockiert.", unblk_btn: "Blockierung aufheben", unblk_done: "Blockierung aufgehoben.", blk_is: "Du hast diese Person blockiert.",
+  blk_list: "🚫 Blockierte Nutzer", blk_none: "Du hast niemanden blockiert.",
+  rules_ok: u => `Ich akzeptiere die <a href="${u}" target="_blank" rel="noopener">Community-Regeln</a>: keine Beleidigungen, kein Hass, keine sexuellen Inhalte, keine Gewalt und nichts Illegales.`,
+  rules_need: "Akzeptiere die Community-Regeln, um zu posten.",
+  cm_rules: u => `Kommentare, die gegen die <a href="${u}" target="_blank" rel="noopener">Regeln</a> verstoßen, werden entfernt.`,
+});
 const t = (k, ...a) => { const v = I18N[LANG][k] ?? I18N.sq[k] ?? k; return typeof v === "function" ? v(...a) : v; };
 function applyLang() {
   document.documentElement.lang = LANG;
@@ -1647,6 +1715,8 @@ async function loadMyProfile() {
     data = { id: user.id, name, bio: "" };
   }
   myProfile = data; refreshAcct();
+  await loadBlocks();
+  if (view === "explore") loadExplore();
 }
 function refreshAcct() {
   const b = document.getElementById("acctBtn");
@@ -1707,6 +1777,7 @@ function showAccount() {
     <div style="color:var(--mut)">${esc(user.email)}</div>
     <button class="go" onclick="closeModal('authBg');openProfile(user.id)">${t("my_profile")}</button>
     <button class="go sec" onclick="closeModal('authBg');go('mine')">${t("my_plans_btn")}</button>
+    <button class="go sec" onclick="showBlocked()">${t("blk_list")}</button>
     <button class="go danger" onclick="doLogout()">${t("logout")}</button>
     <div class="accx"><a href="privacy.html?lang=${LANG}">${t("privacy")}</a><button class="link" onclick="askDeleteAccount()">${t("del_acc")}</button></div>`;
   openModal("authBg");
@@ -1974,7 +2045,7 @@ async function loadExplore() {
                        : q.order("posted_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
   const { data, error } = await q.limit(30);
   if (error) { box.innerHTML = `<div class="err" style="display:block">${esc(error.message)}</div>`; return; }
-  const rows = data || [];
+  const rows = (data || []).filter(r => !isBlocked(r.user_id) && !wasReported("plan", r.id));
   let likedSet = new Set();
   if (user && rows.length) {
     const { data: lk } = await sb.from("likes").select("plan_id").eq("user_id", user.id).in("plan_id", rows.map(r => r.id));
@@ -2036,8 +2107,9 @@ async function feedLike(id, btn) {
 async function loadUserSearch(s) {
   const ub = document.getElementById("exUsers");
   if (!s || s.length < 2) { ub.innerHTML = ""; return; }
-  const { data } = await sb.from("profiles").select("id,name,bio").ilike("name", `%${s}%`).limit(8);
+  let { data } = await sb.from("profiles").select("id,name,bio").ilike("name", `%${s}%`).limit(8);
   if (aVal("exSearch").replace(/[%_,()]/g, "").trim() !== s) return;
+  if (data) data = data.filter(u => !isBlocked(u.id));
   ub.innerHTML = (data || []).length ? `<div class="uhead">${esc(t("users_h"))}</div><div class="ulist">` + data.map(u =>
     `<button class="uchip" onclick="openProfile('${u.id}')"><span class="av" style="background:${avColor(u.id)}">${esc(initials(u.name))}</span><span><b>${esc(u.name || "—")}</b>${u.bio ? `<small>${esc(u.bio.slice(0, 60))}</small>` : ""}</span></button>`).join("") + `</div>` : "";
 }
@@ -2072,9 +2144,11 @@ async function openProfile(id) {
     <span><b id="pfFollowers">${fol.count || 0}</b> ${t("pf_followers")}</span><span><b>${fing.count || 0}</b> ${t("pf_following")}</span><span><b>${likesTotal}</b> ❤️</span>`;
   let a = "";
   if (isMe) a = `<button class="btn2" onclick="toggleEdit()">${t("pf_edit")}</button>`;
-  else a = `<button class="btn2 ${amI.data ? "" : "pri"}" id="followBtn" data-on="${amI.data ? 1 : 0}" onclick="toggleFollow()">${amI.data ? t("unfollow") : t("follow")}</button>`;
+  else if (!isBlocked(id)) a = `<button class="btn2 ${amI.data ? "" : "pri"}" id="followBtn" data-on="${amI.data ? 1 : 0}" onclick="toggleFollow()">${amI.data ? t("unfollow") : t("follow")}</button>`;
   a += `<button class="btn2" onclick="copyProfileLink()">🔗 ${t("copy")}</button>`;
+  if (!isMe) a += `<button class="btn2" onclick="openReport('user',pfUser,pfUser,document.getElementById('pfName').textContent)">${t("rep_user_btn")}</button>`;
   document.getElementById("pfActions").innerHTML = a;
+  if (!isMe && isBlocked(id)) { document.getElementById("pfList").innerHTML = `<div class="empty">${esc(t("blk_is"))}<br><br><button class="btn2" onclick="unblockUser('${id}')">${esc(t("unblk_btn"))}</button></div>`; return; }
   document.getElementById("pfList").innerHTML = plans.map(r => planCard({ ...r, mine: isMe, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` })).join("")
     || `<div class="empty">${t("pf_empty")}</div>`;
   if (isMe) { document.getElementById("pfNameIn").value = prof?.name || ""; document.getElementById("pfBioIn").value = prof?.bio || ""; }
@@ -2248,6 +2322,7 @@ function renderActions() {
     h += `<button class="btn2" onclick="saveCopy()">${t("a_save")}</button>`;
     h += `<button class="btn2" onclick="openShare()">${t("a_share2")}</button>`;
     h += `<button class="btn2" onclick="useAsTemplate()">${t("a_similar")}</button>`;
+    if (row.id && row.user_id && (!user || row.user_id !== user.id)) h += `<button class="btn2" onclick="openReport('plan',row.id,row.user_id,row.author_name)">${t("rep_btn")}</button>`;
   }
   A.innerHTML = h;
 }
@@ -2607,6 +2682,9 @@ function openPost() {
   document.getElementById("postBtn").textContent = posted ? t("post_update") : t("post_btn");
   document.getElementById("unpostBtn").style.display = posted ? "block" : "none";
   document.getElementById("postFile").value = "";
+  document.getElementById("postRulesTxt").innerHTML = t("rules_ok", RULES_URL());
+  let rk = false; try { rk = localStorage.getItem("viaro_rules") === "1"; } catch {}
+  document.getElementById("postRules").checked = rk || posted;
   openModal("postBg");
 }
 async function pickPhoto(file) {
@@ -2622,6 +2700,8 @@ async function pickPhoto(file) {
   } catch { postBlob = null; toast(t("photo_big")); }
 }
 async function postNow() {
+  if (!document.getElementById("postRules").checked) return toast(t("rules_need"));
+  try { localStorage.setItem("viaro_rules", "1"); } catch {}
   const btn = document.getElementById("postBtn"); btn.disabled = true; btn.textContent = t("posting");
   try {
     let photo_url = row.photo_url || null;
@@ -2657,16 +2737,16 @@ async function loadComments() {
   card.style.display = "block";
   document.getElementById("cmtH").textContent = `${t("cm_h")} (${row.comments || 0})`;
   const form = document.getElementById("cmtForm");
-  form.innerHTML = user ? `<input id="cmtIn" maxlength="500" placeholder="${esc(t("cm_ph"))}" onkeydown="if(event.key==='Enter')addComment()"><button class="btn2 pri" onclick="addComment()">${esc(t("cm_send"))}</button>`
+  form.innerHTML = user ? `<input id="cmtIn" maxlength="500" placeholder="${esc(t("cm_ph"))}" onkeydown="if(event.key==='Enter')addComment()"><button class="btn2 pri" onclick="addComment()">${esc(t("cm_send"))}</button><small class="cmrules">${t("cm_rules", RULES_URL())}</small>`
                         : `<button class="btn2 pri" onclick="showAuth('login')">${esc(t("cm_login"))}</button>`;
   const id = row.id;
   const { data } = await sb.from("comments").select("id,user_id,author_name,body,created_at").eq("plan_id", id).order("created_at", { ascending: true }).limit(200);
   if (row.id !== id) return;
-  const list = data || [];
+  const list = (data || []).filter(c => !isBlocked(c.user_id) && !wasReported("comment", c.id));
   row.comments = list.length; document.getElementById("cmtH").textContent = `${t("cm_h")} (${list.length})`;
   document.getElementById("cmtList").innerHTML = list.length ? list.map(c => `<div class="cmt">
       <span class="av" style="background:${avColor(c.user_id)}" onclick="openProfile('${c.user_id}')">${esc(initials(c.author_name))}</span>
-      <div><b onclick="openProfile('${c.user_id}')">${esc(c.author_name || "—")}</b> ${esc(c.body)}<small>${esc(ago(c.created_at))}${user && (user.id === c.user_id || user.id === row.user_id) ? ` · <a onclick="delComment('${c.id}')">${esc(t("cm_del"))}</a>` : ""}</small></div></div>`).join("")
+      <div><b onclick="openProfile('${c.user_id}')">${esc(c.author_name || "—")}</b> ${esc(c.body)}<small>${esc(ago(c.created_at))}${user && (user.id === c.user_id || user.id === row.user_id) ? ` · <a onclick="delComment('${c.id}')">${esc(t("cm_del"))}</a>` : ""}${!user || user.id !== c.user_id ? ` · <a onclick="openReport('comment','${c.id}','${c.user_id}',${esc(JSON.stringify(c.author_name || "—"))})">${esc(t("rep_short"))}</a>` : ""}</small></div></div>`).join("")
     : `<div class="empty" style="padding:14px 0">${esc(t("cm_empty"))}</div>`;
 }
 async function addComment() {
@@ -2682,6 +2762,86 @@ async function delComment(id) {
   const { error } = await sb.from("comments").delete().eq("id", id);
   if (error) return toast(t("err") + error.message);
   await loadComments(); renderActions();
+}
+
+// ================== RAPORTIMI DHE BLLOKIMI ==================
+let BLOCKED = new Set();
+let REPORTED = new Set((() => { try { return JSON.parse(localStorage.getItem("viaro_rep") || "[]"); } catch { return []; } })());
+const RULES_URL = () => `privacy.html?lang=${LANG}#rules`;
+const isBlocked = id => !!id && BLOCKED.has(id);
+const wasReported = (k, id) => REPORTED.has(k + ":" + id);
+async function loadBlocks() {
+  BLOCKED = new Set();
+  if (!sb || !user) return;
+  const { data } = await sb.from("user_blocks").select("blocked").eq("blocker", user.id).limit(500);
+  BLOCKED = new Set((data || []).map(x => x.blocked));
+}
+const REP_REASONS = ["spam", "abuse", "sexual", "violence", "illegal", "other"];
+let repCtx = null;
+function openReport(kind, target, who, name) {
+  if (!sb) return toast(t("accounts_off"));
+  if (!user) return showAuth("login", t("rep_login"));
+  repCtx = { kind, target, who, name: name || "—" };
+  const canBlock = who && who !== user.id;
+  const blocked = isBlocked(who);
+  document.getElementById("repBody").innerHTML = `<h3>${esc(t("rep_h_" + kind))}</h3>
+    ${who === user.id ? "" : `<div class="rlbl">${esc(t("rep_why"))}</div>
+    <div class="rreasons">${REP_REASONS.map(r => `<label><input type="radio" name="repR" value="${r}"><span>${esc(t("rep_r_" + r))}</span></label>`).join("")}</div>
+    <label>${esc(t("rep_note"))}</label><textarea id="repNote" maxlength="500" rows="2"></textarea>
+    <button class="go" id="repSend" onclick="sendReport()">${esc(t("rep_send"))}</button>`}
+    ${canBlock ? `<div class="rblk">${blocked ? `<div>${esc(t("blk_is"))}</div><button class="go sec" onclick="unblockUser('${who}')">${esc(t("unblk_btn"))}</button>`
+      : `<div>${esc(t("blk_sub"))}</div><button class="go danger" onclick="blockUser('${who}')">${esc(t("blk_btn", repCtx.name))}</button>`}</div>` : ""}`;
+  openModal("repBg");
+}
+async function sendReport() {
+  const c = repCtx; if (!c) return;
+  const r = document.querySelector('input[name="repR"]:checked')?.value;
+  if (!REP_REASONS.includes(r)) return toast(t("rep_pick"));
+  const b = document.getElementById("repSend"); b.disabled = true;
+  const note = (document.getElementById("repNote").value || "").trim().slice(0, 500) || null;
+  const { error } = await sb.from("content_reports").insert({ kind: c.kind, target: c.target, reason: r, note });
+  b.disabled = false;
+  if (error && error.code !== "23505") return toast(/report_limit/.test(error.message) ? t("rep_limit") : t("err") + error.message);
+  REPORTED.add(c.kind + ":" + c.target);
+  try { localStorage.setItem("viaro_rep", JSON.stringify([...REPORTED].slice(-300))); } catch {}
+  closeModal("repBg"); toast(t("rep_done"));
+  afterModeration(c.kind === "comment" ? "comment" : c.kind);
+}
+async function blockUser(id) {
+  if (!user || !id || id === user.id) return;
+  const { error } = await sb.rpc("block_user", { p_user: id });
+  if (error) return toast(t("err") + error.message);
+  BLOCKED.add(id); closeModal("repBg"); toast(t("blk_done"));
+  afterModeration("block");
+}
+async function unblockUser(id) {
+  const { error } = await sb.from("user_blocks").delete().eq("blocker", user.id).eq("blocked", id);
+  if (error) return toast(t("err") + error.message);
+  BLOCKED.delete(id); closeModal("repBg"); toast(t("unblk_done"));
+  if (document.getElementById("authBg").classList.contains("on")) showBlocked();
+  else afterModeration("unblock");
+}
+function afterModeration(what) {
+  if (view === "plan") {
+    if (what === "comment") { loadComments(); return; }
+    if (what === "unblock") { renderActions(); loadComments(); return; }
+    if (mode !== "own") { go("explore"); loadExplore(); return; }
+    loadComments(); return;
+  }
+  if (view === "profile" && pfUser) { openProfile(pfUser); return; }
+  if (view === "explore") loadExplore();
+}
+async function showBlocked() {
+  const B = document.getElementById("authBody");
+  B.innerHTML = `<h3>${esc(t("blk_list"))}</h3><div class="empty">${t("loading")}</div>`;
+  openModal("authBg");
+  const { data } = await sb.from("user_blocks").select("blocked").eq("blocker", user.id).order("created_at", { ascending: false }).limit(500);
+  const ids = (data || []).map(x => x.blocked);
+  BLOCKED = new Set(ids);
+  let names = {};
+  if (ids.length) { const { data: pr } = await sb.from("profiles").select("id,name").in("id", ids); (pr || []).forEach(p => names[p.id] = p.name); }
+  B.innerHTML = `<h3>${esc(t("blk_list"))}</h3>` + (ids.length ? `<div class="blist">${ids.map(id => `<div class="bitem"><span class="av" style="background:${avColor(id)}">${esc(initials(names[id]))}</span><b>${esc(names[id] || "—")}</b><button class="btn2" onclick="unblockUser('${id}')">${esc(t("unblk_btn"))}</button></div>`).join("")}</div>`
+    : `<div class="empty">${esc(t("blk_none"))}</div>`) + `<button class="go sec" onclick="showAccount()">${esc(t("back"))}</button>`;
 }
 
 // ================== NDARJA ==================
@@ -3518,7 +3678,7 @@ async function openNotifs() {
   const { data, error } = await sb.from("notifications").select("id,actor_id,actor_name,type,plan_id,plan_city,body,read,created_at")
     .eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
   if (error) { box.innerHTML = `<div class="empty">${esc(t("notif_empty"))}</div>`; return; }
-  notifRows = data || [];
+  notifRows = (data || []).filter(n => !isBlocked(n.actor_id));
   box.innerHTML = notifRows.map((n, i) => {
     const who = `<b>${esc(n.actor_name || "—")}</b>`, city = esc(n.plan_city || "");
     const txt = n.type === "like" ? t("n_like", who, city) : n.type === "comment" ? t("n_comment", who, city) : t("n_follow", who);
@@ -3600,7 +3760,7 @@ function downloadIcs() {
     if (user) loadMyProfile();
     sb.auth.onAuthStateChange((ev, session) => {
       const was = user; user = session?.user || null; refreshAcct();
-      if (!user) myProfile = null;
+      if (!user) { myProfile = null; BLOCKED = new Set(); }
       if (!was && user) loadMyProfile();
       if (ev === "PASSWORD_RECOVERY") showAuth("newpass");
       if (!was && user && ev === "SIGNED_IN") { let pj = null; try { pj = sessionStorage.getItem("viaro_join"); } catch {} if (pj) setTimeout(() => handleJoin(pj), 300); migrateLocal(); if (view === "mine") loadMine(); if (view === "plan" && mode === "own" && row.localId) renderActions(); }
