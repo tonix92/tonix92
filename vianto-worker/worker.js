@@ -84,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p10.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p11.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -429,6 +429,7 @@ Rules:
 - Include a lunch stop (and dinner if the day ends after 19:00) as {"poi": null, "type": "meal"} with a suggestion of the neighbourhood and a typical local dish. Do not name specific restaurants.
 - Prioritise famous places (higher "pop") and the traveller's interests. Do not repeat a place.
 - Give realistic visit durations (big museums 2–3h, viewpoints 20–30 min) and travel time between stops.
+- Keep each day geographically compact: group stops by neighbourhood, order them so consecutive stops are close, and never put two consecutive stops more than ~40 minutes apart (on foot) or ~50 minutes (public transport). Far-away places go on their own day with nearby stops, or are left out.
 - If children are travelling: pick child-friendly stops first, keep museum visits short, add a rest or playground/park break every 2–3 hours, avoid long walks between stops, and mention family/child tickets. For children aged 0–3 add stroller/nap tips; for teenagers prefer interactive and active places.
 - "budget": realistic ESTIMATES in EUR for the WHOLE group per day: "stay" = one night of accommodation for the group in this city matching the budget level (0 on the last day of a multi-day trip; for a 1-day trip assume no overnight stay = 0), entry tickets for the planned stops, food incl. the meals, local transport, parking only when travelling by car, paid activities, other. Numbers only, no text. Match the budget level.
 - Write all human-readable text in ${LANG[p.lang]}. Keep notes short (1–2 sentences) and practical (tickets, best time, queues).
@@ -726,6 +727,30 @@ async function finishPlan(env, plan, p, byId, opts = {}) {
   const dates = tripDates(p.date, p.days);
   const used = [...new Set((plan.days || []).flatMap(d => (d.stops || []).map(s => s.poi)).filter(id => id && byId[id]))].map(id => byId[id]);
   await enrichPois(used, opts.enrichMax ?? 15);
+  // Faza 11: asnjë kalim i pamundur. Një vend shumë larg nga pjesa tjetër e ditës kalon në ditën ku përshtatet më mirë.
+  const MAXLEG = { kembe: 40, publik: 50, vetura: 60 }[p.transport] || 40;
+  const legMin = (a, b) => estimateLeg(hav(a.lat, a.lon, b.lat, b.lon), p.transport).min;
+  const geoOf = s => s.poi && byId[s.poi] ? byId[s.poi] : null;
+  const DAYS = plan.days || [];
+  if (!opts.keepOrder && DAYS.length > 1) {
+    for (const [i, d] of DAYS.entries()) {
+      for (const s of [...(d.stops || [])]) {
+        const g = geoOf(s); if (!g || s.type === "meal") continue;
+        const others = (d.stops || []).filter(x => x !== s).map(geoOf).filter(Boolean);
+        if (others.length < 2) continue;
+        const near = Math.min(...others.map(o => legMin(g, o)));
+        if (near <= MAXLEG) continue;
+        let best = null, bestMin = MAXLEG * 0.6;
+        DAYS.forEach((e, j) => { if (j === i) return; for (const o of (e.stops || []).map(geoOf).filter(Boolean)) { const m = legMin(g, o); if (m < bestMin) { bestMin = m; best = j; } } });
+        if (best != null) {
+          d.stops = d.stops.filter(x => x !== s);
+          const tgt = DAYS[best].stops, lastMeal = tgt.length && tgt[tgt.length - 1].type === "meal" ? tgt.length - 1 : tgt.length;
+          tgt.splice(lastMeal, 0, s);
+          (DAYS[best].moved_in = DAYS[best].moved_in || []).push(s.name || g.name);
+        }
+      }
+    }
+  }
   for (const [i, d] of (plan.days || []).entries()) {
     const dt = dates[i] || null;
     if (dt) { d.date = isoDay(dt); }
@@ -764,8 +789,26 @@ async function finishPlan(env, plan, p, byId, opts = {}) {
     const changed = alt.some((s, k) => s !== stops[k]);
     const b = changed ? await tryOrder(alt, false) : null;
     let best = b && b.score + 5 < a.score ? b : a;
-    const optimized = best === b;
-    if (env.ORS_KEY) best = await tryOrder(optimized ? alt : stops, true);
+    let optimized = best === b;
+    // Kontrolli i fortë: nëse mbetet një kalim mbi kufirin, hiqet vendi që e shkakton (jo vaktet, minimumi 2 vizita)
+    for (let g = 0; g < 2 && !opts.keepOrder; g++) {
+      const long = [...best.legsByIdx.entries()].find(([, l]) => l.min > MAXLEG);
+      if (!long) break;
+      const ord = best.stops, k = long[0];
+      const visits = ord.filter(x => x.lat != null && x.type !== "meal");
+      if (visits.length <= 2) break;
+      const nn = x => Math.min(...ord.filter(y => y !== x && y.lat != null).map(y => hav(x.lat, x.lon, y.lat, y.lon)));
+      const prevK = [...ord.slice(0, k)].reverse().find(x => x.lat != null);
+      const cand = [ord[k], prevK].filter(x => x && x.type !== "meal").sort((x, y) => nn(y) - nn(x))[0];
+      if (!cand) break;
+      (d.far_removed = d.far_removed || []).push(cand.name);
+      stops = stops.filter(x => x !== cand && x.poi !== cand.poi);
+      const alt2 = reorderDay(stops);
+      const c1 = await tryOrder(stops, false), c2 = await tryOrder(alt2, false);
+      best = c2.score + 5 < c1.score ? c2 : c1; optimized = best === c2;
+      if (optimized) stops = alt2;
+    }
+    if (env.ORS_KEY) best = await tryOrder(optimized && !d.far_removed ? alt : stops, true);
     d.stops = best.stops.map(({ _oh, ...s }) => s);
     d.route = [...best.legsByIdx.entries()].filter(([, l]) => l.line).map(([k, l]) => ({ to: k, line: thin(l.line) }));
     d.routed = !!d.route.length;
