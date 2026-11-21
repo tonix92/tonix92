@@ -857,6 +857,23 @@
   #printArea .pr-wm{display:flex;align-items:center;gap:8px;height:auto}
   #printArea .pr-wm svg{width:26px;height:26px}
   #printArea .pr-wm span{font-family:"Fraunces",Georgia,serif;font-weight:800;font-size:22px;letter-spacing:-.04em;color:#1F1A17}
+  /* Faza 9: Explore Around Me */
+  .exm{max-height:90vh;overflow-y:auto}
+  .exm .seg{margin-top:12px}
+  .exgo{display:flex;flex-direction:column;gap:8px;margin-top:12px}.exgo .go{margin-top:0}
+  .exhead{font-size:13px;color:var(--mut);margin:14px 0 6px}
+  .exitem{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;background:var(--surface)}
+  .exitem b{display:block;font-size:15px}.exitem small{display:block;color:var(--mut);font-size:12.5px;margin-top:1px}
+  .exrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 2px}
+  .exrow .tchip svg{width:14px;height:14px}
+  .exst{font-size:12.5px;font-weight:600;color:var(--mut)}.exst.open{color:#2F7D4F}.exst.opens{color:#8A5A12}
+  html[data-theme=dark] .exst.open{color:#7BCB97}html[data-theme=dark] .exst.opens{color:#E6C07A}
+  .exitem .links{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:6px}
+  .exitem .links a{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--terra)}
+  .exitem .links svg{width:14px;height:14px}
+  .exadd{margin-left:auto;font-size:13px!important;padding:6px 12px!important}
+  .cadd{cursor:pointer}
+  .nowbtns{display:flex;gap:8px;flex-wrap:wrap}
   /* Faza 8: Live Travel Assistant */
   .chatfab{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:40;align-items:center;gap:8px;border:0;border-radius:999px;padding:13px 18px;background:var(--terra);color:#fff;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 10px 24px -8px rgba(120,20,30,.55)}
   .chatfab svg{width:20px;height:20px}
@@ -985,7 +1002,7 @@
     <div class="quota" id="quota"></div>
     <div class="err" id="err"></div>
   </div>
-  <div class="card nowcard"><div><b data-i18n="now_h"></b><small data-i18n="now_sub"></small></div><button class="btn2 pri" onclick="openNow()" data-i18n="now_btn"></button></div>
+  <div class="card nowcard"><div><b data-i18n="now_h"></b><small data-i18n="now_sub"></small></div><div class="nowbtns"><button class="btn2 pri" onclick="openNow()" data-i18n="now_btn"></button><button class="btn2" onclick="openExplore(false)" data-i18n="nr_btn"></button></div></div>
   <div class="loading card" id="loading">
     <div class="lmk" aria-hidden="true"><svg id="lmkSvg" viewBox="0 0 100 100"></svg><span id="lmkName"></span></div>
     <b id="loadMsg" aria-live="polite"></b>
@@ -1161,6 +1178,20 @@
     <div class="dhint" id="rpWait" style="display:none" data-i18n="rp_wait"></div>
   </div>
 </div>
+<div class="modal-bg" id="exBg" onclick="if(event.target===this)closeModal('exBg')">
+  <div class="modal exm">
+    <button class="x" onclick="closeModal('exBg')">×</button>
+    <h3 data-i18n="nr_h"></h3>
+    <div class="dhint" data-i18n="nr_sub"></div>
+    <div class="seg keepemo" id="exCat"><button data-v="see" class="on" data-i18n="nr_see"></button><button data-v="food" data-i18n="nr_food"></button><button data-v="cafe" data-i18n="nr_cafe"></button></div>
+    <label data-i18n="nr_time"></label>
+    <div class="seg" id="exMin"><button data-v="60">1h</button><button data-v="120" class="on">2h</button><button data-v="180">3h</button><button data-v="300">5h</button></div>
+    <div class="exgo"><button class="go" id="exGeo" onclick="runExplore(true)" data-i18n="now_geo"></button><button class="btn2" id="exStop" onclick="runExplore(false)" data-i18n="nr_from_stop"></button></div>
+    <div class="err" id="exErr" style="display:none"></div>
+    <div class="dhint" id="exWait" style="display:none" data-i18n="nr_wait"></div>
+    <div id="nrList"></div>
+  </div>
+</div>
 <div class="modal-bg" id="chatBg" onclick="if(event.target===this)closeModal('chatBg')">
   <div class="modal chatm">
     <button class="x" onclick="closeModal('chatBg')">×</button>
@@ -1204,6 +1235,10 @@ const I18N = {
     del_yes: "Po, fshije përgjithmonë", del_no: "Anulo", del_done: "Llogaria u fshi.", del_err: "Fshirja nuk u krye. Provo përsëri pas pak.",
     date_q: "Kur fillon udhëtimi?", date_hint: "Opsionale: me datë kontrollohen oraret e hapjes për çdo ditë.", h_closed: "I mbyllur atë ditë", h_closes: "Mbyllet para se ta përfundosh vizitën", h_unconf: "orari i pakonfirmuar", h_unknown: "Orari nuk dihet — kontrolloje para se të shkosh", free: "Hyrje falas", fee_yes: "Me pagesë (çmimi nuk dihet)", unverified: "I pakonfirmuar", overtime: m => `Kjo ditë zgjat rreth ${m} min më shumë se koha që zgjodhe.`, est_note: "~ = kohë e vlerësuar, jo e matur.", gm_leg: "Rruga ↗",
     bud_h: "Buxheti", bud_est: "Vlerësim për gjithë grupin — çmimet e vërteta mund të ndryshojnë.", bud_none: "Ky plan nuk ka ende vlerësim buxheti.", bud_calc: "Llogarit buxhetin me AI", bud_msg: "Llogarit buxhetin për këtë plan", bud_total: "Gjithsej", bud_pp: n => `Për person (${n})`, bud_my: "Buxheti yt", bud_left: "Të mbeten", bud_over: "Mbi buxhet", bud_ver: "Çmime nga OpenStreetMap (të verifikuara)", bud_free: "Alternativa falas", bk_tickets: "Bileta", bk_food: "Ushqim", bk_transport: "Transport", bk_parking: "Parkim", bk_activities: "Aktivitete", bk_other: "Të tjera", off_save: "⬇ Ruaj për offline", off_remove: "✓ I ruajtur offline · Hiqe", off_hint: "Plani, oraret, adresat dhe shënimet hapen edhe pa internet. Harta pa internet shfaq vetëm pikat.", off_saved: "Plani u ruajt në këtë pajisje.", off_removed: "U hoq nga pajisja.", off_full: "Nuk ka vend në pajisje.", off_list: "Të ruajtura për offline", off_later: "Pa internet: ndryshimi do të ruhet kur të kthehet lidhja.", off_synced: n => `U sinkronizuan ${n} plane.`, off_mode: "Je pa internet. Këtu janë planet e ruajtura në pajisje.", note_add: "＋ Shënim", note_edit: "Ndrysho shënimin", loc: "Ku jam unë", you_here: "Ti je këtu",
+    nr_btn: "Afër meje", nr_h: "Çfarë ka afër?", nr_sub: "Vende të verifikuara afër teje, të hapura sot, me distancën dhe kohën e rrugës.", nr_see: "🏛 Vende", nr_food: "🍽 Ushqim", nr_cafe: "☕ Kafe",
+    nr_time: "Sa kohë ke?", nr_from_stop: "Kërko afër ndalesës së radhës", nr_wait: "Po kërkoj vende afër…", nr_nogeo: "Nuk e mora vendndodhjen. Lejoje te cilësimet e telefonit.", nr_nogeo_plan: "Nuk e mora vendndodhjen. Provo “Kërko afër ndalesës së radhës”.",
+    nr_open: o => `Hapur sot ${o}`, nr_opens: o => `Hapet në ${o}`, nr_hunk: "Orari nuk dihet", nr_found: (n, d) => `${n} ${n === 1 ? "vend" : "vende"} brenda ${d}`, nr_none: "Nuk gjeta vende të hapura afër. Provo një kategori tjetër ose më shumë kohë.",
+    nr_src: "Të dhënat: OpenStreetMap dhe Wikipedia. Kontrollo orarin para se të shkosh.", nr_add: "Shto në plan", nr_added: "Shtuar nga ti", nr_added_ok: n => `${n} u shtua në plan`, nr_added_at: (n, s) => `${n} u shtua në plan${s ? ", në " + s : ""}. Orari u rillogarit.`,
     ch_fab: "Asistenti", ch_h: "Asistenti i udhëtimit", ch_sub: "E di planin tënd, orën dhe vendet afër. Rekomandon vetëm vende të verifikuara.",
     ch_hi: "Përshëndetje! Më pyet çfarë të bësh tani, ku të hash ose si të shkosh te ndalesa tjetër.", ch_ph: "Shkruaj pyetjen…",
     ch_q_now: "Çfarë të bëj tani?", ch_q_near: "Çfarë ka interesante afër meje?", ch_q_eat: "Ku të ha me çmim të arsyeshëm?", ch_q_go: "Si të shkoj te ndalesa tjetër?", ch_q_change: "A mund ta ndryshoj planin e sotëm?",
@@ -1287,6 +1322,10 @@ const I18N = {
     del_yes: "Yes, delete permanently", del_no: "Cancel", del_done: "Your account has been deleted.", del_err: "Deletion didn't go through. Try again in a moment.",
     date_q: "When does the trip start?", date_hint: "Optional: with a date, opening hours are checked for each day.", h_closed: "Closed that day", h_closes: "Closes before you'd finish the visit", h_unconf: "hours not confirmed", h_unknown: "Hours unknown — check before you go", free: "Free entry", fee_yes: "Paid entry (price unknown)", unverified: "Not confirmed", overtime: m => `This day runs about ${m} min longer than the time you chose.`, est_note: "~ = estimated time, not measured.", gm_leg: "Route ↗",
     bud_h: "Budget", bud_est: "Estimate for the whole group — real prices may differ.", bud_none: "This plan has no budget estimate yet.", bud_calc: "Estimate the budget with AI", bud_msg: "Estimate the budget for this plan", bud_total: "Total", bud_pp: n => `Per person (${n})`, bud_my: "Your budget", bud_left: "Left", bud_over: "Over budget", bud_ver: "Prices from OpenStreetMap (verified)", bud_free: "Free alternatives", bk_tickets: "Tickets", bk_food: "Food", bk_transport: "Transport", bk_parking: "Parking", bk_activities: "Activities", bk_other: "Other", off_save: "⬇ Save for offline", off_remove: "✓ Saved offline · Remove", off_hint: "The plan, times, addresses and notes open without internet. Offline, the map shows only the pins.", off_saved: "Plan saved on this device.", off_removed: "Removed from this device.", off_full: "Not enough space on this device.", off_list: "Saved for offline", off_later: "No internet: the change will be saved when you're back online.", off_synced: n => `${n} plans synced.`, off_mode: "You're offline. Here are the plans saved on this device.", note_add: "＋ Note", note_edit: "Edit note", loc: "Where am I", you_here: "You are here",
+    nr_btn: "Near me", nr_h: "What's nearby?", nr_sub: "Verified places near you, open today, with distance and travel time.", nr_see: "🏛 Sights", nr_food: "🍽 Food", nr_cafe: "☕ Cafés",
+    nr_time: "How much time do you have?", nr_from_stop: "Search near the next stop", nr_wait: "Looking for places nearby…", nr_nogeo: "Couldn't get your location. Allow it in your phone settings.", nr_nogeo_plan: "Couldn't get your location. Try “Search near the next stop”.",
+    nr_open: o => `Open today ${o}`, nr_opens: o => `Opens at ${o}`, nr_hunk: "Hours unknown", nr_found: (n, d) => `${n} ${n === 1 ? "place" : "places"} within ${d}`, nr_none: "No open places found nearby. Try another category or more time.",
+    nr_src: "Data: OpenStreetMap and Wikipedia. Check opening hours before you go.", nr_add: "Add to plan", nr_added: "Added by you", nr_added_ok: n => `${n} was added to the plan`, nr_added_at: (n, s) => `${n} was added to the plan${s ? " at " + s : ""}. Times were recalculated.`,
     ch_fab: "Assistant", ch_h: "Travel assistant", ch_sub: "Knows your plan, the time and places nearby. Only recommends verified places.",
     ch_hi: "Hi! Ask me what to do now, where to eat or how to get to your next stop.", ch_ph: "Type your question…",
     ch_q_now: "What can I do now?", ch_q_near: "What's interesting near me?", ch_q_eat: "Where can I eat at a fair price?", ch_q_go: "How do I get to the next stop?", ch_q_change: "Can I change today's plan?",
@@ -1370,6 +1409,10 @@ const I18N = {
     del_yes: "Ja, endgültig löschen", del_no: "Abbrechen", del_done: "Dein Konto wurde gelöscht.", del_err: "Löschen hat nicht geklappt. Versuch es gleich noch einmal.",
     date_q: "Wann beginnt die Reise?", date_hint: "Optional: Mit Datum werden die Öffnungszeiten für jeden Tag geprüft.", h_closed: "An diesem Tag geschlossen", h_closes: "Schließt, bevor der Besuch endet", h_unconf: "Öffnungszeiten unbestätigt", h_unknown: "Öffnungszeiten unbekannt – vorher prüfen", free: "Eintritt frei", fee_yes: "Eintritt kostenpflichtig (Preis unbekannt)", unverified: "Nicht bestätigt", overtime: m => `Dieser Tag dauert etwa ${m} Min. länger als die gewählte Zeit.`, est_note: "~ = geschätzte Zeit, nicht gemessen.", gm_leg: "Route ↗",
     bud_h: "Budget", bud_est: "Schätzung für die ganze Gruppe – echte Preise können abweichen.", bud_none: "Für diesen Plan gibt es noch keine Budgetschätzung.", bud_calc: "Budget mit KI schätzen", bud_msg: "Schätze das Budget für diesen Plan", bud_total: "Gesamt", bud_pp: n => `Pro Person (${n})`, bud_my: "Dein Budget", bud_left: "Übrig", bud_over: "Über Budget", bud_ver: "Preise aus OpenStreetMap (bestätigt)", bud_free: "Kostenlose Alternativen", bk_tickets: "Tickets", bk_food: "Essen", bk_transport: "Verkehr", bk_parking: "Parken", bk_activities: "Aktivitäten", bk_other: "Sonstiges", off_save: "⬇ Offline speichern", off_remove: "✓ Offline gespeichert · Entfernen", off_hint: "Plan, Zeiten, Adressen und Notizen öffnen sich auch ohne Internet. Offline zeigt die Karte nur die Punkte.", off_saved: "Plan auf diesem Gerät gespeichert.", off_removed: "Vom Gerät entfernt.", off_full: "Nicht genug Speicher auf dem Gerät.", off_list: "Offline gespeichert", off_later: "Kein Internet: Die Änderung wird gespeichert, sobald du wieder online bist.", off_synced: n => `${n} Pläne synchronisiert.`, off_mode: "Du bist offline. Hier sind die auf dem Gerät gespeicherten Pläne.", note_add: "＋ Notiz", note_edit: "Notiz ändern", loc: "Wo bin ich", you_here: "Du bist hier",
+    nr_btn: "In der Nähe", nr_h: "Was ist in der Nähe?", nr_sub: "Geprüfte Orte in deiner Nähe, heute geöffnet, mit Entfernung und Wegzeit.", nr_see: "🏛 Sehenswert", nr_food: "🍽 Essen", nr_cafe: "☕ Cafés",
+    nr_time: "Wie viel Zeit hast du?", nr_from_stop: "Beim nächsten Stopp suchen", nr_wait: "Suche Orte in der Nähe…", nr_nogeo: "Standort nicht verfügbar. Erlaube ihn in den Telefoneinstellungen.", nr_nogeo_plan: "Standort nicht verfügbar. Versuch „Beim nächsten Stopp suchen“.",
+    nr_open: o => `Heute geöffnet ${o}`, nr_opens: o => `Öffnet um ${o}`, nr_hunk: "Öffnungszeiten unbekannt", nr_found: (n, d) => `${n} ${n === 1 ? "Ort" : "Orte"} im Umkreis von ${d}`, nr_none: "Keine geöffneten Orte in der Nähe gefunden. Versuch eine andere Kategorie oder mehr Zeit.",
+    nr_src: "Daten: OpenStreetMap und Wikipedia. Prüfe die Öffnungszeiten vor dem Besuch.", nr_add: "Zum Plan", nr_added: "Von dir hinzugefügt", nr_added_ok: n => `${n} wurde zum Plan hinzugefügt`, nr_added_at: (n, s) => `${n} wurde zum Plan hinzugefügt${s ? ", um " + s : ""}. Die Zeiten wurden neu berechnet.`,
     ch_fab: "Assistent", ch_h: "Reise-Assistent", ch_sub: "Kennt deinen Plan, die Uhrzeit und Orte in der Nähe. Empfiehlt nur geprüfte Orte.",
     ch_hi: "Hallo! Frag mich, was du jetzt tun kannst, wo du essen kannst oder wie du zum nächsten Stopp kommst.", ch_ph: "Schreib deine Frage…",
     ch_q_now: "Was kann ich jetzt machen?", ch_q_near: "Was ist in meiner Nähe interessant?", ch_q_eat: "Wo kann ich günstig essen?", ch_q_go: "Wie komme ich zum nächsten Stopp?", ch_q_change: "Kann ich den heutigen Plan ändern?",
@@ -2175,6 +2218,7 @@ function renderDay(i) {
     else if (s.hours_warn === "closes") info.push(`<span class="hb closes">${t("h_closes")}</span>`);
     if (s.verified === false && !isMeal) info.push(`<span class="hb unv">${t("unverified")}</span>`);
     if (s.replanned) info.push(`<span class="hb rpl">${t("rp_new")}</span>`);
+    if (s.added) info.push(`<span class="hb rpl">${t("nr_added")}</span>`);
     const lines = [], row = (ic, html) => lines.push(`<div class="row">${IC(ic)}<span>${html}</span></div>`);
     if (s.hours && s.hours !== "closed") row("clock", esc(s.hours));
     else if (s.hours_raw && s.hours !== "closed") row("clock", `${esc(s.hours_raw)} · ${t("h_unconf")}`);
@@ -2204,7 +2248,7 @@ function renderDay(i) {
   card.classList.remove("fade"); void card.offsetWidth; card.classList.add("fade");
   card.style.setProperty("--dc", color);
   card.innerHTML = `<div class="dayhead"><div><h3>${t("day")} ${d.day || i + 1}: ${esc(d.theme || "")}</h3>
-    <div class="area">${esc([dateTxt, d.area].filter(Boolean).join(" · "))}</div><div class="dstats">${stats.join("")}</div></div><div class="dhbtns">${gmapsLink(d)}${isOwn ? `<button class="btn2 rpbtn" onclick="openReplan(${i})">${IC("clock")}${esc(t("rp_btn"))}</button>` : ""}</div></div>${warn}${rpNote && rpNote.di === i ? `<div class="rpnote"><span>${esc(rpNote.text)}</span><span class="undo" onclick="undoReplan()">${esc(t("ed_undo"))}</span></div>` : ""}<div>${stops}</div>${anyEst ? `<div class="estnote">${t("est_note")}</div>` : ""}<div class="phcred" id="phCred" style="display:none">${esc(t("ph_credit"))}</div>`;
+    <div class="area">${esc([dateTxt, d.area].filter(Boolean).join(" · "))}</div><div class="dstats">${stats.join("")}</div></div><div class="dhbtns">${gmapsLink(d)}${isOwn ? `<button class="btn2 rpbtn" onclick="openReplan(${i})">${IC("clock")}${esc(t("rp_btn"))}</button><button class="btn2 rpbtn" onclick="openExplore(true, ${i})">${IC("pin")}${esc(t("nr_btn"))}</button>` : ""}</div></div>${warn}${rpNote && rpNote.di === i ? `<div class="rpnote"><span>${esc(rpNote.text)}</span><span class="undo" onclick="undoReplan()">${esc(t("ed_undo"))}</span></div>` : ""}<div>${stops}</div>${anyEst ? `<div class="estnote">${t("est_note")}</div>` : ""}<div class="phcred" id="phCred" style="display:none">${esc(t("ph_credit"))}</div>`;
   card.querySelectorAll(".sbody").forEach(el => el.onclick = e => {
     if (e.target.closest("a")) return;
     const s = d.stops[+el.dataset.idx];
@@ -2743,7 +2787,7 @@ async function doReplan(di, idx, reason, extra = {}) {
   prevPlan = JSON.parse(JSON.stringify(strip(plan)));
   const np = strip(plan); np.days[di] = res.day;
   plan = sanePlan(np);
-  let text = res.reply || (reason === "remove" ? t("rp_done_remove", (res.changed || []).join(", ")) : reason === "late" ? t("rp_done_late", res.day.stops[idx]?.start || res.start) : t("ed_done"));
+  let text = res.reply || (reason === "remove" ? t("rp_done_remove", (res.changed || []).join(", ")) : reason === "late" ? t("rp_done_late", res.day.stops[idx]?.start || res.start) : reason === "add" ? t("nr_added_at", (res.changed || [])[0] || "", res.day.stops.find(x => x.added && x.name === (res.changed || [])[0])?.start || "") : t("ed_done"));
   if (res.dropped?.length) text += " " + t("rp_dropped", res.dropped.join(", "));
   rpNote = { di, text };
   await persistPlan();
@@ -2779,6 +2823,70 @@ async function undoReplan() {
   toast(t("ed_undone"));
 }
 
+// ---- Faza 9: Explore Around Me ----
+var exCtx = { plan: false, di: 0 }, exPlaces = [];
+function canAdd() { return exCtx.plan && mode === "own" && plan && plan.kind !== "now" && plan.days?.length; }
+function openExplore(inPlan, di) {
+  exCtx = { plan: !!inPlan, di: di ?? (plan?.days ? chatDay() : 0) };
+  document.getElementById("exStop").style.display = inPlan ? "" : "none";
+  document.getElementById("exErr").style.display = "none";
+  document.getElementById("nrList").innerHTML = "";
+  openModal("exBg");
+}
+function exRef() {
+  // Pika e nisjes pa GPS: ndalesa e radhës sot, përndryshe ndalesa e parë e ditës
+  const d = plan.days[exCtx.di]; if (!d) return null;
+  const k = d.date === todayIso() ? rpDefaultIdx(d) : 0;
+  return d.stops.slice(k).find(s => s.lat != null) || d.stops.find(s => s.lat != null) || null;
+}
+const ST_TXT = x => x.status === "open" ? t("nr_open", x.open) : x.status === "opens" ? t("nr_opens", x.open.split("–")[0]) : x.open ? x.open : t("nr_hunk");
+function exCard(x, k) {
+  const ic = { walking: "walk", transit: "bus", driving: "car" }[x.mode] || "walk";
+  const meta = [x.cuisine || (x.kind === "restaurant" ? "" : x.kind === "cafe" ? "" : x.kind)].filter(Boolean);
+  return `<div class="exitem"><div class="exmain"><b>${esc(x.name)}</b>${meta.length ? `<small>${esc(meta.join(" · "))}</small>` : ""}
+    <div class="exrow"><span class="tchip">${IC(ic)}~${x.min} min · ${x.dist >= 1000 ? (x.dist / 1000).toFixed(1) + " km" : x.dist + " m"}</span><span class="exst ${x.status}">${esc(ST_TXT(x))}</span></div>
+    ${x.addr ? `<small>${esc(x.addr)}</small>` : ""}</div>
+    <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=${+x.lat},${+x.lon}" target="_blank" rel="noopener">${IC("map")}${esc(t("ch_map"))}</a><a href="https://www.google.com/maps/dir/?api=1&destination=${+x.lat},${+x.lon}&travelmode=${x.mode || "walking"}" target="_blank" rel="noopener">${IC(ic)}${esc(t("ch_route"))}</a>${canAdd() ? `<button class="btn2 pri exadd" onclick="exAdd(${k}, this)">+ ${esc(t("nr_add"))}</button>` : ""}</div></div>`;
+}
+async function runExplore(useGeo) {
+  const err = document.getElementById("exErr"), wait = document.getElementById("exWait"), list = document.getElementById("nrList");
+  err.style.display = "none";
+  if (!navigator.onLine) { err.textContent = t("no_conn"); err.style.display = "block"; return; }
+  const f = (exCtx.plan && plan?.request) || readForm();
+  const body = { cat: document.querySelector("#exCat .on")?.dataset.v || "see", minutes: +(document.querySelector("#exMin .on")?.dataset.v || 120), time: nowHM(), date: todayIso(),
+    transport: f.transport, interests: f.interests || [], lang: plan?.request?.lang || LANG, ui: LANG };
+  if (useGeo) {
+    const pos = await getPos();
+    if (!pos) { err.textContent = t(exCtx.plan ? "nr_nogeo_plan" : "nr_nogeo"); err.style.display = "block"; return; }
+    Object.assign(body, pos);
+  } else { const r = exRef(); if (!r) { err.textContent = t("nr_nogeo"); err.style.display = "block"; return; } body.lat = r.lat; body.lon = r.lon; }
+  wait.style.display = "block"; list.innerHTML = ""; document.querySelectorAll("#exBg .exgo button").forEach(b => b.disabled = true);
+  try {
+    const r = await fetch(API + "/near", { method: "POST", headers: await authHeaders(), body: JSON.stringify(body) });
+    const res = await r.json().catch(() => ({ error: t("bad_resp") }));
+    if (!r.ok || res.error) throw new Error(res.error || "Gabim " + r.status);
+    exPlaces = res.places || [];
+    list.innerHTML = exPlaces.length ? `<div class="exhead">${esc(t("nr_found", exPlaces.length, res.maxDist >= 1000 ? (res.maxDist / 1000).toFixed(1) + " km" : res.maxDist + " m"))}</div>` + exPlaces.map(exCard).join("") + `<div class="dhint">${esc(t("nr_src"))}</div>` : `<div class="dhint">${esc(t("nr_none"))}</div>`;
+  } catch (e) { err.textContent = /fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message; err.style.display = "block"; }
+  finally { wait.style.display = "none"; document.querySelectorAll("#exBg .exgo button").forEach(b => b.disabled = false); }
+}
+// Shton një vend të verifikuar në ditën e planit: sot pas ndalesës aktuale, ditë të tjera aty ku shton më pak rrugë
+async function addPlace(x, di) {
+  const d = plan.days[di]; let idx = 0;
+  if (d.date === todayIso()) {
+    const k = rpDefaultIdx(d), s = d.stops[k];
+    idx = s && s.start && toMinF(s.start) <= toMinF(nowHM()) ? k + 1 : k;
+    if (toMinF(nowHM()) >= toMinF(d.stops[d.stops.length - 1]?.start || "00:00") + (+d.stops[d.stops.length - 1]?.duration_min || 0)) idx = d.stops.length;
+  }
+  return doReplan(di, Math.min(idx, d.stops.length), "add", { place: x });
+}
+async function exAdd(k, btn) {
+  const x = exPlaces[k]; if (!x || btn.disabled) return;
+  btn.disabled = true; btn.textContent = "…";
+  try { await addPlace(x, exCtx.di); closeModal("exBg"); toast(t("nr_added_ok", x.name)); document.getElementById("dayCard").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  catch (e) { btn.disabled = false; btn.textContent = "⚠️ " + e.message; }
+}
+
 // ---- Faza 8: Live Travel Assistant ----
 var chatLog = [], chatGeo = false, chatBusy = false, chatActs = {};
 function chatDay() { const k = plan.days.findIndex(d => d.date === todayIso()); return k >= 0 ? k : Math.max(0, curDay); }
@@ -2810,7 +2918,14 @@ const TRMODE = () => ({ kembe: "walking", publik: "transit", vetura: "driving" }
 function placeCard(x) {
   const meta = [x.cuisine || x.kind, `~${x.walk} min · ${x.dist >= 1000 ? (x.dist / 1000).toFixed(1) + " km" : x.dist + " m"}`, x.open && x.open !== "hours unknown" ? x.open : ""].filter(Boolean);
   return `<div class="cplace"><b>${esc(x.name)}</b><small>${esc(meta.join(" · "))}</small>${x.addr ? `<small>${esc(x.addr)}</small>` : ""}
-    <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=${+x.lat},${+x.lon}" target="_blank" rel="noopener">${IC("map")}${esc(t("ch_map"))}</a><a href="https://www.google.com/maps/dir/?api=1&destination=${+x.lat},${+x.lon}&travelmode=${TRMODE()}" target="_blank" rel="noopener">${IC("walk")}${esc(t("ch_route"))}</a></div></div>`;
+    <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=${+x.lat},${+x.lon}" target="_blank" rel="noopener">${IC("map")}${esc(t("ch_map"))}</a><a href="https://www.google.com/maps/dir/?api=1&destination=${+x.lat},${+x.lon}&travelmode=${TRMODE()}" target="_blank" rel="noopener">${IC("walk")}${esc(t("ch_route"))}</a>${mode === "own" && plan.kind !== "now" ? `<a class="cadd" onclick="chatAdd(this)" data-p="${esc(JSON.stringify(x))}">+ ${esc(t("nr_add"))}</a>` : ""}</div></div>`;
+}
+async function chatAdd(el) {
+  if (el.dataset.busy) return; el.dataset.busy = 1;
+  let x; try { x = JSON.parse(el.dataset.p); } catch { return; }
+  el.textContent = "…";
+  try { const r = await addPlace(x, chatDay()); el.replaceWith(Object.assign(document.createElement("span"), { className: "cdone", textContent: "✓ " + t("nr_added_ok", x.name) })); chatLog.push({ role: "ai", text: r.text }); }
+  catch (e) { delete el.dataset.busy; el.textContent = "⚠️ " + e.message; }
 }
 async function chatAsk(text, quick) {
   text = String(text || "").trim(); if (!text || chatBusy) return;
