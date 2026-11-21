@@ -84,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p4.1", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p7.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -102,6 +102,10 @@ export default {
     try { q = await req.json(); } catch { return json({ error: MSG.sq.bad }, 400, H); }
     const M = MSG[q?.ui] || MSG[q?.lang] || MSG.sq;
     const path = new URL(req.url).pathname;
+    if (path === "/replan") {
+      if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
+      return handleReplan(q, req, env, ctx, H, M);
+    }
     if (path === "/edit" || path === "/now") {
       if (!env.ANTHROPIC_API_KEY) return json({ error: M.nokey }, 500, H);
       if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
@@ -1021,3 +1025,189 @@ ${list}`;
     return json({ error: M.fail + (e.message || e) }, 502, H);
   }
 }
+
+// ================== FAZA 7: Smart Replanning ==================
+// Ndryshon vetëm pjesën e mbetur të një dite. Ndalesat para "idx" dhe ditët e tjera nuk preken kurrë.
+const RP_LIMIT = { user: 20, guest: 10, ai: 10 };
+const INDOOR_RE = /museum|gallery|church|cathedral|basilica|chapel|mosque|synagogue|temple|palace|theatre|theater|opera|library|aquarium|market hall|shopping|arcade|planetarium|exhibition|concert hall|castle|abbey/i;
+async function sbUser(env, token) {
+  try {
+    const r = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, { headers: { apikey: env.SUPABASE_KEY, Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return null; const u = await r.json(); return u?.id || null;
+  } catch { return null; }
+}
+// Orari i pjesës së mbetur: nis te "T" (minuta), me kalimin nga ndalesa e fundit e ruajtur ("anchor")
+async function scheduleRest(env, anchor, rest, T, p, dt, useOrs) {
+  const order = anchor ? [{ ...anchor, duration_min: 10, _oh: undefined }, ...rest] : rest;
+  const geoIdx = order.map((s, k) => s.lat != null ? k : -1).filter(k => k >= 0);
+  const pts = geoIdx.map(k => order[k]);
+  const legs = useOrs ? await orsRoute(env, pts, p.transport) : null;
+  const legsByIdx = new Map();
+  for (let j = 1; j < geoIdx.length; j++) {
+    const a = pts[j - 1], b = pts[j];
+    let leg = legs ? { ...legs[j - 1], mode: p.transport === "vetura" ? "driving" : "walking", est: false } : estimateLeg(hav(a.lat, a.lon, b.lat, b.lon), p.transport);
+    if (legs && p.transport === "publik" && leg.min > 15) leg = { ...estimateLeg(leg.m / 1.3, "publik"), line: null };
+    legsByIdx.set(geoIdx[j], leg);
+  }
+  const sch = schedule(order, legsByIdx, fmtMin(Math.max(0, anchor ? T - 10 : T)), p.end, dt);
+  const off = anchor ? 1 : 0;
+  return {
+    stops: sch.stops.slice(off).map(({ _oh, ...s }) => s), over: sch.over, warn: sch.warn,
+    lines: [...legsByIdx.entries()].filter(([k, l]) => l.line && k >= off).map(([k, l]) => ({ k: k - off, line: thin(l.line) })),
+  };
+}
+function candStop(x, o, dt) {
+  const s = { poi: null, name: x.name, type: "visit", duration_min: Math.max(15, Math.min(240, parseInt(o.duration_min) || 60)),
+    note: String(o.note || "").slice(0, 300), tip: String(o.tip || "").slice(0, 200), lat: x.lat, lon: x.lon, wiki: x.wiki, osm: x.osm, wd: x.wd, verified: true, replanned: true };
+  if (x.addr) s.address = x.addr; if (x.fee) s.fee = x.fee; if (x.charge) s.price = x.charge;
+  if (x.oh) { s.hours_raw = x.oh; const r = ohParse(x.oh); if (r) { const st = ohOn(r, dt); s.hours = st.st === "unknown" ? null : (st.st === "open" ? spansText(st.spans) : "closed"); s.hours_ok = !!dt; } }
+  return s;
+}
+// Kandidatë të verifikuar afër një pike, të hapur rreth orës "T" të asaj dite
+async function replanCands(center, usedNames, p, dt, T, filter) {
+  const maxD = { kembe: 1500, publik: 4000, vetura: 8000 }[p.transport] || 1500;
+  let c = (await fetchPois(+center.lat.toFixed(3), +center.lon.toFixed(3), 3000))
+    .filter(x => !usedNames.has(String(x.name).toLowerCase()) && (!filter || filter(x)))
+    .map(x => ({ ...x, dist: hav(center.lat, center.lon, x.lat, x.lon) })).filter(x => x.dist <= maxD);
+  c.sort((a, b) => (b.pop || 0) / (1 + b.dist / 600) - (a.pop || 0) / (1 + a.dist / 600));
+  c = c.slice(0, 14);
+  await enrichPois(c.slice(0, 8), 6);
+  return c.filter(x => {
+    const r = ohParse(x.oh); if (!r || !dt) { x.now = "hours unknown"; return true; }
+    const o = ohOn(r, dt); if (o.st === "closed") return false;
+    if (o.st === "open") { const sp = o.spans.find(([a, b]) => T + 30 < b); if (!sp) return false; x.now = `open ${spansText(o.spans)}`; }
+    return true;
+  }).slice(0, 10);
+}
+async function dayForecast(lat, lon, date) {
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,precipitation_sum,temperature_2m_max,temperature_2m_min&timezone=auto&start_date=${date}&end_date=${date}`, { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) return null; const d = (await r.json()).daily; if (!d?.time?.length) return null;
+    return `max ${Math.round(d.temperature_2m_max[0])}°C, min ${Math.round(d.temperature_2m_min[0])}°C, rain ${d.precipitation_sum[0]} mm, code ${d.weather_code[0]}`;
+  } catch { return null; }
+}
+async function handleReplan(q, req, env, ctx, H, M) {
+  const reason = String(q.reason || "");
+  if (!["late", "closed", "weather", "remove"].includes(reason)) return json({ error: M.bad }, 400, H);
+  const old = q.plan, di = parseInt(q.day) - 1, idx = parseInt(q.idx);
+  if (!old || !Array.isArray(old.days) || old.days.length > 7 || JSON.stringify(old).length > 400000) return json({ error: M.bad }, 400, H);
+  const d = old.days[di];
+  if (!d || !Array.isArray(d.stops) || !d.stops.length || d.stops.length > 20 || !(idx >= 0 && idx < d.stops.length)) return json({ error: M.bad }, 400, H);
+  const needAI = reason === "closed" || reason === "weather";
+  const token = bearer(req);
+  const uid = token ? await sbUser(env, token) : null;
+  if (needAI && !uid) return json({ error: M.rp_login, code: "auth" }, 401, H);
+  if (needAI && !env.ANTHROPIC_API_KEY) return json({ error: M.nokey }, 500, H);
+
+  // Kufijtë ditorë: të gjitha riplanifikimet + ato me AI veçmas
+  const cache = caches.default, today = new Date().toISOString().slice(0, 10);
+  const who = uid ? "u" + (await sha(uid)).slice(0, 24) : "ip" + (await sha("viaro|" + (req.headers.get("CF-Connecting-IP") || "anon") + "|" + today)).slice(0, 24);
+  const rKey = `rp/${today}/${who}`, aKey = `rpa/${today}/${who}`;
+  const used = (await limitGet(env, cache, rKey)) || 0, usedAI = needAI ? (await limitGet(env, cache, aKey)) || 0 : 0;
+  const maxR = uid ? RP_LIMIT.user : RP_LIMIT.guest;
+  if (used >= maxR) return json({ error: M.rp_limit(maxR), code: "rp_day" }, 429, H);
+  if (needAI && usedAI >= RP_LIMIT.ai) return json({ error: M.rp_limit(RP_LIMIT.ai), code: "rp_ai_day" }, 429, H);
+  if (needAI) {
+    const stat = (await limitGet(env, cache, `d/${today}`)) || { n: 0 };
+    if ((stat.n || 0) + (stat.calls || 0) >= GLOBAL_DAILY_LIMIT * 2) return json({ error: M.busy }, 429, H);
+  }
+
+  try {
+    const rq = old.request || {};
+    const p = sanitize({ ...rq, city: old.city?.name || rq.city || "city", days: old.days.length });
+    if (p.error) return json({ error: M.bad }, 400, H);
+    const lang = LANG[q.lang] ? q.lang : p.lang;
+    const dt = /^\d{4}-\d{2}-\d{2}$/.test(d.date || "") ? new Date(d.date + "T00:00:00Z") : null;
+    const nowMin = /^\d{2}:\d{2}$/.test(q.now || "") ? toMin(q.now) : null;
+    const stops = d.stops.map(s => { const c = { ...s }; delete c._marker; return c; });
+    const locked = stops.slice(0, idx);
+    let rest = stops.slice(idx);
+    const anchor = [...locked].reverse().find(s => s.lat != null) || null;
+    const last = locked[locked.length - 1];
+    let T = last?.start ? toMin(last.start) + (parseInt(last.duration_min) || 60) : toMin(rest[0].start || p.start);
+    const lateMin = reason === "late" ? Math.max(5, Math.min(240, parseInt(q.minutes) || 30)) : 0;
+    T += lateMin;
+    if (nowMin != null) T = Math.max(T, nowMin);
+    const changed = [], dropped = [];
+    let reply = "", ai = null;
+    const usedNames = new Set(old.days.flatMap(x => (x.stops || []).map(s => String(s.name || "").toLowerCase())));
+
+    if (reason === "remove") { changed.push(rest[0].name); rest = rest.slice(1); }
+    else if (needAI) {
+      const geo = rest.filter(s => s.lat != null);
+      const center = reason === "closed" ? (rest[0].lat != null ? rest[0] : anchor || old.city) : geo.length ? { lat: geo.reduce((a, s) => a + s.lat, 0) / geo.length, lon: geo.reduce((a, s) => a + s.lon, 0) / geo.length } : anchor || old.city;
+      if (!center || center.lat == null) return json({ error: M.rp_none }, 404, H);
+      const cands = await replanCands(center, usedNames, p, dt, T, reason === "weather" ? x => INDOOR_RE.test(x.kind || "") || INDOOR_RE.test(x.name || "") : null);
+      if (!cands.length) return json({ error: M.rp_none }, 404, H);
+      cands.forEach((x, i) => { x.id = "C" + (i + 1); });
+      const byId = Object.fromEntries(cands.map(x => [x.id, x]));
+      const candTxt = cands.map(x => `${x.id}|${x.name}|${x.kind}|${Math.round(x.dist)} m|pop ${Math.round(x.pop || 0)}|${x.now}${x.fee ? "|fee " + x.fee : ""}`).join("\n");
+      const restTxt = rest.map((s, k) => `[${idx + k}] ${s.start || "?"} ${s.name} (${s.type || "visit"}, ${s.duration_min || 60} min)`).join("\n");
+      const who2 = `${p.adults} adult(s)${p.kids ? ` + ${p.kids} child(ren)` : ""}; interests: ${p.interests.join(", ") || "general"}; budget: ${{ ulet: "low", mesem: "medium", larte: "high" }[p.budget]}; getting around: ${TR_EN[p.transport] || "on foot"}`;
+      let system, user;
+      if (reason === "closed") {
+        system = `A place in a traveller's day plan turned out to be closed. Pick ONE replacement ONLY from the candidate list (by id). Prefer something similar in spirit, close by and popular. Never invent places. Write "note" (1 sentence, why this one), "tip" (optional) and "reply" (1 sentence saying what changed) in ${LANG[lang]}. Reply JSON only: {"id":"C1","duration_min":60,"note":"...","tip":"...","reply":"..."}`;
+        user = `Closed: ${rest[0].name}. Arrival around ${fmtMin(T)}. Travellers: ${who2}.\nRest of the day:\n${restTxt}\n\nCandidates (id|name|type|distance|popularity|hours):\n${candTxt}`;
+      } else {
+        const wk = ["rain", "hot", "cold"].includes(q.weather) ? q.weather : "rain";
+        const fc = dt ? await dayForecast(center.lat, center.lon, d.date) : null;
+        system = `The weather changed during a traveller's day (${wk}). Adapt ONLY the remaining stops listed. Replace outdoor stops that suffer in this weather (parks, gardens, viewpoints, walks, squares, bridges, open-air sites) with indoor places ONLY from the candidate list (by id). Keep indoor stops, meals and anything still fine exactly as they are. Never invent places. Change as little as possible. Write "note" and "reply" (1–2 sentences saying what changed) in ${LANG[lang]}. Reply JSON only: {"ops":[{"op":"replace","idx":3,"id":"C1","duration_min":60,"note":"..."},{"op":"duration","idx":4,"minutes":30}],"reply":"..."}`;
+        user = `Weather: ${wk}${fc ? " (forecast: " + fc + ")" : ""}. Travellers: ${who2}.\nRemaining stops (only these may change):\n${restTxt}\n\nIndoor candidates (id|name|type|distance|popularity|hours):\n${candTxt}`;
+      }
+      await limitPut(env, cache, aKey, usedAI + 1);
+      const r = await callClaude(env.ANTHROPIC_API_KEY, system, user, 1200);
+      ai = aiCost(MODEL, r.usage); ctx.waitUntil(addDayStat(env, ai));
+      const out = r.out;
+      if (!out) throw new Error(M.badplan);
+      reply = String(out.reply || "").slice(0, 400);
+      if (reason === "closed") {
+        const x = byId[out.id];
+        if (!x) { await limitPut(env, cache, aKey, usedAI); return json({ error: M.rp_none }, 404, H); }
+        changed.push(rest[0].name); rest[0] = candStop(x, out, dt);
+      } else {
+        const ops = (Array.isArray(out.ops) ? out.ops : []).slice(0, rest.length * 2);
+        const tgt = ops.map(o => ({ ...o, _s: rest[parseInt(o.idx) - idx] }));
+        const usedC = new Set();
+        for (const o of tgt) {
+          if (!o._s) continue; // jashtë pjesës së lejuar: injorohet
+          const k = rest.indexOf(o._s); if (k < 0) continue;
+          if (o.op === "replace" && byId[o.id] && !usedC.has(o.id)) { usedC.add(o.id); changed.push(rest[k].name); rest[k] = candStop(byId[o.id], o, dt); }
+          else if (o.op === "duration") { rest[k].duration_min = Math.max(10, Math.min(300, parseInt(o.minutes) || rest[k].duration_min)); }
+          else if (o.op === "remove" && rest[k].type !== "meal") { changed.push(rest[k].name); rest[k]._del = true; }
+        }
+        rest = rest.filter(s => !s._del);
+        if (!changed.length && !ops.length) return json({ day: null, reply: reply || M.rp_nochange, changed, dropped }, 200, H);
+      }
+    }
+
+    // Orari i ri, me oraret e hapjes të rilidhura
+    rest = rest.map(s => { const c = { ...s }; delete c.start; delete c.hours_warn; delete c.travel_min; delete c.travel_m; delete c.travel_mode; delete c.travel_est;
+      if (c.hours_raw) { const r = ohParse(c.hours_raw); if (r) c._oh = r; } return c; });
+    let sch = await scheduleRest(env, anchor, rest, T, p, dt, false);
+    // Kur dita nuk mjafton: hiqen vizitat e fundit (jo vaktet), maksimumi 4
+    for (let g = 0; reason === "late" && sch.over > 30 && g < 4; g++) {
+      let k = -1;
+      for (let j = rest.length - 1; j >= 0; j--) if (rest[j].type !== "meal" && rest[j].type !== "break" && sch.stops[j]?.hours_warn) { k = j; break; }
+      if (k < 0) for (let j = rest.length - 1; j >= 0; j--) if (rest[j].type !== "meal" && rest[j].type !== "break") { k = j; break; }
+      if (k < 0 || rest.length <= 1) break;
+      dropped.push(rest[k].name); rest.splice(k, 1);
+      sch = await scheduleRest(env, anchor, rest, T, p, dt, false);
+    }
+    if (env.ORS_KEY && rest.some(s => s.lat != null)) sch = await scheduleRest(env, anchor, rest, T, p, dt, true);
+
+    const day = { ...d, stops: [...locked, ...sch.stops] };
+    delete day.overtime_min;
+    if (sch.over) day.overtime_min = sch.over;
+    day.route = [...(Array.isArray(d.route) ? d.route.filter(r => r.to < idx) : []), ...sch.lines.map(l => ({ to: idx + l.k, line: l.line }))];
+    day.routed = !!day.route.length;
+    day.replans = (d.replans || 0) + 1;
+    await limitPut(env, cache, rKey, used + 1);
+    return json({ day, di, reply, changed, dropped, late: lateMin, start: fmtMin(T), ai, left: { all: maxR - used - 1, ai: needAI ? RP_LIMIT.ai - usedAI - 1 : undefined } }, 200, H);
+  } catch (e) {
+    if (needAI) await limitPut(env, cache, aKey, usedAI);
+    return json({ error: M.fail + (e.message || e) }, 502, H);
+  }
+}
+Object.assign(MSG.sq, { rp_login: "Hyr në llogari që AI të gjejë alternativa.", rp_limit: n => `Sot e ke arritur kufirin prej ${n} ndryshimesh. Provo nesër.`, rp_none: "Nuk gjeta alternativë të verifikuar afër. Provo ta heqësh ndalesën.", rp_nochange: "Plani i mbetur i përshtatet këtij moti; nuk ndryshova asgjë." });
+Object.assign(MSG.en, { rp_login: "Log in so AI can find alternatives.", rp_limit: n => `You've reached today's limit of ${n} changes. Try again tomorrow.`, rp_none: "I couldn't find a verified alternative nearby. Try removing the stop.", rp_nochange: "The rest of your plan already suits this weather; nothing changed." });
+Object.assign(MSG.de, { rp_login: "Melde dich an, damit die KI Alternativen findet.", rp_limit: n => `Du hast heute das Limit von ${n} Änderungen erreicht. Versuch es morgen wieder.`, rp_none: "Keine geprüfte Alternative in der Nähe gefunden. Entferne den Stopp stattdessen.", rp_nochange: "Der Rest deines Plans passt schon zu diesem Wetter; nichts geändert." });
