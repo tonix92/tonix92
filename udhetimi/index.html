@@ -965,6 +965,7 @@
   <div class="daytabs" id="dayTabs"></div>
   <div id="map"></div>
   <div class="card" id="dayCard"></div>
+  <div class="card remcard" id="remCard" style="display:none"></div>
   <div class="card aied" id="aiEd" style="display:none">
     <b data-i18n="ed_h"></b><small class="dhint" data-i18n="ed_sub"></small>
     <div class="chips edchips" id="edChips"></div>
@@ -1146,7 +1147,7 @@ const I18N = {
     notif_h: "Njoftimet", notif_empty: "Ende asnjë njoftim. Kur dikush pëlqen ose komenton planin tënd, ose fillon të të ndjekë, do ta shohësh këtu.",
     n_like: (a, c) => `${a} pëlqeu planin tënd${c ? " për " + c : ""}`, n_comment: (a, c) => `${a} komentoi planin tënd${c ? " për " + c : ""}`, n_follow: a => `${a} filloi të të ndjekë`,
     nav_create: "✨ Krijo", nav_mine: "📁 Planet e mia", nav_explore: "🌍 Zbulo", login: "Hyr",
-    h_where: "Ku po shkon?", wz1: "Qyteti", wz2: "Stili", wz3: "Dita", wz4: "Krijo", wz_next: "Vazhdo →", wz_back: "← Prapa", wz_t: ["Destinacioni", "Zgjidh stilin tënd", "Dita jote", "Prekja e fundit"], wz_s: ["Qyteti, sa ditë dhe kush vjen me ty.", "Çka të pëlqen dhe sa shpejt do të lëvizësh.", "Orari, mënyra e lëvizjes dhe buxheti.", "Gjuha e planit dhe dëshira të veçanta. Pastaj krijoje."], wz_of: n => `Hapi ${n} nga 4`, lead: "Më thuaj qytetin dhe çka të pëlqen, unë ta bëj planin ditë për ditë.",
+    h_where: "Ku po shkon?", rem_h: "Kujtesat e udhëtimit", rem_s: "Mbrëmjen para nisjes dhe çdo mëngjes, një orë para ndalesës së parë.", rem_denied: "Njoftimet janë të ndaluara. Lejoji te Cilësimet e telefonit.", rem_off: "Kujtesat u çaktivizuan.", rem_none: "S'ka ditë të ardhshme për kujtesa.", rem_ok: n => `${n} kujtesa u caktuan`, rem_eve_t: c => `Nesër nis udhëtimi në ${c}`, rem_eve_b: (n, f) => `${n === 1 ? "1 ditë e planifikuar" : n + " ditë të planifikuara"}.${f ? " Ndalesa e parë: " + f : ""}`, rem_day_t: (d, c) => `Dita ${d} në ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "Fillon me " + f : ""}`, wz1: "Qyteti", wz2: "Stili", wz3: "Dita", wz4: "Krijo", wz_next: "Vazhdo →", wz_back: "← Prapa", wz_t: ["Destinacioni", "Zgjidh stilin tënd", "Dita jote", "Prekja e fundit"], wz_s: ["Qyteti, sa ditë dhe kush vjen me ty.", "Çka të pëlqen dhe sa shpejt do të lëvizësh.", "Orari, mënyra e lëvizjes dhe buxheti.", "Gjuha e planit dhe dëshira të veçanta. Pastaj krijoje."], wz_of: n => `Hapi ${n} nga 4`, lead: "Më thuaj qytetin dhe çka të pëlqen, unë ta bëj planin ditë për ditë.",
     city: "Cili qytet?", city_ph: "p.sh. Roma, Paris, Barcelona, Vjena, Tirana…",
     days_q: "Sa ditë?", days_n: n => `${n} ditë`, start: "Fillon çdo ditë", end: "Mbaron",
     pace: "Ritmi", pace_qete: "🐢 I qetë", pace_normal: "🚶 Normal", pace_intensiv: "🏃 Intensiv",
@@ -1217,7 +1218,7 @@ const I18N = {
     notif_h: "Notifications", notif_empty: "No notifications yet. When someone likes or comments on your plan, or follows you, you'll see it here.",
     n_like: (a, c) => `${a} liked your plan${c ? " for " + c : ""}`, n_comment: (a, c) => `${a} commented on your plan${c ? " for " + c : ""}`, n_follow: a => `${a} started following you`,
     nav_create: "✨ Create", nav_mine: "📁 My plans", nav_explore: "🌍 Explore", login: "Log in",
-    h_where: "Where are you going?", wz1: "Where", wz2: "Vibe", wz3: "Your day", wz4: "Create", wz_next: "Continue →", wz_back: "← Back", wz_t: ["Destination", "Pick your vibe", "Your day", "Final touches"], wz_s: ["The city, how many days and who's coming.", "What you love and how fast you like to go.", "Hours, getting around and budget.", "Plan language and any wishes. Then create it."], wz_of: n => `Step ${n} of 4`, lead: "Tell me the city and what you love — I'll plan it day by day.",
+    h_where: "Where are you going?", rem_h: "Trip reminders", rem_s: "The evening before you leave and every morning, an hour before your first stop.", rem_denied: "Notifications are turned off. Allow them in your phone settings.", rem_off: "Reminders turned off.", rem_none: "No upcoming days to remind you about.", rem_ok: n => `${n} ${n === 1 ? "reminder" : "reminders"} set`, rem_eve_t: c => `Your ${c} trip starts tomorrow`, rem_eve_b: (n, f) => `${n} ${n === 1 ? "day" : "days"} planned.${f ? " First stop: " + f : ""}`, rem_day_t: (d, c) => `Day ${d} in ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "Starts with " + f : ""}`, wz1: "Where", wz2: "Vibe", wz3: "Your day", wz4: "Create", wz_next: "Continue →", wz_back: "← Back", wz_t: ["Destination", "Pick your vibe", "Your day", "Final touches"], wz_s: ["The city, how many days and who's coming.", "What you love and how fast you like to go.", "Hours, getting around and budget.", "Plan language and any wishes. Then create it."], wz_of: n => `Step ${n} of 4`, lead: "Tell me the city and what you love — I'll plan it day by day.",
     city: "Which city?", city_ph: "e.g. Rome, Paris, Barcelona, Vienna, Tirana…",
     days_q: "How many days?", days_n: n => `${n} ${n === 1 ? "day" : "days"}`, start: "Start each day", end: "End",
     pace: "Pace", pace_qete: "🐢 Relaxed", pace_normal: "🚶 Normal", pace_intensiv: "🏃 Intense",
@@ -1288,7 +1289,7 @@ const I18N = {
     notif_h: "Benachrichtigungen", notif_empty: "Noch keine Benachrichtigungen. Wenn jemand deinen Plan mag, kommentiert oder dir folgt, siehst du es hier.",
     n_like: (a, c) => `${a} gefällt dein Plan${c ? " für " + c : ""}`, n_comment: (a, c) => `${a} hat deinen Plan${c ? " für " + c : ""} kommentiert`, n_follow: a => `${a} folgt dir jetzt`,
     nav_create: "✨ Erstellen", nav_mine: "📁 Meine Pläne", nav_explore: "🌍 Entdecken", login: "Anmelden",
-    h_where: "Wohin geht's?", wz1: "Ziel", wz2: "Stil", wz3: "Tag", wz4: "Erstellen", wz_next: "Weiter →", wz_back: "← Zurück", wz_t: ["Reiseziel", "Wähle deinen Stil", "Dein Tag", "Letzter Schliff"], wz_s: ["Stadt, Anzahl der Tage und wer mitkommt.", "Was dir gefällt und wie schnell du unterwegs bist.", "Zeiten, Fortbewegung und Budget.", "Sprache des Plans und besondere Wünsche. Dann erstellen."], wz_of: n => `Schritt ${n} von 4`, lead: "Sag mir die Stadt und was dich interessiert – ich plane dir jeden Tag.",
+    h_where: "Wohin geht's?", rem_h: "Reise-Erinnerungen", rem_s: "Am Abend vor der Abreise und jeden Morgen, eine Stunde vor dem ersten Stopp.", rem_denied: "Mitteilungen sind deaktiviert. Erlaube sie in den Telefon-Einstellungen.", rem_off: "Erinnerungen deaktiviert.", rem_none: "Keine kommenden Tage für Erinnerungen.", rem_ok: n => `${n} ${n === 1 ? "Erinnerung" : "Erinnerungen"} geplant`, rem_eve_t: c => `Morgen beginnt deine Reise nach ${c}`, rem_eve_b: (n, f) => `${n} ${n === 1 ? "Tag" : "Tage"} geplant.${f ? " Erster Stopp: " + f : ""}`, rem_day_t: (d, c) => `Tag ${d} in ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "Los geht's mit " + f : ""}`, wz1: "Ziel", wz2: "Stil", wz3: "Tag", wz4: "Erstellen", wz_next: "Weiter →", wz_back: "← Zurück", wz_t: ["Reiseziel", "Wähle deinen Stil", "Dein Tag", "Letzter Schliff"], wz_s: ["Stadt, Anzahl der Tage und wer mitkommt.", "Was dir gefällt und wie schnell du unterwegs bist.", "Zeiten, Fortbewegung und Budget.", "Sprache des Plans und besondere Wünsche. Dann erstellen."], wz_of: n => `Schritt ${n} von 4`, lead: "Sag mir die Stadt und was dich interessiert – ich plane dir jeden Tag.",
     city: "Welche Stadt?", city_ph: "z. B. Rom, Paris, Barcelona, Wien, Tirana…",
     days_q: "Wie viele Tage?", days_n: n => `${n} ${n === 1 ? "Tag" : "Tage"}`, start: "Tagesbeginn", end: "Tagesende",
     pace: "Tempo", pace_qete: "🐢 Entspannt", pace_normal: "🚶 Normal", pace_intensiv: "🏃 Intensiv",
@@ -1973,7 +1974,7 @@ function openPlanHeader() {
     : "";
   document.getElementById("rTips").innerHTML = (p.tips || []).map(x => `<li>${esc(x)}</li>`).join("");
   document.getElementById("rCost").textContent = p.cost_estimate ? "💶 " + p.cost_estimate : "";
-  renderBudget(); renderOffBtn();
+  renderBudget(); renderOffBtn(); renderRem();
   if (p.kind === "now" && p.weather) document.getElementById("rGroup").textContent = t("wx", p.weather.temp, p.weather.rain || p.weather.snow);
 }
 function renderTabs() {
@@ -2212,6 +2213,60 @@ function wzRender() {
   }
 }
 document.getElementById("city").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); wzGo(2); } });
+// ---- Kujtesat e udhëtimit (njoftime lokale në app; pa server, pa çelësa) ----
+const REM_KEY = "vianto_rem";
+function remOn() { try { return localStorage.getItem(REM_KEY) !== "0"; } catch { return true; } }
+function remLN() { return IS_APP ? NP().LocalNotifications : null; }
+function planRemId(r) { const k = String(r?.id || r?.localId || ""); let h = 7; for (const c of k) h = (h * 31 + c.charCodeAt(0)) | 0; return 1000 + (Math.abs(h) % 60000) * 32; }
+function remFirst(d) { const st = (d.stops || []).find(x => x.type !== "meal" && x.name); return st ? `${st.start ? st.start + " · " : ""}${st.name}` : ""; }
+function remAt(date, hh, mm) { const [y, m, d] = date.split("-").map(Number); return new Date(y, m - 1, d, hh, mm || 0, 0); }
+async function cancelTripReminders(r) {
+  const LN = remLN(); if (!LN) return;
+  const b = planRemId(r);
+  try { await LN.cancel({ notifications: Array.from({ length: 32 }, (_, i) => ({ id: b + i })) }); } catch {}
+}
+async function scheduleTripReminders(p, r, ask) {
+  const LN = remLN(); if (!LN || !p || p.kind === "now" || !remOn()) return 0;
+  const days = (p.days || []).filter(d => d.date); if (!days.length) return 0;
+  try {
+    let perm = (await LN.checkPermissions()).display;
+    if (perm !== "granted") { if (!ask) return -1; perm = (await LN.requestPermissions()).display; if (perm !== "granted") return -1; }
+    await cancelTripReminders(r);
+    const b = planRemId(r), city = p.city?.name || p.request?.city || "", now = new Date(), extra = { rid: r?.id || null, lid: r?.localId || null }, list = [];
+    const eve = remAt(days[0].date, 19); eve.setDate(eve.getDate() - 1);
+    if (eve > now) list.push({ id: b, title: t("rem_eve_t", city), body: t("rem_eve_b", p.days.length, remFirst(days[0])), schedule: { at: eve, allowWhileIdle: true }, extra });
+    days.slice(0, 30).forEach((d, i) => {
+      const first = (d.stops || []).find(x => x.start)?.start || "09:00";
+      let [hh, mm] = first.split(":").map(Number); hh -= 1; if (hh < 6) { hh = 6; mm = 0; }
+      const at = remAt(d.date, hh, mm);
+      if (at > now) list.push({ id: b + 1 + i, title: t("rem_day_t", d.day || i + 1, city), body: t("rem_day_b", d.theme || "", remFirst(d)), schedule: { at, allowWhileIdle: true }, extra });
+    });
+    if (list.length) await LN.schedule({ notifications: list });
+    return list.length;
+  } catch { return 0; }
+}
+async function renderRem(noSched) {
+  const c = document.getElementById("remCard"); if (!c) return;
+  const hasDate = (plan.days || []).some(d => d.date);
+  if (!remLN() || mode !== "own" || plan.kind === "now" || !hasDate) { c.style.display = "none"; return; }
+  let perm = "prompt"; try { perm = (await remLN().checkPermissions()).display; } catch {}
+  const on = remOn() && perm === "granted";
+  c.style.display = "block";
+  c.innerHTML = `<div class="switch" style="margin:0"><div><b>🔔 ${esc(t("rem_h"))}</b><small>${esc(t(perm === "denied" ? "rem_denied" : "rem_s"))}</small></div>
+    <label class="tog"><input type="checkbox" ${on ? "checked" : ""} ${perm === "denied" ? "disabled" : ""} onchange="setRem(this.checked)"><span></span></label></div>`;
+  if (on && !noSched) scheduleTripReminders(plan, row, false);
+}
+async function setRem(v) {
+  try { localStorage.setItem(REM_KEY, v ? "1" : "0"); } catch {}
+  if (!v) { await cancelTripReminders(row); toast(t("rem_off")); return renderRem(); }
+  const n = await scheduleTripReminders(plan, row, true);
+  toast(n > 0 ? t("rem_ok", n) : n < 0 ? t("rem_denied") : t("rem_none"));
+  renderRem(true);
+}
+if (window.Capacitor?.isNativePlatform?.()) window.Capacitor?.Plugins?.LocalNotifications?.addListener?.("localNotificationActionPerformed", e => {
+  const x = e?.notification?.extra || {};
+  if (x.rid) openById(x.rid); else if (x.lid) openLocal(x.lid);
+});
 // ---- Pamja e errët ----
 function applyThemeMeta() {
   const dark = document.documentElement.dataset.theme === "dark";
@@ -2258,6 +2313,7 @@ async function deletePlan() {
   if (!confirmTap("del")) return;
   if (row.id) { const { error } = await sb.from("plans").delete().eq("id", row.id); if (error) return toast(t("err") + error.message); }
   if (row.localId) removeLocal(row.localId);
+  cancelTripReminders(row);
   toast(t("deleted")); go("mine");
 }
 function regenerate() { if (plan.request) { fillForm(plan.request); makePlan({ ...plan.request, fresh: true }); } else go("create"); }
