@@ -84,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p7.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p8.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -102,6 +102,10 @@ export default {
     try { q = await req.json(); } catch { return json({ error: MSG.sq.bad }, 400, H); }
     const M = MSG[q?.ui] || MSG[q?.lang] || MSG.sq;
     const path = new URL(req.url).pathname;
+    if (path === "/chat") {
+      if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
+      return handleChat(q, req, env, ctx, H, M);
+    }
     if (path === "/replan") {
       if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
       return handleReplan(q, req, env, ctx, H, M);
@@ -1212,3 +1216,109 @@ async function handleReplan(q, req, env, ctx, H, M) {
 Object.assign(MSG.sq, { rp_login: "Hyr në llogari që AI të gjejë alternativa.", rp_limit: n => `Sot e ke arritur kufirin prej ${n} ndryshimesh. Provo nesër.`, rp_none: "Nuk gjeta alternativë të verifikuar afër. Provo ta heqësh ndalesën.", rp_nochange: "Plani i mbetur i përshtatet këtij moti; nuk ndryshova asgjë." });
 Object.assign(MSG.en, { rp_login: "Log in so AI can find alternatives.", rp_limit: n => `You've reached today's limit of ${n} changes. Try again tomorrow.`, rp_none: "I couldn't find a verified alternative nearby. Try removing the stop.", rp_nochange: "The rest of your plan already suits this weather; nothing changed." });
 Object.assign(MSG.de, { rp_login: "Melde dich an, damit die KI Alternativen findet.", rp_limit: n => `Du hast heute das Limit von ${n} Änderungen erreicht. Versuch es morgen wieder.`, rp_none: "Keine geprüfte Alternative in der Nähe gefunden. Entferne den Stopp stattdessen.", rp_nochange: "Der Rest deines Plans passt schon zu diesem Wetter; nichts geändert." });
+
+// ================== FAZA 8: Live Travel Assistant ==================
+// Bisedë me kontekstin e planit. AI përdor VETËM vendet e planit dhe listat e verifikuara që i jepen.
+const CHAT_LIMIT = 20;
+const CHAT_FOOD_RE = /(^|[\s,.!?])(ha|hamë|hash|ngrënë|pi|pije|kafe|kafene|pizza|byrek|snack|coffee|drink|bar|essen|trinken|kaffee|imbiss)([\s,.!?]|$)/i;
+const NEAR_RE = /afër|aty pran|rreth|këtu|tani|now|near|nearby|around|here|close|jetzt|nähe|hier|in der nähe|umgebung|bëj|do now|was tun|vizitoj|visit|besuch/i;
+async function handleChat(q, req, env, ctx, H, M) {
+  const token = bearer(req);
+  const uid = token ? await sbUser(env, token) : null;
+  if (!uid) return json({ error: M.chat_login, code: "auth" }, 401, H);
+  if (!env.ANTHROPIC_API_KEY) return json({ error: M.nokey }, 500, H);
+  const old = q.plan, msg = String(q.message || "").replace(/\s+/g, " ").trim().slice(0, 400);
+  if (!msg || !old || !Array.isArray(old.days) || !old.days.length || old.days.length > 7 || JSON.stringify(old).length > 400000) return json({ error: M.bad }, 400, H);
+  const cache = caches.default, today = new Date().toISOString().slice(0, 10);
+  const who = "u" + (await sha(uid)).slice(0, 24), key = `ch/${today}/${who}`;
+  const used = (await limitGet(env, cache, key)) || 0;
+  if (used >= CHAT_LIMIT) return json({ error: M.chat_limit(CHAT_LIMIT), code: "chat_day" }, 429, H);
+  const stat = (await limitGet(env, cache, `d/${today}`)) || { n: 0 };
+  if ((stat.n || 0) + (stat.calls || 0) >= GLOBAL_DAILY_LIMIT * 2) return json({ error: M.busy }, 429, H);
+  await limitPut(env, cache, key, used + 1);
+  try {
+    const rq = old.request || {};
+    const p = sanitize({ ...rq, city: old.city?.name || rq.city || "city", days: old.days.length });
+    const lang = LANG[q.lang] ? q.lang : p.lang;
+    const di = Math.max(0, Math.min(old.days.length - 1, parseInt(q.day) || 0));
+    const d = old.days[di];
+    const now = /^\d{2}:\d{2}$/.test(q.now || "") ? q.now : null;
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(q.date || "") ? q.date : today;
+    const isToday = d.date === date;
+    let lat = parseFloat(q.lat), lon = parseFloat(q.lon);
+    const hasGeo = Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && !isNaN(lat) && !isNaN(lon);
+    // Pika e referencës: vendndodhja, përndryshe ndalesa e radhës sot, përndryshe qendra e qytetit
+    const stops = (d.stops || []).slice(0, 20);
+    const nowM = now ? toMin(now) : null;
+    let nextIdx = isToday && nowM != null ? stops.findIndex(s => s.start && toMin(s.start) + (parseInt(s.duration_min) || 0) > nowM) : -1;
+    const ref = hasGeo ? { lat, lon } : (nextIdx >= 0 && stops[nextIdx].lat != null ? stops[nextIdx] : stops.find(s => s.lat != null) || old.city);
+    if (!ref || ref.lat == null) throw new Error(M.bad);
+    const rlat = +(+ref.lat).toFixed(3), rlon = +(+ref.lon).toFixed(3);
+
+    const wantFood = FOOD_RE.test(msg) || CHAT_FOOD_RE.test(msg), wantNear = hasGeo || NEAR_RE.test(msg);
+    const used2 = new Set(old.days.flatMap(x => (x.stops || []).map(s => String(s.name || "").toLowerCase())));
+    const dt = new Date(date + "T00:00:00Z");
+    const [wx, food, sights] = await Promise.all([
+      isToday ? weatherNow(rlat, rlon) : null,
+      wantFood ? nearbyFood(rlat, rlon).catch(() => []) : [],
+      wantNear ? fetchPois(rlat, rlon, 2500).catch(() => []) : [],
+    ]);
+    const list = [];
+    const add = (x, kind, i) => {
+      const dist = hav(rlat, rlon, x.lat, x.lon); if (dist > 2500) return;
+      let open = "hours unknown";
+      const r = ohParse(x.oh); if (r) { const o = ohOn(r, dt); open = o.st === "closed" ? "closed today" : o.st === "open" ? spansText(o.spans) : open; }
+      if (open === "closed today") return;
+      list.push({ id: kind + (i + 1), name: x.name, kind: x.kind || kind, cuisine: x.cuisine, lat: x.lat, lon: x.lon, addr: x.addr, wiki: x.wiki, open, dist: Math.round(dist), walk: Math.max(1, Math.round(dist * 1.3 / 75)), pop: x.pop || 0 });
+    };
+    food.slice(0, 12).forEach((x, i) => add(x, "R", i));
+    sights.filter(x => !used2.has(String(x.name).toLowerCase())).map(x => ({ ...x, _d: hav(rlat, rlon, x.lat, x.lon) }))
+      .sort((a, b) => (b.pop || 0) / (1 + b._d / 600) - (a.pop || 0) / (1 + a._d / 600)).slice(0, 10).forEach((x, i) => add(x, "C", i));
+    const byId = Object.fromEntries(list.map(x => [x.id, x]));
+
+    const dayTxt = stops.map((s, k) => `[${k}] ${s.start || "?"} ${s.name} (${s.type || "visit"}, ${s.duration_min || 60} min${s.address ? ", " + s.address : ""}${s.hours ? ", hours " + s.hours : ""}${s.price ? ", price " + s.price : ""}${s.hours_warn ? ", WARNING " + s.hours_warn : ""})`).join("\n");
+    const others = old.days.map((x, k) => k === di ? null : `Day ${k + 1}${x.date ? " " + x.date : ""}: ` + (x.stops || []).filter(s => s.type !== "meal").map(s => s.name).join(", ")).filter(Boolean).join("\n");
+    const listTxt = list.map(x => `${x.id}|${x.name}|${x.kind}${x.cuisine ? " " + x.cuisine : ""}|${x.dist} m (~${x.walk} min walk)|${x.open}`).join("\n");
+    const hist = (Array.isArray(q.history) ? q.history : []).slice(-6).map(h => `${h.role === "ai" ? "Assistant" : "Traveller"}: ${String(h.text || "").slice(0, 300)}`).join("\n");
+    const budget = old.budget ? `Planned budget (EUR, group): ${old.budget.days.map(b => BUD_KEYS.reduce((a, k) => a + (b[k] || 0), 0)).join(" / ")} per day${old.budget.my ? `; own limit ${old.budget.my}` : ""}` : "";
+
+    const system = `You are Viaro, a friendly travel assistant helping a traveller DURING their trip in ${old.city?.name || p.city}. Be short, concrete and practical: 1–4 sentences, no lists longer than 3 items.
+Hard rules:
+- Recommend places ONLY from the traveller's plan or the verified list (ids R1.. = restaurants, C1.. = sights). Never invent places, addresses, opening hours or prices. If a price or time is not given, don't guess; say it is not known.
+- Mention a listed place by name and put its id in "places" (max 3). Distances/walk times are given; use them.
+- If the traveller wants to change today's plan (late, a place closed, bad weather, skip a stop), do NOT change it yourself: propose an "action" of type "replan" and say that they can confirm it.
+- For "how do I get to X" questions about a stop in the plan, use action "directions" with that stop index.
+- If the traveller asks about something you cannot know (live transport, tickets availability), say so briefly and suggest what to check.
+- Reply in ${LANG[lang]}. JSON only: {"reply":"...","places":["R1"],"action":null}
+Actions: {"type":"replan","reason":"late|closed|weather|remove","idx":2,"minutes":30,"weather":"rain|hot|cold"} or {"type":"directions","idx":3}`;
+    const user = `${isToday ? `Today is ${date} (${WD[dt.getUTCDay()]}), local time ${now || "unknown"}. The traveller is on day ${di + 1} of the plan.` : `Today is ${date}. The traveller is looking at day ${di + 1}${d.date ? " (" + d.date + ")" : ""}, which is not today.`}
+${hasGeo ? "The traveller shared their current location; distances below are from there." : `Distances below are from ${nextIdx >= 0 ? "the next stop (" + stops[nextIdx].name + ")" : "the day's first stop or city centre"}.`}
+${wx ? `Weather now: ${wx.temp}°C${wx.rain ? ", raining" : ""}${wx.snow ? ", snow" : ""}.` : ""}
+Travellers: ${p.adults} adult(s)${p.kids ? ` + ${p.kids} child(ren)` : ""}; budget level ${{ ulet: "low", mesem: "medium", larte: "high" }[p.budget]}; getting around ${TR_EN[p.transport] || "on foot"}; interests ${p.interests.join(", ") || "general"}.
+${budget}
+Day ${di + 1} plan${nextIdx >= 0 ? ` (next/current stop is [${nextIdx}])` : ""}:
+${dayTxt}
+${others ? "Other days:\n" + others : ""}
+${list.length ? "Verified places nearby (id|name|type|distance|hours today):\n" + listTxt : "No nearby place list was loaded for this question."}
+${hist ? "\nConversation so far:\n" + hist : ""}
+
+Traveller: ${msg}`;
+    const { out, usage } = await callClaude(env.ANTHROPIC_API_KEY, system, user, 700);
+    const ai = aiCost(MODEL, usage); ctx.waitUntil(addDayStat(env, ai));
+    if (!out || typeof out.reply !== "string") throw new Error(M.badplan);
+    const places = (Array.isArray(out.places) ? out.places : []).map(id => byId[id]).filter(Boolean).slice(0, 3)
+      .map(({ id, pop, ...x }) => x);
+    let action = null; const a = out.action;
+    if (a && a.type === "replan" && ["late", "closed", "weather", "remove"].includes(a.reason) && parseInt(a.idx) >= 0 && parseInt(a.idx) < stops.length)
+      action = { type: "replan", reason: a.reason, idx: parseInt(a.idx), minutes: Math.max(5, Math.min(240, parseInt(a.minutes) || 30)), weather: ["rain", "hot", "cold"].includes(a.weather) ? a.weather : "rain" };
+    else if (a && a.type === "directions" && parseInt(a.idx) >= 0 && parseInt(a.idx) < stops.length && stops[parseInt(a.idx)].lat != null)
+      action = { type: "directions", idx: parseInt(a.idx) };
+    return json({ reply: out.reply.slice(0, 700), places, action, day: di, left: CHAT_LIMIT - used - 1 }, 200, H);
+  } catch (e) {
+    await limitPut(env, cache, key, used);
+    return json({ error: M.fail + (e.message || e) }, 502, H);
+  }
+}
+Object.assign(MSG.sq, { chat_login: "Hyr në llogari për të biseduar me asistentin.", chat_limit: n => `Sot i ke përdorur të ${n} mesazhet me asistentin. Provo nesër.` });
+Object.assign(MSG.en, { chat_login: "Log in to chat with the assistant.", chat_limit: n => `You've used all ${n} assistant messages today. Try again tomorrow.` });
+Object.assign(MSG.de, { chat_login: "Melde dich an, um mit dem Assistenten zu chatten.", chat_limit: n => `Du hast heute alle ${n} Nachrichten an den Assistenten genutzt. Versuch es morgen wieder.` });
