@@ -84,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p9.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p10.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -430,7 +430,7 @@ Rules:
 - Prioritise famous places (higher "pop") and the traveller's interests. Do not repeat a place.
 - Give realistic visit durations (big museums 2–3h, viewpoints 20–30 min) and travel time between stops.
 - If children are travelling: pick child-friendly stops first, keep museum visits short, add a rest or playground/park break every 2–3 hours, avoid long walks between stops, and mention family/child tickets. For children aged 0–3 add stroller/nap tips; for teenagers prefer interactive and active places.
-- "budget": realistic ESTIMATES in EUR for the WHOLE group per day (entry tickets for the planned stops, food incl. the meals, local transport, parking only when travelling by car, paid activities, other). Numbers only, no text. Match the budget level.
+- "budget": realistic ESTIMATES in EUR for the WHOLE group per day: "stay" = one night of accommodation for the group in this city matching the budget level (0 on the last day of a multi-day trip; for a 1-day trip assume no overnight stay = 0), entry tickets for the planned stops, food incl. the meals, local transport, parking only when travelling by car, paid activities, other. Numbers only, no text. Match the budget level.
 - Write all human-readable text in ${LANG[p.lang]}. Keep notes short (1–2 sentences) and practical (tickets, best time, queues).
 - Reply with JSON only, no markdown.`;
 
@@ -448,7 +448,7 @@ Places (id|name|type|zone|lat,lon|popularity|...):
 ${list}
 
 Return this JSON shape:
-{"title": "...", "summary": "2 sentences", "days": [{"day": 1, "theme": "short title", "area": "neighbourhood name", "stops": [{"poi": "P1", "name": "display name", "type": "visit|meal|break|walk", "start": "09:00", "duration_min": 90, "travel_min": 10, "note": "...", "tip": "..."}]}], "tips": ["3-5 general tips: transport ticket, city card, safety, etc."], "budget": {"currency": "EUR", "days": [{"day": 1, "tickets": 0, "food": 0, "transport": 0, "parking": 0, "activities": 0, "other": 0}], "free": ["2-4 free things to do in this city, preferably places from the list"]}, "cost_estimate": "rough daily cost in EUR excluding hotel${p.adults + p.kids > 1 ? ", for the whole group (say so)" : " per person"}"}`;
+{"title": "...", "summary": "2 sentences", "days": [{"day": 1, "theme": "short title", "area": "neighbourhood name", "stops": [{"poi": "P1", "name": "display name", "type": "visit|meal|break|walk", "start": "09:00", "duration_min": 90, "travel_min": 10, "note": "...", "tip": "..."}]}], "tips": ["3-5 general tips: transport ticket, city card, safety, etc."], "budget": {"currency": "EUR", "days": [{"day": 1, "stay": 0, "tickets": 0, "food": 0, "transport": 0, "parking": 0, "activities": 0, "other": 0}], "free": ["2-4 free things to do in this city, preferably places from the list"]}, "cost_estimate": "rough daily cost in EUR excluding hotel${p.adults + p.kids > 1 ? ", for the whole group (say so)" : " per person"}"}`;
 
   // Provo deri në 2 herë: nëse përgjigja vjen e prerë ose jo si JSON, kërkohet përsëri
   let plan = null, d = null; const total = {};
@@ -776,7 +776,7 @@ async function finishPlan(env, plan, p, byId, opts = {}) {
 
 // ================== FAZA 4: buxheti ==================
 const TR_EN = { kembe: "on foot", publik: "on foot + public transport", vetura: "car" };
-const BUD_KEYS = ["tickets", "food", "transport", "parking", "activities", "other"];
+const BUD_KEYS = ["stay", "tickets", "food", "transport", "parking", "activities", "other"];
 function cleanBudget(b, nDays) {
   if (!b || !Array.isArray(b.days)) return null;
   const num = v => Math.max(0, Math.min(20000, Math.round(+v || 0)));
@@ -903,7 +903,7 @@ Allowed ops:
 {"op":"theme","day":1,"theme":"..."}
 
 Current budget estimate (EUR, whole group): ${old.budget ? JSON.stringify({ days: old.budget.days }) : "none"}
-After your changes ALWAYS return "budget" for the whole updated itinerary: {"currency":"EUR","days":[{"day":1,"tickets":0,"food":0,"transport":0,"parking":0,"activities":0,"other":0}],"free":["2-4 free things to do nearby"]} (whole group, realistic estimates; keep unchanged days as they were).
+After your changes ALWAYS return "budget" for the whole updated itinerary: {"currency":"EUR","days":[{"day":1,"stay":0,"tickets":0,"food":0,"transport":0,"parking":0,"activities":0,"other":0}],"free":["2-4 free things to do nearby"]} (whole group, realistic estimates; "stay" = one night of accommodation matching the budget level, 0 on the last day; keep unchanged days as they were). If the traveller asks for a cheaper plan, replace expensive paid stops with free or cheaper ones from the candidate list and lower the estimates accordingly.
 
 Return: {"ops":[...],"reply":"...","budget":{...}}`;
     const { out, usage } = await callClaude(env.ANTHROPIC_API_KEY, system, user, 4000);
