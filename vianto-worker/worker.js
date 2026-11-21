@@ -84,7 +84,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p8.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p9.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -102,6 +102,10 @@ export default {
     try { q = await req.json(); } catch { return json({ error: MSG.sq.bad }, 400, H); }
     const M = MSG[q?.ui] || MSG[q?.lang] || MSG.sq;
     const path = new URL(req.url).pathname;
+    if (path === "/near") {
+      if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
+      return handleNear(q, req, env, ctx, H, M);
+    }
     if (path === "/chat") {
       if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
       return handleChat(q, req, env, ctx, H, M);
@@ -1093,11 +1097,11 @@ async function dayForecast(lat, lon, date) {
 }
 async function handleReplan(q, req, env, ctx, H, M) {
   const reason = String(q.reason || "");
-  if (!["late", "closed", "weather", "remove"].includes(reason)) return json({ error: M.bad }, 400, H);
+  if (!["late", "closed", "weather", "remove", "add"].includes(reason)) return json({ error: M.bad }, 400, H);
   const old = q.plan, di = parseInt(q.day) - 1, idx = parseInt(q.idx);
   if (!old || !Array.isArray(old.days) || old.days.length > 7 || JSON.stringify(old).length > 400000) return json({ error: M.bad }, 400, H);
   const d = old.days[di];
-  if (!d || !Array.isArray(d.stops) || !d.stops.length || d.stops.length > 20 || !(idx >= 0 && idx < d.stops.length)) return json({ error: M.bad }, 400, H);
+  if (!d || !Array.isArray(d.stops) || !d.stops.length || d.stops.length > 20 || !(idx >= 0 && (idx < d.stops.length || (reason === "add" && idx === d.stops.length)))) return json({ error: M.bad }, 400, H);
   const needAI = reason === "closed" || reason === "weather";
   const token = bearer(req);
   const uid = token ? await sbUser(env, token) : null;
@@ -1129,7 +1133,7 @@ async function handleReplan(q, req, env, ctx, H, M) {
     let rest = stops.slice(idx);
     const anchor = [...locked].reverse().find(s => s.lat != null) || null;
     const last = locked[locked.length - 1];
-    let T = last?.start ? toMin(last.start) + (parseInt(last.duration_min) || 60) : toMin(rest[0].start || p.start);
+    let T = last?.start ? toMin(last.start) + (parseInt(last.duration_min) || 60) : toMin(rest[0]?.start || p.start);
     const lateMin = reason === "late" ? Math.max(5, Math.min(240, parseInt(q.minutes) || 30)) : 0;
     T += lateMin;
     if (nowMin != null) T = Math.max(T, nowMin);
@@ -1138,6 +1142,31 @@ async function handleReplan(q, req, env, ctx, H, M) {
     const usedNames = new Set(old.days.flatMap(x => (x.stops || []).map(s => String(s.name || "").toLowerCase())));
 
     if (reason === "remove") { changed.push(rest[0].name); rest = rest.slice(1); }
+    else if (reason === "add") {
+      // Vendi vjen nga lista /near ose nga asistenti (të dyja të verifikuara). Pastrohet dhe kontrollohet afërsia me ditën.
+      const x = q.place || {}, la = parseFloat(x.lat), lo = parseFloat(x.lon), nm = String(x.name || "").trim().slice(0, 120);
+      const geo = stops.filter(s => s.lat != null);
+      const near = geo.length ? Math.min(...geo.map(s => hav(la, lo, s.lat, s.lon))) : (old.city?.lat != null ? hav(la, lo, old.city.lat, old.city.lon) : 0);
+      if (!nm || isNaN(la) || isNaN(lo) || near > 15000 || !(x.wd || x.osm || x.wiki)) return json({ error: M.add_bad }, 400, H);
+      const kind = String(x.kind || "");
+      const s = { poi: null, name: nm, type: kind === "restaurant" ? "meal" : "visit", duration_min: Math.max(15, Math.min(240, parseInt(x.duration_min) || (kind === "restaurant" ? 60 : kind === "cafe" ? 30 : 45))),
+        lat: +la.toFixed(5), lon: +lo.toFixed(5), verified: true, added: true };
+      for (const k of ["wiki", "wd", "osm", "cuisine"]) if (x[k]) s[k] = String(x[k]).slice(0, 200);
+      if (x.addr) s.address = String(x.addr).slice(0, 200);
+      if (x.hours_raw) s.hours_raw = String(x.hours_raw).slice(0, 200);
+      if (x.fee === "yes" || x.fee === "no") s.fee = x.fee; if (x.price) s.price = String(x.price).slice(0, 80);
+      if (s.hours_raw && dt) { const r = ohParse(s.hours_raw); if (r) { const o = ohOn(r, dt); s.hours = o.st === "unknown" ? null : (o.st === "open" ? spansText(o.spans) : "closed"); s.hours_ok = true; } }
+      // Vendi më i mirë: aty ku shton më pak rrugë (pas idx)
+      const pts = [anchor, ...rest].map(v => v && v.lat != null ? v : null);
+      let best = rest.length, bestCost = Infinity;
+      for (let k = 0; k <= rest.length; k++) {
+        const prev = [anchor, ...rest.slice(0, k)].reverse().find(v => v && v.lat != null), next = rest.slice(k).find(v => v.lat != null);
+        const c = (prev ? hav(prev.lat, prev.lon, la, lo) : 0) + (next ? hav(la, lo, next.lat, next.lon) : 0) - (prev && next ? hav(prev.lat, prev.lon, next.lat, next.lon) : 0);
+        if (c < bestCost - 1) { bestCost = c; best = k; }
+      }
+      if (q.asap) best = 0;
+      rest.splice(best, 0, s); changed.push(nm);
+    }
     else if (needAI) {
       const geo = rest.filter(s => s.lat != null);
       const center = reason === "closed" ? (rest[0].lat != null ? rest[0] : anchor || old.city) : geo.length ? { lat: geo.reduce((a, s) => a + s.lat, 0) / geo.length, lon: geo.reduce((a, s) => a + s.lon, 0) / geo.length } : anchor || old.city;
@@ -1269,7 +1298,7 @@ async function handleChat(q, req, env, ctx, H, M) {
       let open = "hours unknown";
       const r = ohParse(x.oh); if (r) { const o = ohOn(r, dt); open = o.st === "closed" ? "closed today" : o.st === "open" ? spansText(o.spans) : open; }
       if (open === "closed today") return;
-      list.push({ id: kind + (i + 1), name: x.name, kind: x.kind || kind, cuisine: x.cuisine, lat: x.lat, lon: x.lon, addr: x.addr, wiki: x.wiki, open, dist: Math.round(dist), walk: Math.max(1, Math.round(dist * 1.3 / 75)), pop: x.pop || 0 });
+      list.push({ id: kind + (i + 1), name: x.name, kind: kind === "R" ? "restaurant" : (x.kind || kind), cuisine: x.cuisine, lat: x.lat, lon: x.lon, addr: x.addr, wiki: x.wiki, wd: x.wd, osm: x.osm, hours_raw: x.oh, open, dist: Math.round(dist), walk: Math.max(1, Math.round(dist * 1.3 / 75)), pop: x.pop || 0 });
     };
     food.slice(0, 12).forEach((x, i) => add(x, "R", i));
     sights.filter(x => !used2.has(String(x.name).toLowerCase())).map(x => ({ ...x, _d: hav(rlat, rlon, x.lat, x.lon) }))
@@ -1322,3 +1351,86 @@ Traveller: ${msg}`;
 Object.assign(MSG.sq, { chat_login: "Hyr në llogari për të biseduar me asistentin.", chat_limit: n => `Sot i ke përdorur të ${n} mesazhet me asistentin. Provo nesër.` });
 Object.assign(MSG.en, { chat_login: "Log in to chat with the assistant.", chat_limit: n => `You've used all ${n} assistant messages today. Try again tomorrow.` });
 Object.assign(MSG.de, { chat_login: "Melde dich an, um mit dem Assistenten zu chatten.", chat_limit: n => `Du hast heute alle ${n} Nachrichten an den Assistenten genutzt. Versuch es morgen wieder.` });
+
+// ================== FAZA 9: Explore Around Me ==================
+// Lista e vendeve të verifikuara afër (pa AI, pa kosto Claude). Kategoritë: see | food | cafe
+const NEAR_LIMIT = { user: 40, guest: 15 };
+const INT_RE = { histori: /histor|castle|fort|ruin|monument|memorial|archaeolog|palace|old town|medieval|roman|ancient/i, muze: /museum/i, art: /art|gallery|sculpture|fresco/i,
+  arkitekture: /architect|building|tower|bridge|cathedral|palace|basilica/i, natyre: /park|garden|lake|river|beach|forest|nature|hill|mount/i, pamje: /viewpoint|view|tower|hill|panoram|terrace/i,
+  blerje: /market|shopping|bazaar|mall|street/i, nate: /theatre|theater|opera|concert|club|bar/i, femije: /zoo|aquarium|park|playground|children|science/i, fe: /church|cathedral|basilica|mosque|synagogue|temple|monastery|abbey|chapel/i, fotografi: /viewpoint|square|bridge|fountain|tower/i };
+async function nearbyKind(lat, lon, kind) {
+  if (kind === "restaurant") return nearbyFood(lat, lon);
+  const key = new Request(`https://cache.udhetimi/${kind}1/${lat.toFixed(3)},${lon.toFixed(3)}`);
+  const hit = await caches.default.match(key); if (hit) return hit.json();
+  const d = 0.007, out = [];
+  try {
+    const u = `https://nominatim.openstreetmap.org/search?format=jsonv2&extratags=1&addressdetails=1&limit=12&bounded=1&accept-language=en&viewbox=${lon - d},${lat + d},${lon + d},${lat - d}&q=${kind}`;
+    const r = await fetch(u, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(6000) });
+    if (r.ok) for (const x of await r.json()) {
+      if (!x.name || x.type !== kind) continue;
+      const e = x.extratags || {}, a = x.address || {};
+      out.push({ name: x.name, lat: +(+x.lat).toFixed(5), lon: +(+x.lon).toFixed(5), kind, cuisine: e.cuisine, oh: e.opening_hours, wd: e.wikidata,
+        addr: [[a.road || a.pedestrian || a.square, a.house_number].filter(Boolean).join(" "), [a.postcode, a.city || a.town || a.village].filter(Boolean).join(" ")].filter(Boolean).join(", ") || undefined,
+        osm: x.osm_type?.[0] + x.osm_id });
+    }
+  } catch {}
+  await caches.default.put(key, new Response(JSON.stringify(out), { headers: { "Cache-Control": "max-age=" + 86400 * 7 } }));
+  return out;
+}
+async function handleNear(q, req, env, ctx, H, M) {
+  const cat = ["see", "food", "cafe"].includes(q.cat) ? q.cat : "see";
+  let lat = parseFloat(q.lat), lon = parseFloat(q.lon);
+  if (!(Math.abs(lat) <= 90 && Math.abs(lon) <= 180) || isNaN(lat) || isNaN(lon)) return json({ error: M.now_where }, 400, H);
+  const token = bearer(req), uid = token ? await sbUser(env, token) : null;
+  const cache = caches.default, today = new Date().toISOString().slice(0, 10);
+  const who = uid ? "u" + (await sha(uid)).slice(0, 24) : "ip" + (await sha("viaro|" + (req.headers.get("CF-Connecting-IP") || "anon") + "|" + today)).slice(0, 24);
+  const key = `nr/${today}/${who}`, used = (await limitGet(env, cache, key)) || 0, max = uid ? NEAR_LIMIT.user : NEAR_LIMIT.guest;
+  if (used >= max) return json({ error: M.near_limit(max), code: "near_day" }, 429, H);
+  await limitPut(env, cache, key, used + 1);
+  const minutes = Math.max(30, Math.min(480, parseInt(q.minutes) || 120));
+  const transport = ["kembe", "publik", "vetura"].includes(q.transport) ? q.transport : "kembe";
+  const interests = (Array.isArray(q.interests) ? q.interests : []).filter(i => INTERESTS.includes(i)).slice(0, 8);
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(q.date || "") ? q.date : today;
+  const now = /^\d{2}:\d{2}$/.test(q.time || "") ? toMin(q.time) : null;
+  const dt = new Date(date + "T00:00:00Z");
+  // Distanca maksimale: rreth 1/4 e kohës së lirë për të shkuar (pjesa tjetër për vizitën dhe kthimin)
+  const maxDist = Math.min({ kembe: 2500, publik: 5000, vetura: 9000 }[transport], Math.max(600, { kembe: 75, publik: 250, vetura: 500 }[transport] * minutes / 4));
+  const rl = +lat.toFixed(3), ro = +lon.toFixed(3);
+  try {
+    let raw = cat === "see" ? await fetchPois(rl, ro, Math.min(5000, Math.max(1500, maxDist))) : await nearbyKind(rl, ro, cat === "food" ? "restaurant" : "cafe");
+    let list = raw.map(x => ({ ...x, dist: Math.round(hav(lat, lon, x.lat, x.lon)) })).filter(x => x.dist <= maxDist);
+    if (cat === "see") {
+      const boost = x => interests.some(i => INT_RE[i]?.test(`${x.kind} ${x.name}`)) ? 2 : 1;
+      list.sort((a, b) => (b.pop || 0) * boost(b) / (1 + b.dist / 500) - (a.pop || 0) * boost(a) / (1 + a.dist / 500));
+      list = list.slice(0, 14);
+      await enrichPois(list.slice(0, 8), 5);
+    } else list.sort((a, b) => a.dist - b.dist);
+    const out = [];
+    for (const x of list) {
+      let open = null, status = "unknown";
+      const r = ohParse(x.oh);
+      if (r) {
+        const o = ohOn(r, dt);
+        if (o.st === "closed") { status = "closed"; }
+        else if (o.st === "open") {
+          open = spansText(o.spans);
+          if (now != null) { const sp = o.spans.find(([a, b]) => now < b - 20); status = !sp ? "closed" : sp[0] > now ? "opens" : "open"; if (sp && sp[0] > now) open = `${fmtMin(sp[0])}–${fmtMin(sp[1])}`; }
+          else status = "open";
+        }
+      }
+      if (status === "closed") continue;
+      const leg = estimateLeg(x.dist, transport);
+      out.push({ name: x.name, kind: cat === "see" ? x.kind : cat === "food" ? "restaurant" : "cafe", cuisine: x.cuisine, lat: x.lat, lon: x.lon, addr: x.addr, wiki: x.wiki, wd: x.wd, osm: x.osm,
+        hours_raw: x.oh, open, status, fee: x.fee, price: x.charge, dist: x.dist, min: leg.min, mode: leg.mode });
+      if (out.length >= 12) break;
+    }
+    if (!out.length) await limitPut(env, cache, key, used);
+    return json({ cat, places: out, maxDist: Math.round(maxDist), left: max - used - 1 }, 200, H);
+  } catch (e) {
+    await limitPut(env, cache, key, used);
+    return json({ error: M.fail + (e.message || e) }, 502, H);
+  }
+}
+Object.assign(MSG.sq, { near_limit: n => `Sot e ke kërkuar ${n} herë vende afër. Provo nesër.`, add_bad: "Ky vend nuk mund të shtohet." });
+Object.assign(MSG.en, { near_limit: n => `You've searched nearby places ${n} times today. Try again tomorrow.`, add_bad: "This place can't be added." });
+Object.assign(MSG.de, { near_limit: n => `Du hast heute ${n}-mal nach Orten in der Nähe gesucht. Versuch es morgen wieder.`, add_bad: "Dieser Ort kann nicht hinzugefügt werden." });
