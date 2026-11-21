@@ -658,6 +658,7 @@ function schedule(stops, legsByIdx, dayStart, dayEnd, dt) {
       t += c.travel_min || 0; travelTotal += c.travel_min || 0;
     }
     let start = t; const dur = Math.max(10, Math.min(300, parseInt(c.duration_min) || 60));
+    if (c._earliest != null && start < c._earliest) start = c._earliest; // vaktet nuk dalin më herët se ora e planifikuar
     if (c._oh && dt) {
       const o = ohOn(c._oh, dt);
       if (o.st === "open") {
@@ -1052,7 +1053,7 @@ async function scheduleRest(env, anchor, rest, T, p, dt, useOrs) {
   const sch = schedule(order, legsByIdx, fmtMin(Math.max(0, anchor ? T - 10 : T)), p.end, dt);
   const off = anchor ? 1 : 0;
   return {
-    stops: sch.stops.slice(off).map(({ _oh, ...s }) => s), over: sch.over, warn: sch.warn,
+    stops: sch.stops.slice(off).map(({ _oh, _earliest, ...s }) => s), over: sch.over, warn: sch.warn,
     lines: [...legsByIdx.entries()].filter(([k, l]) => l.line && k >= off).map(([k, l]) => ({ k: k - off, line: thin(l.line) })),
   };
 }
@@ -1181,7 +1182,7 @@ async function handleReplan(q, req, env, ctx, H, M) {
     }
 
     // Orari i ri, me oraret e hapjes të rilidhura
-    rest = rest.map(s => { const c = { ...s }; delete c.start; delete c.hours_warn; delete c.travel_min; delete c.travel_m; delete c.travel_mode; delete c.travel_est;
+    rest = rest.map(s => { const c = { ...s }; if (c.type === "meal" && /^\d{2}:\d{2}$/.test(c.start || "")) c._earliest = toMin(c.start); delete c.start; delete c.hours_warn; delete c.travel_min; delete c.travel_m; delete c.travel_mode; delete c.travel_est;
       if (c.hours_raw) { const r = ohParse(c.hours_raw); if (r) c._oh = r; } return c; });
     let sch = await scheduleRest(env, anchor, rest, T, p, dt, false);
     // Kur dita nuk mjafton: hiqen vizitat e fundit (jo vaktet), maksimumi 4
