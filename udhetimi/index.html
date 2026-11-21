@@ -857,6 +857,21 @@
   #printArea .pr-wm{display:flex;align-items:center;gap:8px;height:auto}
   #printArea .pr-wm svg{width:26px;height:26px}
   #printArea .pr-wm span{font-family:"Fraunces",Georgia,serif;font-weight:800;font-size:22px;letter-spacing:-.04em;color:#1F1A17}
+  /* Faza 12: Travel Together */
+  .gbtn{margin-top:10px}
+  .gmem{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+  .gmb{display:inline-flex;align-items:center;gap:4px;background:var(--surface-3);border-radius:99px;padding:5px 10px;font-size:13.5px;font-weight:600}
+  .gmb.me{outline:2px solid color-mix(in srgb,var(--terra) 45%,transparent)}.gmb small{font-weight:500;color:var(--mut)}
+  .gmb .x2,.gact .x2{border:0;background:none;color:var(--mut);font-size:17px;cursor:pointer;padding:0 2px;line-height:1}
+  .gbtns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+  .gprops{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .gprop{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface)}
+  .gprop.added{opacity:.7}.gprop.rejected{opacity:.5}
+  .gpt b{display:block;font-size:15px}.gpt small{display:block;color:var(--mut);font-size:12.5px}.gnote{font-size:13.5px;margin-top:4px}
+  .gact{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+  .vote{border:1px solid var(--line);background:var(--surface-2,var(--surface));color:var(--text);border-radius:99px;padding:5px 11px;font-size:13.5px;cursor:pointer}
+  .vote.on{border-color:var(--terra);background:color-mix(in srgb,var(--terra) 10%,var(--surface))}
+  .gact .btn2{font-size:13px!important;padding:6px 12px!important;margin-left:auto}
   /* Faza 11: Planner më realist */
   .okv{font-size:11.5px;font-weight:700;color:#2F7D4F;white-space:nowrap}html[data-theme=dark] .okv{color:#7BCB97}
   .daywarn.dinfo{background:color-mix(in srgb,var(--sun) 18%,var(--surface))!important;border-color:color-mix(in srgb,var(--sun) 50%,var(--line))!important}
@@ -1078,6 +1093,7 @@
     <div id="edLog"></div>
   </div>
   <div class="card bud" id="budCard" style="display:none"></div>
+  <div class="card grp" id="grpCard" style="display:none"></div>
   <div class="card"><b data-i18n="tips"></b><ul class="tips" id="rTips"></ul><div id="rCost" style="color:var(--mut);font-size:14px"></div></div>
   <div class="card ptools"><b data-i18n="take_h"></b><div class="tbtns"><button class="btn2" onclick="printPlan()" data-i18n="pdf"></button><button class="btn2" onclick="openCal()" data-i18n="cal"></button><button class="btn2" id="offBtn"></button></div><div class="dhint" data-i18n="off_hint"></div></div>
   <div class="card cmts" id="cmtCard" style="display:none"><h3 class="cmth" id="cmtH"></h3><div id="cmtList"></div>
@@ -1281,6 +1297,13 @@ const I18N = {
     del_yes: "Po, fshije përgjithmonë", del_no: "Anulo", del_done: "Llogaria u fshi.", del_err: "Fshirja nuk u krye. Provo përsëri pas pak.",
     date_q: "Kur fillon udhëtimi?", date_hint: "Opsionale: me datë kontrollohen oraret e hapjes për çdo ditë.", h_closed: "I mbyllur atë ditë", h_closes: "Mbyllet para se ta përfundosh vizitën", h_unconf: "orari i pakonfirmuar", h_unknown: "Orari nuk dihet — kontrolloje para se të shkosh", free: "Hyrje falas", fee_yes: "Me pagesë (çmimi nuk dihet)", unverified: "I pakonfirmuar", overtime: m => `Kjo ditë zgjat rreth ${m} min më shumë se koha që zgjodhe.`, est_note: "~ = kohë e vlerësuar, jo e matur.", gm_leg: "Rruga ↗",
     bud_h: "Buxheti", bud_est: "Vlerësim për gjithë grupin — çmimet e vërteta mund të ndryshojnë.", bud_none: "Ky plan nuk ka ende vlerësim buxheti.", bud_calc: "Llogarit buxhetin me AI", bud_msg: "Llogarit buxhetin për këtë plan", bud_total: "Gjithsej", bud_pp: n => `Për person (${n})`, bud_my: "Buxheti yt", bud_left: "Të mbeten", bud_over: "Mbi buxhet", bud_ver: "Çmime nga OpenStreetMap (të verifikuara)", bud_free: "Alternativa falas", bk_tickets: "Bileta", bk_food: "Ushqim", bk_transport: "Transport", bk_parking: "Parkim", bk_activities: "Aktivitete", bk_other: "Të tjera", off_save: "⬇ Ruaj për offline", off_remove: "✓ I ruajtur offline · Hiqe", off_hint: "Plani, oraret, adresat dhe shënimet hapen edhe pa internet. Harta pa internet shfaq vetëm pikat.", off_saved: "Plani u ruajt në këtë pajisje.", off_removed: "U hoq nga pajisja.", off_full: "Nuk ka vend në pajisje.", off_list: "Të ruajtura për offline", off_later: "Pa internet: ndryshimi do të ruhet kur të kthehet lidhja.", off_synced: n => `U sinkronizuan ${n} plane.`, off_mode: "Je pa internet. Këtu janë planet e ruajtura në pajisje.", note_add: "＋ Shënim", note_edit: "Ndrysho shënimin", loc: "Ku jam unë", you_here: "Ti je këtu",
+    grp_h: "Udhëtim në grup", grp_intro: "Fto miqtë me një link: secili mund ta shohë dhe ta ndryshojë planin, të propozojë vende dhe të votojë. Ndryshimet shfaqen te të gjithë menjëherë.", grp_need_acct: "Ruaje planin në llogari për ta ndarë me grupin.", grp_unavail: "Udhëtimet në grup nuk janë aktivizuar ende.",
+    grp_invite: "Fto miqtë", grp_invite_more: "Fto më shumë", grp_new_link: "Link i ri", grp_renew_q: "Linku i vjetër nuk do të funksionojë më. Ata që janë bashkuar mbeten në grup. Të vazhdoj?", grp_invite_text: c => `Eja të planifikojmë bashkë udhëtimin në ${c} në Viaro!`, grp_link_copied: "Linku i ftesës u kopjua", grp_link: "Linku i ftesës",
+    grp_owner: "organizator", grp_remove: "Hiqe nga grupi", grp_leave: "Largohu nga grupi", grp_leave_q: "Të largohesh nga ky udhëtim në grup?", grp_left: "U largove nga grupi", grp_removed: "Nuk je më në këtë grup.",
+    grp_live: "Ndryshimet sinkronizohen me grupin në kohë reale.", grp_props: "Propozimet", grp_no_props: "Ende asnjë propozim. Shtyp “Propozo një vend” për të sugjeruar diçka.", grp_propose: "Propozo një vend", grp_propose_btn: "Propozo", grp_proposed: "U propozua", grp_note_q: "Shënim për grupin (opsional):",
+    grp_by: n => `nga ${n}`, grp_st_added: "u shtua", grp_st_rejected: "u refuzua", grp_up: "Pro", grp_down: "Kundër",
+    grp_updated: "Plani u përditësua nga grupi", grp_conflict: "Dikush tjetër e ndryshoi planin njëkohësisht. Mora versionin e fundit, provo përsëri.",
+    grp_join_login: "Hyr ose krijo llogari për t'u bashkuar me udhëtimin.", grp_joined: "U bashkove me udhëtimin!", grp_invalid: "Ky link ftese nuk vlen më. Kërkoji organizatorit një të ri.", grp_full: "Grupi është plot (maksimumi 12 veta).", grp_mine: "Udhëtime në grup",
     h_ver: "orar i verifikuar", far_removed: n => `U hoq nga kjo ditë: ${n}, sepse ishte shumë larg nga ndalesat e tjera.`, moved_in: n => `U zhvendos në këtë ditë: ${n}, sepse është më afër ndalesave të saj.`, bk_stay: "Akomodim", bud_spent: "Shpenzuar", bud_planned: "Planifikuar", bud_pct: p => `${p}% e buxhetit është shpenzuar`, bud_w_near: "⚠️ Po i afrohesh kufirit të buxhetit (mbi 80%).", bud_w_over: "⛔ E ke kaluar buxhetin.",
     bud_cheaper_btn: "Gjej alternativa më të lira", bud_cheaper_msg: "Bëje planin më ekonomik: zëvendëso vendet e shtrenjta me alternativa falas ose më të lira afër dhe ul vlerësimin e buxhetit.",
     bud_add_h: "Shpenzimet e tua", bud_amt: "Shuma €", bud_note: "Shënim (opsional), p.sh. darka", bud_add: "Shto", bud_added: "Shpenzimi u shtua", bud_amt_bad: "Shkruaj një shumë më të madhe se 0.", bud_del: "Fshi",
@@ -1371,6 +1394,13 @@ const I18N = {
     del_yes: "Yes, delete permanently", del_no: "Cancel", del_done: "Your account has been deleted.", del_err: "Deletion didn't go through. Try again in a moment.",
     date_q: "When does the trip start?", date_hint: "Optional: with a date, opening hours are checked for each day.", h_closed: "Closed that day", h_closes: "Closes before you'd finish the visit", h_unconf: "hours not confirmed", h_unknown: "Hours unknown — check before you go", free: "Free entry", fee_yes: "Paid entry (price unknown)", unverified: "Not confirmed", overtime: m => `This day runs about ${m} min longer than the time you chose.`, est_note: "~ = estimated time, not measured.", gm_leg: "Route ↗",
     bud_h: "Budget", bud_est: "Estimate for the whole group — real prices may differ.", bud_none: "This plan has no budget estimate yet.", bud_calc: "Estimate the budget with AI", bud_msg: "Estimate the budget for this plan", bud_total: "Total", bud_pp: n => `Per person (${n})`, bud_my: "Your budget", bud_left: "Left", bud_over: "Over budget", bud_ver: "Prices from OpenStreetMap (verified)", bud_free: "Free alternatives", bk_tickets: "Tickets", bk_food: "Food", bk_transport: "Transport", bk_parking: "Parking", bk_activities: "Activities", bk_other: "Other", off_save: "⬇ Save for offline", off_remove: "✓ Saved offline · Remove", off_hint: "The plan, times, addresses and notes open without internet. Offline, the map shows only the pins.", off_saved: "Plan saved on this device.", off_removed: "Removed from this device.", off_full: "Not enough space on this device.", off_list: "Saved for offline", off_later: "No internet: the change will be saved when you're back online.", off_synced: n => `${n} plans synced.`, off_mode: "You're offline. Here are the plans saved on this device.", note_add: "＋ Note", note_edit: "Edit note", loc: "Where am I", you_here: "You are here",
+    grp_h: "Group trip", grp_intro: "Invite friends with a link: everyone can view and edit the plan, suggest places and vote. Changes appear for everyone instantly.", grp_need_acct: "Save the plan to your account to share it with a group.", grp_unavail: "Group trips aren't enabled yet.",
+    grp_invite: "Invite friends", grp_invite_more: "Invite more", grp_new_link: "New link", grp_renew_q: "The old link will stop working. People who already joined stay in the group. Continue?", grp_invite_text: c => `Let's plan our trip to ${c} together on Viaro!`, grp_link_copied: "Invite link copied", grp_link: "Invite link",
+    grp_owner: "organiser", grp_remove: "Remove from group", grp_leave: "Leave group", grp_leave_q: "Leave this group trip?", grp_left: "You left the group", grp_removed: "You're no longer in this group.",
+    grp_live: "Changes sync with the group in real time.", grp_props: "Suggestions", grp_no_props: "No suggestions yet. Tap “Suggest a place” to propose something.", grp_propose: "Suggest a place", grp_propose_btn: "Suggest", grp_proposed: "Suggested", grp_note_q: "Note for the group (optional):",
+    grp_by: n => `by ${n}`, grp_st_added: "added", grp_st_rejected: "rejected", grp_up: "For", grp_down: "Against",
+    grp_updated: "The plan was updated by the group", grp_conflict: "Someone else changed the plan at the same time. I loaded the latest version, try again.",
+    grp_join_login: "Log in or create an account to join the trip.", grp_joined: "You joined the trip!", grp_invalid: "This invite link no longer works. Ask the organiser for a new one.", grp_full: "The group is full (max 12 people).", grp_mine: "Group trips",
     h_ver: "verified hours", far_removed: n => `Removed from this day: ${n}, because it was too far from the other stops.`, moved_in: n => `Moved to this day: ${n}, because it is closer to its stops.`, bk_stay: "Accommodation", bud_spent: "Spent", bud_planned: "Planned", bud_pct: p => `${p}% of the budget spent`, bud_w_near: "⚠️ You're getting close to your budget (over 80%).", bud_w_over: "⛔ You're over budget.",
     bud_cheaper_btn: "Find cheaper alternatives", bud_cheaper_msg: "Make the plan cheaper: replace expensive places with free or cheaper alternatives nearby and lower the budget estimate.",
     bud_add_h: "Your expenses", bud_amt: "Amount €", bud_note: "Note (optional), e.g. dinner", bud_add: "Add", bud_added: "Expense added", bud_amt_bad: "Enter an amount greater than 0.", bud_del: "Delete",
@@ -1461,6 +1491,13 @@ const I18N = {
     del_yes: "Ja, endgültig löschen", del_no: "Abbrechen", del_done: "Dein Konto wurde gelöscht.", del_err: "Löschen hat nicht geklappt. Versuch es gleich noch einmal.",
     date_q: "Wann beginnt die Reise?", date_hint: "Optional: Mit Datum werden die Öffnungszeiten für jeden Tag geprüft.", h_closed: "An diesem Tag geschlossen", h_closes: "Schließt, bevor der Besuch endet", h_unconf: "Öffnungszeiten unbestätigt", h_unknown: "Öffnungszeiten unbekannt – vorher prüfen", free: "Eintritt frei", fee_yes: "Eintritt kostenpflichtig (Preis unbekannt)", unverified: "Nicht bestätigt", overtime: m => `Dieser Tag dauert etwa ${m} Min. länger als die gewählte Zeit.`, est_note: "~ = geschätzte Zeit, nicht gemessen.", gm_leg: "Route ↗",
     bud_h: "Budget", bud_est: "Schätzung für die ganze Gruppe – echte Preise können abweichen.", bud_none: "Für diesen Plan gibt es noch keine Budgetschätzung.", bud_calc: "Budget mit KI schätzen", bud_msg: "Schätze das Budget für diesen Plan", bud_total: "Gesamt", bud_pp: n => `Pro Person (${n})`, bud_my: "Dein Budget", bud_left: "Übrig", bud_over: "Über Budget", bud_ver: "Preise aus OpenStreetMap (bestätigt)", bud_free: "Kostenlose Alternativen", bk_tickets: "Tickets", bk_food: "Essen", bk_transport: "Verkehr", bk_parking: "Parken", bk_activities: "Aktivitäten", bk_other: "Sonstiges", off_save: "⬇ Offline speichern", off_remove: "✓ Offline gespeichert · Entfernen", off_hint: "Plan, Zeiten, Adressen und Notizen öffnen sich auch ohne Internet. Offline zeigt die Karte nur die Punkte.", off_saved: "Plan auf diesem Gerät gespeichert.", off_removed: "Vom Gerät entfernt.", off_full: "Nicht genug Speicher auf dem Gerät.", off_list: "Offline gespeichert", off_later: "Kein Internet: Die Änderung wird gespeichert, sobald du wieder online bist.", off_synced: n => `${n} Pläne synchronisiert.`, off_mode: "Du bist offline. Hier sind die auf dem Gerät gespeicherten Pläne.", note_add: "＋ Notiz", note_edit: "Notiz ändern", loc: "Wo bin ich", you_here: "Du bist hier",
+    grp_h: "Gruppenreise", grp_intro: "Lade Freunde per Link ein: Alle können den Plan sehen und ändern, Orte vorschlagen und abstimmen. Änderungen erscheinen sofort bei allen.", grp_need_acct: "Speichere den Plan in deinem Konto, um ihn mit einer Gruppe zu teilen.", grp_unavail: "Gruppenreisen sind noch nicht aktiviert.",
+    grp_invite: "Freunde einladen", grp_invite_more: "Weitere einladen", grp_new_link: "Neuer Link", grp_renew_q: "Der alte Link funktioniert dann nicht mehr. Wer schon beigetreten ist, bleibt in der Gruppe. Fortfahren?", grp_invite_text: c => `Lass uns unsere Reise nach ${c} gemeinsam mit Viaro planen!`, grp_link_copied: "Einladungslink kopiert", grp_link: "Einladungslink",
+    grp_owner: "Organisator", grp_remove: "Aus der Gruppe entfernen", grp_leave: "Gruppe verlassen", grp_leave_q: "Diese Gruppenreise verlassen?", grp_left: "Du hast die Gruppe verlassen", grp_removed: "Du bist nicht mehr in dieser Gruppe.",
+    grp_live: "Änderungen werden in Echtzeit mit der Gruppe synchronisiert.", grp_props: "Vorschläge", grp_no_props: "Noch keine Vorschläge. Tippe auf „Ort vorschlagen“.", grp_propose: "Ort vorschlagen", grp_propose_btn: "Vorschlagen", grp_proposed: "Vorgeschlagen", grp_note_q: "Notiz für die Gruppe (optional):",
+    grp_by: n => `von ${n}`, grp_st_added: "hinzugefügt", grp_st_rejected: "abgelehnt", grp_up: "Dafür", grp_down: "Dagegen",
+    grp_updated: "Der Plan wurde von der Gruppe aktualisiert", grp_conflict: "Jemand anderes hat den Plan gleichzeitig geändert. Ich habe die neueste Version geladen, versuch es noch einmal.",
+    grp_join_login: "Melde dich an oder erstelle ein Konto, um der Reise beizutreten.", grp_joined: "Du bist der Reise beigetreten!", grp_invalid: "Dieser Einladungslink gilt nicht mehr. Bitte den Organisator um einen neuen.", grp_full: "Die Gruppe ist voll (max. 12 Personen).", grp_mine: "Gruppenreisen",
     h_ver: "geprüfte Öffnungszeiten", far_removed: n => `Von diesem Tag entfernt: ${n}, weil es zu weit von den anderen Stopps entfernt war.`, moved_in: n => `Zu diesem Tag verschoben: ${n}, weil es näher an dessen Stopps liegt.`, bk_stay: "Unterkunft", bud_spent: "Ausgegeben", bud_planned: "Geplant", bud_pct: p => `${p}% des Budgets ausgegeben`, bud_w_near: "⚠️ Du näherst dich deinem Budget (über 80%).", bud_w_over: "⛔ Du hast dein Budget überschritten.",
     bud_cheaper_btn: "Günstigere Alternativen finden", bud_cheaper_msg: "Mach den Plan günstiger: Ersetze teure Orte durch kostenlose oder günstigere Alternativen in der Nähe und senke die Budgetschätzung.",
     bud_add_h: "Deine Ausgaben", bud_amt: "Betrag €", bud_note: "Notiz (optional), z. B. Abendessen", bud_add: "Hinzufügen", bud_added: "Ausgabe hinzugefügt", bud_amt_bad: "Gib einen Betrag größer als 0 ein.", bud_del: "Löschen",
@@ -1892,6 +1929,7 @@ async function loadMine() {
     const { data, error } = navigator.onLine ? await sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,photo_url,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100) : { data: [], error: { message: t("off_mode") } };
     if (error) html += `<div class="err" style="display:block">${esc(navigator.onLine ? error.message : t("off_mode"))}</div>`;
     syncOffline();
+    html += await loadGroupMine().catch(() => "");
     (data || []).forEach(r => html += planCard({ ...r, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` }));
   }
   local.forEach(x => html += planCard({ city: x.plan.city?.name, country: x.plan.city?.country, days: x.plan.days.length, title: x.plan.title,
@@ -2089,7 +2127,9 @@ async function openById(id, toComments) {
   if (!sb) return;
   const { data, error } = await sb.from("plans").select("*").eq("id", id).maybeSingle();
   if (error || !data) { toast(t("not_found")); go("create"); return; }
-  openPlan(data.data, data, user && data.user_id === user.id ? "own" : "shared");
+  let m = user && data.user_id === user.id ? "own" : "shared";
+  if (m === "shared" && user) { const { data: mem } = await sb.from("trip_members").select("role").eq("plan_id", id).eq("user_id", user.id).maybeSingle(); if (mem) { m = "own"; data.member = true; } }
+  openPlan(data.data, data, m);
   if (toComments) setTimeout(() => document.getElementById("cmtCard").scrollIntoView({ behavior: "smooth", block: "start" }), 400);
 }
 function openLocal(id) { const x = localList().find(l => l.localId === id); if (x) openPlan(x.plan, { localId: id }, "own"); }
@@ -2152,6 +2192,7 @@ function openPlan(p, r, m) { rpNote = null; chatLog = []; chatActs = {};
   }
   setTimeout(() => { map.invalidateSize(); selectDay(0); }, 60);
   renderEditor();
+  initGroup();
 }
 
 function openPlanHeader() {
@@ -2191,7 +2232,11 @@ function renderActions() {
   let h = "";
   if (row.id && row.is_public) h += `<button class="btn2 likebtn ${liked ? "on" : ""}" onclick="toggleLike()">${HEART(liked)} ${row.likes || 0}</button>`
     + `<button class="btn2 likebtn" onclick="document.getElementById('cmtCard').scrollIntoView({behavior:'smooth'})">${BUBBLE} ${row.comments || 0}</button>`;
-  if (mode === "own") {
+  if (mode === "own" && row.member) {
+    h += `<button class="btn2" onclick="openShare()">${t("a_share2")}</button>`;
+    h += `<button class="btn2" onclick="copyPlan()">${t("a_copy")}</button>`;
+    h += `<button class="btn2" onclick="leaveGroup()">${t("grp_leave")}</button>`;
+  } else if (mode === "own") {
     h += `<button class="btn2 pri" onclick="openPost()">${row.is_public ? t("a_edit_post") : t("a_post")}</button>`;
     h += `<button class="btn2" onclick="openShare()">${t("a_share")}</button>`;
     h += `<button class="btn2" onclick="regenerate()">${t("a_regen")}</button>`;
@@ -2759,6 +2804,7 @@ function updateLocal(id, p) {
   try { const l = localList(); const x = l.find(y => y.localId === id); if (x) { x.plan = strip(p); localStorage.setItem(LOCAL_KEY, JSON.stringify(l)); } } catch {}
 }
 async function persistPlan() {
+  if (row.group && row.id && sb && user && navigator.onLine) return saveGroupPlan();
   if (row.id && sb && user && navigator.onLine) {
     const { error } = await sb.from("plans").update({ data: strip(plan), title: plan.title || null, summary: plan.summary || null, days: plan.days.length }).eq("id", row.id);
     if (error) { offUpdate(true); toast(isOffline() ? t("off_later") : t("not_saved") + error.message); } else offUpdate(false);
@@ -2927,11 +2973,173 @@ function pickVCity(k) {
   toast(t("vr_picked", x.n[{ sq: 0, en: 1, de: 2 }[LANG] ?? 1]));
 }
 
+// ---- Faza 12: Travel Together (udhëtime në grup) ----
+var grp = { members: [], props: [], votes: [], ch: null, pending: false };
+const INVITE_BASE = () => /^https?:/.test(location.href) ? location.origin + location.pathname : APP_URL;
+const isPlanOwner = () => !!(user && row.user_id === user.id);
+async function initGroup() {
+  const el = document.getElementById("grpCard");
+  if (grp.ch) { try { sb.removeChannel(grp.ch); } catch {} grp.ch = null; }
+  grp = { members: [], props: [], votes: [], ch: null, pending: false };
+  row.group = false;
+  if (!sb || mode !== "own" || plan.kind === "now") { el.style.display = "none"; return; }
+  if (!user || !row.id) { el.style.display = row.localId && sb ? "block" : "none"; el.innerHTML = `<b>👥 ${t("grp_h")}</b><div class="dhint">${t("grp_need_acct")}</div>`; return; }
+  el.style.display = "block"; el.innerHTML = `<b>👥 ${t("grp_h")}</b><div class="dhint">${t("loading")}</div>`;
+  const pid = row.id;
+  const { data: mem, error } = await sb.from("trip_members").select("user_id,role,name").eq("plan_id", pid).order("joined_at");
+  if (row.id !== pid) return;
+  if (error) { el.innerHTML = `<b>👥 ${t("grp_h")}</b><div class="dhint">${esc(t("grp_unavail"))}</div>`; return; }
+  grp.members = mem || [];
+  row.group = grp.members.length > 0;
+  if (row.group) {
+    const { data: v } = await sb.from("plans").select("version").eq("id", pid).maybeSingle();
+    row.version = v?.version ?? row.version ?? 1;
+    await loadProposals();
+    subscribeGroup(pid);
+  }
+  renderGroup();
+}
+async function loadProposals() {
+  const { data: pr } = await sb.from("trip_proposals").select("id,user_id,author_name,day,place,note,status,created_at").eq("plan_id", row.id).order("created_at", { ascending: false }).limit(100);
+  grp.props = pr || [];
+  const ids = grp.props.map(p => p.id);
+  if (ids.length) { const { data: vt } = await sb.from("trip_votes").select("proposal_id,user_id,value").in("proposal_id", ids); grp.votes = vt || []; } else grp.votes = [];
+}
+function subscribeGroup(pid) {
+  try {
+    grp.ch = sb.channel("trip-" + pid)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "plans", filter: "id=eq." + pid }, pl => { if ((pl.new?.version || 0) > (row.version || 0)) refreshGroupPlan(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "trip_members", filter: "plan_id=eq." + pid }, () => initGroupSoft())
+      .on("postgres_changes", { event: "*", schema: "public", table: "trip_proposals", filter: "plan_id=eq." + pid }, () => loadProposals().then(renderGroup))
+      .on("postgres_changes", { event: "*", schema: "public", table: "trip_votes" }, () => loadProposals().then(renderGroup))
+      .subscribe();
+  } catch {}
+}
+async function initGroupSoft() {
+  const { data: mem } = await sb.from("trip_members").select("user_id,role,name").eq("plan_id", row.id).order("joined_at");
+  grp.members = mem || [];
+  if (user && row.member && !grp.members.some(m => m.user_id === user.id)) { toast(t("grp_removed")); go("mine"); return; }
+  renderGroup();
+}
+// Plani u ndryshua nga një anëtar tjetër: merret versioni i ri (pritet nëse po shkruan diçka)
+async function refreshGroupPlan(force) {
+  const a = document.activeElement;
+  if (!force && a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && document.getElementById("v-plan").contains(a)) { grp.pending = true; a.addEventListener("blur", () => { if (grp.pending) { grp.pending = false; refreshGroupPlan(true); } }, { once: true }); return; }
+  const { data } = await sb.from("plans").select("data,version,title").eq("id", row.id).maybeSingle();
+  if (!data || (data.version || 0) <= (row.version || 0)) return;
+  plan = sanePlan(data.data); row.version = data.version;
+  openPlanHeader(); renderTabs(); selectDay(Math.min(curDay, plan.days.length - 1)); renderGroup();
+  toast(t("grp_updated"));
+}
+async function saveGroupPlan() {
+  const { data, error } = await sb.rpc("save_trip_plan", { p_plan: row.id, p_version: row.version || 1, p_data: strip(plan), p_title: plan.title || null, p_days: plan.days.length });
+  if (!error) { row.version = data; offUpdate(false); return; }
+  if (/conflict/.test(error.message)) { toast(t("grp_conflict")); row.version = 0; await refreshGroupPlan(true); return; }
+  offUpdate(true); toast(t("not_saved") + error.message);
+}
+function renderGroup() {
+  const el = document.getElementById("grpCard"); if (!el || !plan) return;
+  const owner = isPlanOwner(), me = user?.id;
+  let h = `<b>👥 ${t("grp_h")}</b>`;
+  if (!row.group) {
+    h += `<div class="dhint">${t("grp_intro")}</div>${owner ? `<button class="btn2 pri gbtn" onclick="inviteGroup(false)">${t("grp_invite")}</button>` : ""}`;
+    el.innerHTML = h; return;
+  }
+  h += `<div class="gmem">${grp.members.map(m => `<span class="gmb${m.user_id === me ? " me" : ""}">${esc(m.name || "?")}${m.role === "owner" ? ` <small>${t("grp_owner")}</small>` : ""}${owner && m.role !== "owner" ? ` <button class="x2" aria-label="${t("grp_remove")}" onclick="removeMember('${esc(m.user_id)}')">×</button>` : ""}</span>`).join("")}</div>
+    <div class="dhint">${t("grp_live")}</div>
+    <div class="gbtns">${owner ? `<button class="btn2 pri" onclick="inviteGroup(false)">${t("grp_invite_more")}</button><button class="btn2" onclick="inviteGroup(true)">${t("grp_new_link")}</button>` : ""}<button class="btn2" onclick="openExplore(true, ${Math.max(0, curDay)}, true)">💬 ${t("grp_propose")}</button></div>`;
+  const score = p => grp.votes.filter(v => v.proposal_id === p.id).reduce((a, v) => a + v.value, 0);
+  const props = grp.props.slice().sort((a, b) => (a.status === "open" ? 0 : 1) - (b.status === "open" ? 0 : 1) || score(b) - score(a));
+  h += `<div class="bsub">${t("grp_props")}</div>`;
+  h += props.length ? `<div class="gprops">${props.map(p => {
+    const up = grp.votes.filter(v => v.proposal_id === p.id && v.value > 0).length, dn = grp.votes.filter(v => v.proposal_id === p.id && v.value < 0).length;
+    const mine = grp.votes.find(v => v.proposal_id === p.id && v.user_id === me)?.value || 0;
+    const pl = p.place || {};
+    return `<div class="gprop ${esc(p.status)}"><div class="gpt"><b>${esc(pl.name || "?")}</b><small>${t("day")} ${+p.day || 1} · ${esc(t("grp_by", p.author_name || "?"))}${p.status !== "open" ? ` · ${t("grp_st_" + p.status)}` : ""}</small>${p.note ? `<div class="gnote">${esc(p.note)}</div>` : ""}</div>
+      <div class="gact"><button class="vote${mine > 0 ? " on" : ""}" onclick="voteProp('${esc(p.id)}',1)" aria-label="${t("grp_up")}">👍 ${up}</button><button class="vote${mine < 0 ? " on" : ""}" onclick="voteProp('${esc(p.id)}',-1)" aria-label="${t("grp_down")}">👎 ${dn}</button>
+      ${p.status === "open" ? `<button class="btn2 pri" onclick="acceptProp('${esc(p.id)}', this)">+ ${t("nr_add")}</button>` : ""}${owner || p.user_id === me ? `<button class="x2" aria-label="${t("bud_del")}" onclick="delProp('${esc(p.id)}')">×</button>` : ""}</div></div>`;
+  }).join("")}</div>` : `<div class="dhint">${t("grp_no_props")}</div>`;
+  el.innerHTML = h;
+}
+async function inviteGroup(renew) {
+  if (!user || !row.id) return showAuth("signup", t("grp_need_acct"));
+  if (renew && !confirmInline("grp_renew_q")) return;
+  const { data: tok, error } = await sb.rpc("create_trip_invite", { p_plan: row.id, p_name: displayName(user) || null, p_renew: !!renew });
+  if (error) return toast(t("err") + error.message);
+  const url = INVITE_BASE() + "?join=" + encodeURIComponent(tok);
+  const d = { title: plan.title || plan.city?.name, text: t("grp_invite_text", plan.city?.name || ""), url };
+  let shared = false;
+  if (navigator.share) { try { await navigator.share(d); shared = true; } catch {} }
+  if (!shared) { try { await navigator.clipboard.writeText(url); toast(t("grp_link_copied")); } catch { prompt(t("grp_link"), url); } }
+  if (!row.group) await initGroup();
+}
+function confirmInline(k) { return window.confirm(t(k)); }
+async function removeMember(uid) {
+  const { error } = await sb.from("trip_members").delete().eq("plan_id", row.id).eq("user_id", uid);
+  if (error) return toast(t("err") + error.message);
+  initGroupSoft();
+}
+async function leaveGroup() {
+  if (!confirmInline("grp_leave_q")) return;
+  const { error } = await sb.from("trip_members").delete().eq("plan_id", row.id).eq("user_id", user.id);
+  if (error) return toast(t("err") + error.message);
+  toast(t("grp_left")); go("mine");
+}
+async function voteProp(id, v) {
+  if (!user) return;
+  const cur = grp.votes.find(x => x.proposal_id === id && x.user_id === user.id);
+  const { error } = cur && cur.value === v ? await sb.from("trip_votes").delete().eq("proposal_id", id).eq("user_id", user.id)
+    : await sb.from("trip_votes").upsert({ proposal_id: id, user_id: user.id, value: v });
+  if (error) return toast(t("err") + error.message);
+  await loadProposals(); renderGroup();
+}
+async function delProp(id) {
+  const { error } = await sb.from("trip_proposals").delete().eq("id", id);
+  if (error) return toast(t("err") + error.message);
+  await loadProposals(); renderGroup();
+}
+async function acceptProp(id, btn) {
+  const p = grp.props.find(x => x.id === id); if (!p || btn.disabled) return;
+  btn.disabled = true; btn.textContent = "…";
+  try {
+    await addPlace(p.place, Math.min(plan.days.length - 1, Math.max(0, (+p.day || 1) - 1)));
+    await sb.rpc("set_proposal_status", { p_id: id, p_status: "added" });
+    await loadProposals(); renderGroup(); toast(t("nr_added_ok", p.place?.name || ""));
+  } catch (e) { btn.disabled = false; btn.textContent = "⚠️ " + e.message; }
+}
+async function exPropose(k, btn) {
+  const x = exPlaces[k]; if (!x || btn.disabled || !row.group) return;
+  btn.disabled = true;
+  const place = {}; for (const f of ["name", "lat", "lon", "kind", "cuisine", "addr", "wiki", "wd", "osm", "hours_raw", "fee", "price"]) if (x[f] != null) place[f] = x[f];
+  const note = (window.prompt(t("grp_note_q")) || "").slice(0, 300);
+  const { error } = await sb.from("trip_proposals").insert({ plan_id: row.id, user_id: user.id, author_name: displayName(user) || null, day: exCtx.di + 1, place, note: note || null });
+  if (error) { btn.disabled = false; return toast(t("err") + error.message); }
+  btn.textContent = "✓ " + t("grp_proposed");
+  await loadProposals(); renderGroup();
+}
+// Hapja e linkut të ftesës (?join=...)
+async function handleJoin(tok) {
+  if (!sb) return;
+  if (!user) { try { sessionStorage.setItem("viaro_join", tok); } catch {} showAuth("signup", t("grp_join_login")); return; }
+  try { sessionStorage.removeItem("viaro_join"); } catch {}
+  setUrlParam("join", null);
+  const { data: pid, error } = await sb.rpc("join_trip", { p_token: tok, p_name: displayName(user) || null });
+  if (error) { toast(/invite_invalid/.test(error.message) ? t("grp_invalid") : /group_full/.test(error.message) ? t("grp_full") : t("err") + error.message); return; }
+  toast(t("grp_joined")); openById(pid);
+}
+async function loadGroupMine() {
+  if (!sb || !user) return "";
+  const { data: mem } = await sb.from("trip_members").select("plan_id").eq("user_id", user.id).eq("role", "member").limit(50);
+  const ids = (mem || []).map(m => m.plan_id); if (!ids.length) return "";
+  const { data } = await sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,photo_url,created_at").in("id", ids);
+  return (data || []).length ? `<div class="bsub" style="margin:4px 0 8px">👥 ${t("grp_mine")}</div>` + data.map(r => planCard({ ...r, date: fmtDate(r.created_at), onclick: `openById('${r.id}')` })).join("") : "";
+}
+
 // ---- Faza 9: Explore Around Me ----
 var exCtx = { plan: false, di: 0 }, exPlaces = [];
 function canAdd() { return exCtx.plan && mode === "own" && plan && plan.kind !== "now" && plan.days?.length; }
-function openExplore(inPlan, di) {
-  exCtx = { plan: !!inPlan, di: di ?? (plan?.days ? chatDay() : 0) };
+function openExplore(inPlan, di, propose) {
+  exCtx = { plan: !!inPlan, di: di ?? (plan?.days ? chatDay() : 0), propose: !!propose };
   document.getElementById("exStop").style.display = inPlan ? "" : "none";
   document.getElementById("exErr").style.display = "none";
   document.getElementById("nrList").innerHTML = "";
@@ -2950,7 +3158,7 @@ function exCard(x, k) {
   return `<div class="exitem"><div class="exmain"><b>${esc(x.name)}</b>${meta.length ? `<small>${esc(meta.join(" · "))}</small>` : ""}
     <div class="exrow"><span class="tchip">${IC(ic)}~${x.min} min · ${x.dist >= 1000 ? (x.dist / 1000).toFixed(1) + " km" : x.dist + " m"}</span><span class="exst ${x.status}">${esc(ST_TXT(x))}</span></div>
     ${x.addr ? `<small>${esc(x.addr)}</small>` : ""}</div>
-    <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=${+x.lat},${+x.lon}" target="_blank" rel="noopener">${IC("map")}${esc(t("ch_map"))}</a><a href="https://www.google.com/maps/dir/?api=1&destination=${+x.lat},${+x.lon}&travelmode=${x.mode || "walking"}" target="_blank" rel="noopener">${IC(ic)}${esc(t("ch_route"))}</a>${canAdd() ? `<button class="btn2 pri exadd" onclick="exAdd(${k}, this)">+ ${esc(t("nr_add"))}</button>` : ""}</div></div>`;
+    <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=${+x.lat},${+x.lon}" target="_blank" rel="noopener">${IC("map")}${esc(t("ch_map"))}</a><a href="https://www.google.com/maps/dir/?api=1&destination=${+x.lat},${+x.lon}&travelmode=${x.mode || "walking"}" target="_blank" rel="noopener">${IC(ic)}${esc(t("ch_route"))}</a>${exCtx.propose ? `<button class="btn2 pri exadd" onclick="exPropose(${k}, this)">💬 ${esc(t("grp_propose_btn"))}</button>` : canAdd() ? `<button class="btn2 pri exadd" onclick="exAdd(${k}, this)">+ ${esc(t("nr_add"))}</button>` : ""}</div></div>`;
 }
 async function runExplore(useGeo) {
   const err = document.getElementById("exErr"), wait = document.getElementById("exWait"), list = document.getElementById("nrList");
@@ -3395,13 +3603,14 @@ function downloadIcs() {
       if (!user) myProfile = null;
       if (!was && user) loadMyProfile();
       if (ev === "PASSWORD_RECOVERY") showAuth("newpass");
-      if (!was && user && ev === "SIGNED_IN") { migrateLocal(); if (view === "mine") loadMine(); if (view === "plan" && mode === "own" && row.localId) renderActions(); }
+      if (!was && user && ev === "SIGNED_IN") { let pj = null; try { pj = sessionStorage.getItem("viaro_join"); } catch {} if (pj) setTimeout(() => handleJoin(pj), 300); migrateLocal(); if (view === "mine") loadMine(); if (view === "plan" && mode === "own" && row.localId) renderActions(); }
     });
   }
   applyLang();
   const params = new URL(location.href).searchParams;
-  const pid = params.get("p"), uid = params.get("u");
-  if (pid && sb) openById(pid);
+  const pid = params.get("p"), uid = params.get("u"), jtok = params.get("join");
+  if (jtok && sb && /^[a-f0-9]{32,80}$/.test(jtok)) handleJoin(jtok);
+  else if (pid && sb) openById(pid);
   else if (uid && sb) openProfile(uid);
   loadHome();
   setInterval(() => { if (user && document.visibilityState === "visible") refreshBell(); }, 60000);
