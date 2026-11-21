@@ -1159,7 +1159,7 @@ async function handleReplan(q, req, env, ctx, H, M) {
       // Vendi më i mirë: aty ku shton më pak rrugë (pas idx)
       const pts = [anchor, ...rest].map(v => v && v.lat != null ? v : null);
       let best = rest.length, bestCost = Infinity;
-      for (let k = 0; k <= rest.length; k++) {
+      for (let k = idx === 0 && rest.length ? 1 : 0; k <= rest.length; k++) { // jo para ndalesës së parë të ditës
         const prev = [anchor, ...rest.slice(0, k)].reverse().find(v => v && v.lat != null), next = rest.slice(k).find(v => v.lat != null);
         const c = (prev ? hav(prev.lat, prev.lon, la, lo) : 0) + (next ? hav(la, lo, next.lat, next.lon) : 0) - (prev && next ? hav(prev.lat, prev.lon, next.lat, next.lon) : 0);
         if (c < bestCost - 1) { bestCost = c; best = k; }
