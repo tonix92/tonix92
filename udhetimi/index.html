@@ -857,6 +857,20 @@
   #printArea .pr-wm{display:flex;align-items:center;gap:8px;height:auto}
   #printArea .pr-wm svg{width:26px;height:26px}
   #printArea .pr-wm span{font-family:"Fraunces",Georgia,serif;font-weight:800;font-size:22px;letter-spacing:-.04em;color:#1F1A17}
+  /* Faza 7: Smart Replanning */
+  .dhbtns{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+  .rpbtn{display:inline-flex;align-items:center;gap:6px;font-size:13px!important;padding:7px 11px!important;white-space:nowrap}
+  .rpbtn svg{width:15px;height:15px}
+  .rpopts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 4px}
+  .rpopts button{border:1.5px solid var(--line);background:var(--surface);color:var(--text);border-radius:14px;padding:12px 10px;font-size:14px;font-weight:600;text-align:left;cursor:pointer;display:flex;gap:8px;align-items:center;line-height:1.25}
+  .rpopts button .e{font-size:20px}
+  .rpopts button.on{border-color:var(--terra);background:color-mix(in srgb,var(--terra) 8%,var(--surface))}
+  .rpopts button small{display:block;font-weight:500;color:var(--mut);font-size:12px}
+  #rpStop{width:100%}
+  .rpnote{display:flex;gap:10px;align-items:baseline;justify-content:space-between;font-size:14px;line-height:1.45;background:color-mix(in srgb,var(--sun) 22%,var(--surface));border:1px solid color-mix(in srgb,var(--sun) 55%,var(--line));border-radius:12px;padding:9px 12px;margin:6px 0 12px}
+  .rpnote .undo{font-size:12.5px;text-decoration:underline;cursor:pointer;color:var(--mut);white-space:nowrap}
+  .hb.rpl{background:color-mix(in srgb,var(--sun) 35%,var(--surface))!important;color:var(--text)!important}
+  @media (max-width:560px){.dayhead{flex-wrap:wrap}.dhbtns{flex-direction:row;width:100%;justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -1104,6 +1118,20 @@
     <div class="dhint" id="nowWait" style="display:none" data-i18n="now_wait"></div>
   </div>
 </div>
+<div class="modal-bg" id="rpBg" onclick="if(event.target===this)closeModal('rpBg')">
+  <div class="modal">
+    <button class="x" onclick="closeModal('rpBg')">×</button>
+    <h3 data-i18n="rp_h"></h3>
+    <div style="color:var(--mut);font-size:14px" data-i18n="rp_sub"></div>
+    <div class="rpopts keepemo" id="rpOpts"></div>
+    <div id="rpMore"></div>
+    <label for="rpStop" id="rpStopL"></label>
+    <select id="rpStop"></select>
+    <button class="go" id="rpGo" onclick="runReplan()" data-i18n="rp_go"></button>
+    <div class="err" id="rpErr" style="display:none"></div>
+    <div class="dhint" id="rpWait" style="display:none" data-i18n="rp_wait"></div>
+  </div>
+</div>
 <div class="modal-bg" id="calBg" onclick="if(event.target===this)closeModal('calBg')">
   <div class="modal">
     <button class="x" onclick="closeModal('calBg')">×</button>
@@ -1137,6 +1165,12 @@ const I18N = {
     del_yes: "Po, fshije përgjithmonë", del_no: "Anulo", del_done: "Llogaria u fshi.", del_err: "Fshirja nuk u krye. Provo përsëri pas pak.",
     date_q: "Kur fillon udhëtimi?", date_hint: "Opsionale: me datë kontrollohen oraret e hapjes për çdo ditë.", h_closed: "I mbyllur atë ditë", h_closes: "Mbyllet para se ta përfundosh vizitën", h_unconf: "orari i pakonfirmuar", h_unknown: "Orari nuk dihet — kontrolloje para se të shkosh", free: "Hyrje falas", fee_yes: "Me pagesë (çmimi nuk dihet)", unverified: "I pakonfirmuar", overtime: m => `Kjo ditë zgjat rreth ${m} min më shumë se koha që zgjodhe.`, est_note: "~ = kohë e vlerësuar, jo e matur.", gm_leg: "Rruga ↗",
     bud_h: "Buxheti", bud_est: "Vlerësim për gjithë grupin — çmimet e vërteta mund të ndryshojnë.", bud_none: "Ky plan nuk ka ende vlerësim buxheti.", bud_calc: "Llogarit buxhetin me AI", bud_msg: "Llogarit buxhetin për këtë plan", bud_total: "Gjithsej", bud_pp: n => `Për person (${n})`, bud_my: "Buxheti yt", bud_left: "Të mbeten", bud_over: "Mbi buxhet", bud_ver: "Çmime nga OpenStreetMap (të verifikuara)", bud_free: "Alternativa falas", bk_tickets: "Bileta", bk_food: "Ushqim", bk_transport: "Transport", bk_parking: "Parkim", bk_activities: "Aktivitete", bk_other: "Të tjera", off_save: "⬇ Ruaj për offline", off_remove: "✓ I ruajtur offline · Hiqe", off_hint: "Plani, oraret, adresat dhe shënimet hapen edhe pa internet. Harta pa internet shfaq vetëm pikat.", off_saved: "Plani u ruajt në këtë pajisje.", off_removed: "U hoq nga pajisja.", off_full: "Nuk ka vend në pajisje.", off_list: "Të ruajtura për offline", off_later: "Pa internet: ndryshimi do të ruhet kur të kthehet lidhja.", off_synced: n => `U sinkronizuan ${n} plane.`, off_mode: "Je pa internet. Këtu janë planet e ruajtura në pajisje.", note_add: "＋ Shënim", note_edit: "Ndrysho shënimin", loc: "Ku jam unë", you_here: "Ti je këtu",
+    rp_btn: "Diçka ndryshoi?", rp_h: "Diçka ndryshoi?", rp_sub: "Ndryshohet vetëm pjesa e mbetur e ditës. Ndalesat e kaluara dhe ditët e tjera mbeten siç janë.",
+    rp_late: "Jam vonë", rp_late_s: "Orari shtyhet", rp_closed: "Është mbyllur", rp_closed_s: "AI gjen alternativë", rp_weather: "Moti ndryshoi", rp_weather_s: "AI përshtat ditën", rp_remove: "Hiqe", rp_remove_s: "Pa këtë ndalesë",
+    rp_howlate: "Sa vonë?", rp_wx: "Si është moti?", rp_wx_rain: "🌧 Shi", rp_wx_hot: "☀️ Vapë", rp_wx_cold: "❄️ Ftohtë",
+    rp_which_late: "Nga cila ndalesë vazhdon?", rp_which_closed: "Cili vend është mbyllur?", rp_which_weather: "Nga cila ndalesë të ndryshohet?", rp_which_remove: "Cilën ndalesë do ta heqësh?",
+    rp_go: "Rregullo planin", rp_wait: "Po rregulloj pjesën e mbetur të ditës…", rp_login: "Hyr në llogari që AI të gjejë alternativa.", rp_new: "Alternativë e re",
+    rp_done_remove: n => `U hoq ${n}. Orari i ditës u rillogarit.`, rp_done_late: s => `Orari u shty. Vazhdon në ${s}.`, rp_dropped: n => `Nuk arrihen më sot: ${n}.`,
     ed_h: "Ndrysho planin me AI", ed_sub: "Shkruaj çka do të ndryshosh. Ndryshohet vetëm ajo pjesë, pjesa tjetër mbetet.", ed_ph: "p.sh. Largoje muzeun e ditës 2", ed_send: "Dërgo", ed_wait: "Po e ndryshoj planin…", ed_done: "Plani u ndryshua.", ed_none: "Nuk u ndryshua asgjë.", ed_undo: "Zhbëje", ed_undone: "u kthye si ishte", ed_login: "Hyr në llogari për të ndryshuar planin me AI.", ed_ex: ["Bëje ditën e parë më të qetë", "Shto një restorant afër", "Gjej atraksione falas", "Shto aktivitete për fëmijë", "Shkurto distancën e ecjes"], now_h: "Çfarë të vizitoj tani?", now_sub: "Vende të hapura afër teje, për kohën që ke.", now_btn: "Provo", now_q: "Sa kohë ke?", now_time: "Koha e lirë", now_geo: "📍 Përdor vendndodhjen time", now_or: "ose shkruaj ku je", now_ph: "p.sh. Piazza Navona, Romë", now_find: "Gjej", now_wait: "Po kërkoj vende të hapura afër… (rreth 30 sekonda)", now_nogeo: "Nuk e mora vendndodhjen. Shkruaj ku ndodhesh.", wx: (c, r) => `Moti tani: ${c}°C${r ? " · reshje" : ""}`,
     who_q: "Kush udhëton?", adults: "Të rritur", kids: "Fëmijë", kid_ages: "Moshat e fëmijëve", yrs: "vjeç",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "i rritur" : "të rritur"}${k ? ` · ${k} fëmijë` : ""}`,
@@ -1208,6 +1242,12 @@ const I18N = {
     del_yes: "Yes, delete permanently", del_no: "Cancel", del_done: "Your account has been deleted.", del_err: "Deletion didn't go through. Try again in a moment.",
     date_q: "When does the trip start?", date_hint: "Optional: with a date, opening hours are checked for each day.", h_closed: "Closed that day", h_closes: "Closes before you'd finish the visit", h_unconf: "hours not confirmed", h_unknown: "Hours unknown — check before you go", free: "Free entry", fee_yes: "Paid entry (price unknown)", unverified: "Not confirmed", overtime: m => `This day runs about ${m} min longer than the time you chose.`, est_note: "~ = estimated time, not measured.", gm_leg: "Route ↗",
     bud_h: "Budget", bud_est: "Estimate for the whole group — real prices may differ.", bud_none: "This plan has no budget estimate yet.", bud_calc: "Estimate the budget with AI", bud_msg: "Estimate the budget for this plan", bud_total: "Total", bud_pp: n => `Per person (${n})`, bud_my: "Your budget", bud_left: "Left", bud_over: "Over budget", bud_ver: "Prices from OpenStreetMap (verified)", bud_free: "Free alternatives", bk_tickets: "Tickets", bk_food: "Food", bk_transport: "Transport", bk_parking: "Parking", bk_activities: "Activities", bk_other: "Other", off_save: "⬇ Save for offline", off_remove: "✓ Saved offline · Remove", off_hint: "The plan, times, addresses and notes open without internet. Offline, the map shows only the pins.", off_saved: "Plan saved on this device.", off_removed: "Removed from this device.", off_full: "Not enough space on this device.", off_list: "Saved for offline", off_later: "No internet: the change will be saved when you're back online.", off_synced: n => `${n} plans synced.`, off_mode: "You're offline. Here are the plans saved on this device.", note_add: "＋ Note", note_edit: "Edit note", loc: "Where am I", you_here: "You are here",
+    rp_btn: "Something changed?", rp_h: "Something changed?", rp_sub: "Only the rest of the day changes. Earlier stops and other days stay as they are.",
+    rp_late: "I'm late", rp_late_s: "Shift the schedule", rp_closed: "It's closed", rp_closed_s: "AI finds an alternative", rp_weather: "Weather changed", rp_weather_s: "AI adapts the day", rp_remove: "Remove", rp_remove_s: "Skip this stop",
+    rp_howlate: "How late?", rp_wx: "What's the weather?", rp_wx_rain: "🌧 Rain", rp_wx_hot: "☀️ Hot", rp_wx_cold: "❄️ Cold",
+    rp_which_late: "Which stop are you continuing from?", rp_which_closed: "Which place is closed?", rp_which_weather: "Change from which stop?", rp_which_remove: "Which stop do you want to remove?",
+    rp_go: "Fix the plan", rp_wait: "Fixing the rest of the day…", rp_login: "Log in so AI can find alternatives.", rp_new: "New alternative",
+    rp_done_remove: n => `Removed ${n}. The day's times were recalculated.`, rp_done_late: s => `Schedule shifted. You continue at ${s}.`, rp_dropped: n => `No longer fits today: ${n}.`,
     ed_h: "Change the plan with AI", ed_sub: "Say what to change. Only that part changes; the rest stays.", ed_ph: "e.g. Remove the museum on day 2", ed_send: "Send", ed_wait: "Changing the plan…", ed_done: "The plan was changed.", ed_none: "Nothing was changed.", ed_undo: "Undo", ed_undone: "restored", ed_login: "Log in to change the plan with AI.", ed_ex: ["Make day 1 calmer", "Add a restaurant nearby", "Find free attractions", "Add activities for kids", "Shorten the walking"], now_h: "What to visit now?", now_sub: "Open places near you, for the time you have.", now_btn: "Try it", now_q: "How much time do you have?", now_time: "Free time", now_geo: "📍 Use my location", now_or: "or type where you are", now_ph: "e.g. Piazza Navona, Rome", now_find: "Find", now_wait: "Looking for open places nearby… (about 30 seconds)", now_nogeo: "Couldn't get your location. Type where you are.", wx: (c, r) => `Weather now: ${c}°C${r ? " · rain" : ""}`,
     who_q: "Who's travelling?", adults: "Adults", kids: "Children", kid_ages: "Children's ages", yrs: "yrs",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "adult" : "adults"}${k ? ` · ${k} ${k === 1 ? "child" : "children"}` : ""}`,
@@ -1279,6 +1319,12 @@ const I18N = {
     del_yes: "Ja, endgültig löschen", del_no: "Abbrechen", del_done: "Dein Konto wurde gelöscht.", del_err: "Löschen hat nicht geklappt. Versuch es gleich noch einmal.",
     date_q: "Wann beginnt die Reise?", date_hint: "Optional: Mit Datum werden die Öffnungszeiten für jeden Tag geprüft.", h_closed: "An diesem Tag geschlossen", h_closes: "Schließt, bevor der Besuch endet", h_unconf: "Öffnungszeiten unbestätigt", h_unknown: "Öffnungszeiten unbekannt – vorher prüfen", free: "Eintritt frei", fee_yes: "Eintritt kostenpflichtig (Preis unbekannt)", unverified: "Nicht bestätigt", overtime: m => `Dieser Tag dauert etwa ${m} Min. länger als die gewählte Zeit.`, est_note: "~ = geschätzte Zeit, nicht gemessen.", gm_leg: "Route ↗",
     bud_h: "Budget", bud_est: "Schätzung für die ganze Gruppe – echte Preise können abweichen.", bud_none: "Für diesen Plan gibt es noch keine Budgetschätzung.", bud_calc: "Budget mit KI schätzen", bud_msg: "Schätze das Budget für diesen Plan", bud_total: "Gesamt", bud_pp: n => `Pro Person (${n})`, bud_my: "Dein Budget", bud_left: "Übrig", bud_over: "Über Budget", bud_ver: "Preise aus OpenStreetMap (bestätigt)", bud_free: "Kostenlose Alternativen", bk_tickets: "Tickets", bk_food: "Essen", bk_transport: "Verkehr", bk_parking: "Parken", bk_activities: "Aktivitäten", bk_other: "Sonstiges", off_save: "⬇ Offline speichern", off_remove: "✓ Offline gespeichert · Entfernen", off_hint: "Plan, Zeiten, Adressen und Notizen öffnen sich auch ohne Internet. Offline zeigt die Karte nur die Punkte.", off_saved: "Plan auf diesem Gerät gespeichert.", off_removed: "Vom Gerät entfernt.", off_full: "Nicht genug Speicher auf dem Gerät.", off_list: "Offline gespeichert", off_later: "Kein Internet: Die Änderung wird gespeichert, sobald du wieder online bist.", off_synced: n => `${n} Pläne synchronisiert.`, off_mode: "Du bist offline. Hier sind die auf dem Gerät gespeicherten Pläne.", note_add: "＋ Notiz", note_edit: "Notiz ändern", loc: "Wo bin ich", you_here: "Du bist hier",
+    rp_btn: "Etwas geändert?", rp_h: "Etwas geändert?", rp_sub: "Nur der Rest des Tages ändert sich. Frühere Stopps und andere Tage bleiben, wie sie sind.",
+    rp_late: "Ich bin spät dran", rp_late_s: "Zeitplan verschieben", rp_closed: "Geschlossen", rp_closed_s: "KI findet eine Alternative", rp_weather: "Wetter geändert", rp_weather_s: "KI passt den Tag an", rp_remove: "Entfernen", rp_remove_s: "Stopp auslassen",
+    rp_howlate: "Wie spät?", rp_wx: "Wie ist das Wetter?", rp_wx_rain: "🌧 Regen", rp_wx_hot: "☀️ Hitze", rp_wx_cold: "❄️ Kälte",
+    rp_which_late: "Ab welchem Stopp geht es weiter?", rp_which_closed: "Welcher Ort ist geschlossen?", rp_which_weather: "Ab welchem Stopp ändern?", rp_which_remove: "Welchen Stopp entfernen?",
+    rp_go: "Plan anpassen", rp_wait: "Passe den Rest des Tages an…", rp_login: "Melde dich an, damit die KI Alternativen findet.", rp_new: "Neue Alternative",
+    rp_done_remove: n => `${n} entfernt. Die Zeiten des Tages wurden neu berechnet.`, rp_done_late: s => `Zeitplan verschoben. Weiter um ${s}.`, rp_dropped: n => `Passt heute nicht mehr: ${n}.`,
     ed_h: "Plan mit KI ändern", ed_sub: "Schreib, was sich ändern soll. Nur dieser Teil ändert sich, der Rest bleibt.", ed_ph: "z. B. Entferne das Museum an Tag 2", ed_send: "Senden", ed_wait: "Plan wird geändert…", ed_done: "Der Plan wurde geändert.", ed_none: "Nichts wurde geändert.", ed_undo: "Rückgängig", ed_undone: "wiederhergestellt", ed_login: "Melde dich an, um den Plan mit KI zu ändern.", ed_ex: ["Tag 1 ruhiger machen", "Ein Restaurant in der Nähe hinzufügen", "Kostenlose Sehenswürdigkeiten finden", "Aktivitäten für Kinder hinzufügen", "Weniger zu Fuß gehen"], now_h: "Was jetzt besuchen?", now_sub: "Geöffnete Orte in deiner Nähe, für deine freie Zeit.", now_btn: "Ausprobieren", now_q: "Wie viel Zeit hast du?", now_time: "Freie Zeit", now_geo: "📍 Meinen Standort verwenden", now_or: "oder gib ein, wo du bist", now_ph: "z. B. Piazza Navona, Rom", now_find: "Suchen", now_wait: "Suche geöffnete Orte in der Nähe… (etwa 30 Sekunden)", now_nogeo: "Standort nicht verfügbar. Gib ein, wo du bist.", wx: (c, r) => `Wetter jetzt: ${c}°C${r ? " · Niederschlag" : ""}`,
     who_q: "Wer reist mit?", adults: "Erwachsene", kids: "Kinder", kid_ages: "Alter der Kinder", yrs: "J.",
     grp: (a, k) => `👥 ${a} ${a === 1 ? "Erwachsene/r" : "Erwachsene"}${k ? ` · ${k} ${k === 1 ? "Kind" : "Kinder"}` : ""}`,
@@ -1928,7 +1974,7 @@ function sanePlan(p) {
   } else p.budget = undefined;
   return p;
 }
-function openPlan(p, r, m) {
+function openPlan(p, r, m) { rpNote = null;
   p = sanePlan(p);
   plan = p; row = r || {}; mode = m;
   go("plan");
@@ -2071,6 +2117,7 @@ function renderDay(i) {
     if (s.hours_warn === "closed") info.push(`<span class="hb closed">${t("h_closed")}</span>`);
     else if (s.hours_warn === "closes") info.push(`<span class="hb closes">${t("h_closes")}</span>`);
     if (s.verified === false && !isMeal) info.push(`<span class="hb unv">${t("unverified")}</span>`);
+    if (s.replanned) info.push(`<span class="hb rpl">${t("rp_new")}</span>`);
     const lines = [], row = (ic, html) => lines.push(`<div class="row">${IC(ic)}<span>${html}</span></div>`);
     if (s.hours && s.hours !== "closed") row("clock", esc(s.hours));
     else if (s.hours_raw && s.hours !== "closed") row("clock", `${esc(s.hours_raw)} · ${t("h_unconf")}`);
@@ -2100,7 +2147,7 @@ function renderDay(i) {
   card.classList.remove("fade"); void card.offsetWidth; card.classList.add("fade");
   card.style.setProperty("--dc", color);
   card.innerHTML = `<div class="dayhead"><div><h3>${t("day")} ${d.day || i + 1}: ${esc(d.theme || "")}</h3>
-    <div class="area">${esc([dateTxt, d.area].filter(Boolean).join(" · "))}</div><div class="dstats">${stats.join("")}</div></div>${gmapsLink(d)}</div>${warn}<div>${stops}</div>${anyEst ? `<div class="estnote">${t("est_note")}</div>` : ""}<div class="phcred" id="phCred" style="display:none">${esc(t("ph_credit"))}</div>`;
+    <div class="area">${esc([dateTxt, d.area].filter(Boolean).join(" · "))}</div><div class="dstats">${stats.join("")}</div></div><div class="dhbtns">${gmapsLink(d)}${isOwn ? `<button class="btn2 rpbtn" onclick="openReplan(${i})">${IC("clock")}${esc(t("rp_btn"))}</button>` : ""}</div></div>${warn}${rpNote && rpNote.di === i ? `<div class="rpnote"><span>${esc(rpNote.text)}</span><span class="undo" onclick="undoReplan()">${esc(t("ed_undo"))}</span></div>` : ""}<div>${stops}</div>${anyEst ? `<div class="estnote">${t("est_note")}</div>` : ""}<div class="phcred" id="phCred" style="display:none">${esc(t("ph_credit"))}</div>`;
   card.querySelectorAll(".sbody").forEach(el => el.onclick = e => {
     if (e.target.closest("a")) return;
     const s = d.stops[+el.dataset.idx];
@@ -2582,6 +2629,84 @@ async function undoEdit(el) {
   plan = prevPlan; prevPlan = null; await persistPlan();
   openPlanHeader(); renderTabs(); selectDay(Math.min(curDay, plan.days.length - 1));
   el.replaceWith(document.createTextNode(" · " + t("ed_undone")));
+}
+
+// ---- Faza 7: Smart Replanning ----
+var rpDay = 0, rpReason = "late", rpNote = null;
+var RP_REASONS = [["late", "⏱"], ["closed", "🔒"], ["weather", "🌧"], ["remove", "✕"]];
+const pad2 = n => String(n).padStart(2, "0");
+function todayIso() { const n = new Date(); return `${n.getFullYear()}-${pad2(n.getMonth() + 1)}-${pad2(n.getDate())}`; }
+function nowHM() { const n = new Date(); return `${pad2(n.getHours())}:${pad2(n.getMinutes())}`; }
+function rpDefaultIdx(d) {
+  // Sot: ndalesa e parë që nuk ka përfunduar ende; ditë të tjera: e para
+  if (d.date !== todayIso()) return 0;
+  const now = toMinF(nowHM());
+  const k = d.stops.findIndex(s => s.start && toMinF(s.start) + (+s.duration_min || 0) > now);
+  return k < 0 ? Math.max(0, d.stops.length - 1) : k;
+}
+const toMinF = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+function openReplan(i) {
+  rpDay = i; rpReason = "late";
+  document.getElementById("rpErr").style.display = "none"; document.getElementById("rpWait").style.display = "none";
+  document.getElementById("rpGo").disabled = false;
+  rpRender(); openModal("rpBg");
+}
+function rpPick(r) { rpReason = r; rpRender(); }
+function rpRender() {
+  const d = plan.days[rpDay]; if (!d) return;
+  document.getElementById("rpOpts").innerHTML = RP_REASONS.map(([r, e]) => `<button class="${r === rpReason ? "on" : ""}" onclick="rpPick('${r}')"><span class="e">${e}</span><span>${esc(t("rp_" + r))}<small>${esc(t("rp_" + r + "_s"))}</small></span></button>`).join("");
+  const more = document.getElementById("rpMore");
+  if (rpReason === "late") more.innerHTML = `<label>${esc(t("rp_howlate"))}</label><div class="seg" id="rpMin">${[15, 30, 45, 60, 90].map(m => `<button data-v="${m}" class="${m === 30 ? "on" : ""}">${m} min</button>`).join("")}</div>`;
+  else if (rpReason === "weather") more.innerHTML = `<label>${esc(t("rp_wx"))}</label><div class="seg" id="rpWx">${["rain", "hot", "cold"].map((w, k) => `<button data-v="${w}" class="${k ? "" : "on"}">${esc(t("rp_wx_" + w))}</button>`).join("")}</div>`;
+  else more.innerHTML = "";
+  more.querySelectorAll(".seg").forEach(seg => seg.addEventListener("click", e => { const b = e.target.closest("button"); if (b) seg.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); }));
+  document.getElementById("rpStopL").textContent = t("rp_which_" + rpReason);
+  const def = rpDefaultIdx(d);
+  const ok = (s, k) => rpReason === "closed" ? s.lat != null && s.type !== "meal" : rpReason === "remove" ? true : true;
+  const opts = d.stops.map((s, k) => ok(s, k) ? `<option value="${k}">${esc((s.start ? s.start + " · " : "") + (s.name || ""))}</option>` : "").join("");
+  const sel = document.getElementById("rpStop"); sel.innerHTML = opts;
+  const vals = [...sel.options].map(o => +o.value), pickV = vals.find(v => v >= def) ?? vals[0];
+  if (pickV != null) sel.value = String(pickV);
+}
+async function runReplan() {
+  const err = document.getElementById("rpErr"), wait = document.getElementById("rpWait"), btn = document.getElementById("rpGo");
+  err.style.display = "none";
+  if (isOffline()) { err.textContent = t("no_conn"); err.style.display = "block"; return; }
+  const d = plan.days[rpDay], idx = +document.getElementById("rpStop").value;
+  if (!d || !(idx >= 0)) return;
+  const needAI = rpReason === "closed" || rpReason === "weather";
+  if (needAI && (!sb || !user)) { closeModal("rpBg"); toast(t("rp_login")); showAuth("login"); return; }
+  const body = { plan: strip(plan), day: rpDay + 1, idx, reason: rpReason, lang: plan.request?.lang || LANG, ui: LANG };
+  if (rpReason === "late") body.minutes = +(document.querySelector("#rpMin .on")?.dataset.v || 30);
+  if (rpReason === "weather") body.weather = document.querySelector("#rpWx .on")?.dataset.v || "rain";
+  if (d.date === todayIso()) body.now = nowHM();
+  btn.disabled = true; wait.style.display = "block";
+  try {
+    const headers = { "Content-Type": "application/json" };
+    if (sb && user) { const { data: ses } = await sb.auth.getSession(); if (ses?.session?.access_token) headers.Authorization = "Bearer " + ses.session.access_token; }
+    const r = await fetch(API + "/replan", { method: "POST", headers, body: JSON.stringify(body) });
+    const res = await r.json().catch(() => ({ error: t("bad_resp") }));
+    if (res.code === "auth") { closeModal("rpBg"); showAuth("login"); }
+    if (!r.ok || res.error) throw new Error(res.error || "Gabim " + r.status);
+    closeModal("rpBg");
+    if (!res.day) { rpNote = null; toast(res.reply || t("ed_none")); return; }
+    const di = rpDay;
+    prevPlan = JSON.parse(JSON.stringify(strip(plan)));
+    const np = strip(plan); np.days[di] = res.day;
+    plan = sanePlan(np);
+    let text = res.reply || (rpReason === "remove" ? t("rp_done_remove", (res.changed || []).join(", ")) : rpReason === "late" ? t("rp_done_late", res.day.stops[idx]?.start || res.start) : t("ed_done"));
+    if (res.dropped?.length) text += " " + t("rp_dropped", res.dropped.join(", "));
+    rpNote = { di, text };
+    await persistPlan();
+    openPlanHeader(); renderTabs(); selectDay(di);
+  } catch (e) { err.textContent = /fetch|Load failed|NetworkError/i.test(e.message) ? t("no_conn") : e.message; err.style.display = "block"; }
+  finally { btn.disabled = false; wait.style.display = "none"; }
+}
+async function undoReplan() {
+  if (!prevPlan) { rpNote = null; selectDay(curDay); return; }
+  plan = sanePlan(prevPlan); prevPlan = null; rpNote = null; await persistPlan();
+  openPlanHeader(); renderTabs(); selectDay(Math.min(curDay, plan.days.length - 1));
+  toast(t("ed_undone"));
 }
 
 // ---- Faza 3: Çfarë të vizitoj tani? ----
