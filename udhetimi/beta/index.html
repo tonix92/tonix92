@@ -1354,6 +1354,8 @@ const I18N = {
     cal_shared: "Zgjidh aplikacionin e kalendarit për ta shtuar planin.", pdf_fail: "Kjo nuk funksionoi në këtë telefon. Provo \"Ndaje\".",
     cal_btn: "Shkarko skedarin e kalendarit", cal_done: "U shkarkua. Hape skedarin për ta shtuar në kalendar.", made_with: "Krijuar me Viaro",
     notif_h: "Njoftimet", notif_empty: "Ende asnjë njoftim. Kur dikush pëlqen ose komenton planin tënd, ose fillon të të ndjekë, do ta shohësh këtu.",
+    n_grp_join: (a, c) => `${a} u bashkua në udhëtimin${c ? " për " + c : ""}`, n_grp_prop: (a, c) => `${a} propozoi një vend${c ? " për " + c : ""}`, n_grp_added: (a, c) => `${a} e shtoi propozimin tënd në plan${c ? " për " + c : ""}`,
+    push_h: "Njoftimet në telefon", push_s: "Kur dikush komenton, të ndjek ose propozon një vend në grup.", push_denied: "Njoftimet janë të bllokuara te cilësimet e telefonit.", push_on: "Njoftimet u aktivizuan.", push_off: "Njoftimet u çaktivizuan.",
     n_like: (a, c) => `${a} pëlqeu planin tënd${c ? " për " + c : ""}`, n_comment: (a, c) => `${a} komentoi planin tënd${c ? " për " + c : ""}`, n_follow: a => `${a} filloi të të ndjekë`,
     nav_create: "✨ Krijo", nav_mine: "📁 Planet e mia", nav_explore: "🌍 Zbulo", login: "Hyr",
     h_where: "Ku po shkon?", rem_h: "Kujtesat e udhëtimit", rem_s: "Mbrëmjen para nisjes dhe çdo mëngjes, një orë para ndalesës së parë.", rem_denied: "Njoftimet janë të ndaluara. Lejoji te Cilësimet e telefonit.", rem_off: "Kujtesat u çaktivizuan.", rem_none: "S'ka ditë të ardhshme për kujtesa.", rem_ok: n => `${n} kujtesa u caktuan`, rem_eve_t: c => `Nesër nis udhëtimi në ${c}`, rem_eve_b: (n, f) => `${n === 1 ? "1 ditë e planifikuar" : n + " ditë të planifikuara"}.${f ? " Ndalesa e parë: " + f : ""}`, rem_day_t: (d, c) => `Dita ${d} në ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "Fillon me " + f : ""}`, wz1: "Qyteti", wz2: "Stili", wz3: "Dita", wz4: "Krijo", wz_next: "Vazhdo →", wz_back: "← Prapa", wz_t: ["Destinacioni", "Zgjidh stilin tënd", "Dita jote", "Prekja e fundit"], wz_s: ["Qyteti, sa ditë dhe kush vjen me ty.", "Çka të pëlqen dhe sa shpejt do të lëvizësh.", "Orari, mënyra e lëvizjes dhe buxheti.", "Gjuha e planit dhe dëshira të veçanta. Pastaj krijoje."], wz_of: n => `Hapi ${n} nga 4`, lead: "Më thuaj qytetin dhe çka të pëlqen, unë ta bëj planin ditë për ditë.",
@@ -1452,6 +1454,8 @@ const I18N = {
     cal_shared: "Choose your calendar app to add the plan.", pdf_fail: "That didn't work on this phone. Try \"Share\" instead.",
     cal_btn: "Download calendar file", cal_done: "Downloaded. Open the file to add it to your calendar.", made_with: "Made with Viaro",
     notif_h: "Notifications", notif_empty: "No notifications yet. When someone likes or comments on your plan, or follows you, you'll see it here.",
+    n_grp_join: (a, c) => `${a} joined the trip${c ? " to " + c : ""}`, n_grp_prop: (a, c) => `${a} suggested a place${c ? " for " + c : ""}`, n_grp_added: (a, c) => `${a} added your suggestion to the plan${c ? " for " + c : ""}`,
+    push_h: "Phone notifications", push_s: "When someone comments, follows you or suggests a place in your group.", push_denied: "Notifications are blocked in your phone settings.", push_on: "Notifications turned on.", push_off: "Notifications turned off.",
     n_like: (a, c) => `${a} liked your plan${c ? " for " + c : ""}`, n_comment: (a, c) => `${a} commented on your plan${c ? " for " + c : ""}`, n_follow: a => `${a} started following you`,
     nav_create: "✨ Create", nav_mine: "📁 My plans", nav_explore: "🌍 Explore", login: "Log in",
     h_where: "Where are you going?", rem_h: "Trip reminders", rem_s: "The evening before you leave and every morning, an hour before your first stop.", rem_denied: "Notifications are turned off. Allow them in your phone settings.", rem_off: "Reminders turned off.", rem_none: "No upcoming days to remind you about.", rem_ok: n => `${n} ${n === 1 ? "reminder" : "reminders"} set`, rem_eve_t: c => `Your ${c} trip starts tomorrow`, rem_eve_b: (n, f) => `${n} ${n === 1 ? "day" : "days"} planned.${f ? " First stop: " + f : ""}`, rem_day_t: (d, c) => `Day ${d} in ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "Starts with " + f : ""}`, wz1: "Where", wz2: "Vibe", wz3: "Your day", wz4: "Create", wz_next: "Continue →", wz_back: "← Back", wz_t: ["Destination", "Pick your vibe", "Your day", "Final touches"], wz_s: ["The city, how many days and who's coming.", "What you love and how fast you like to go.", "Hours, getting around and budget.", "Plan language and any wishes. Then create it."], wz_of: n => `Step ${n} of 4`, lead: "Tell me the city and what you love — I'll plan it day by day.",
@@ -1550,6 +1554,8 @@ const I18N = {
     cal_shared: "Wähle deine Kalender-App, um den Plan hinzuzufügen.", pdf_fail: "Das hat auf diesem Telefon nicht funktioniert. Versuch es mit „Teilen“.",
     cal_btn: "Kalenderdatei herunterladen", cal_done: "Heruntergeladen. Öffne die Datei, um sie in deinen Kalender zu übernehmen.", made_with: "Erstellt mit Viaro",
     notif_h: "Benachrichtigungen", notif_empty: "Noch keine Benachrichtigungen. Wenn jemand deinen Plan mag, kommentiert oder dir folgt, siehst du es hier.",
+    n_grp_join: (a, c) => `${a} ist der Reise${c ? " nach " + c : ""} beigetreten`, n_grp_prop: (a, c) => `${a} schlägt einen Ort${c ? " für " + c : ""} vor`, n_grp_added: (a, c) => `${a} hat deinen Vorschlag zum Plan${c ? " für " + c : ""} hinzugefügt`,
+    push_h: "Benachrichtigungen aufs Telefon", push_s: "Wenn jemand kommentiert, dir folgt oder in der Gruppe einen Ort vorschlägt.", push_denied: "Benachrichtigungen sind in den Telefoneinstellungen blockiert.", push_on: "Benachrichtigungen aktiviert.", push_off: "Benachrichtigungen deaktiviert.",
     n_like: (a, c) => `${a} gefällt dein Plan${c ? " für " + c : ""}`, n_comment: (a, c) => `${a} hat deinen Plan${c ? " für " + c : ""} kommentiert`, n_follow: a => `${a} folgt dir jetzt`,
     nav_create: "✨ Erstellen", nav_mine: "📁 Meine Pläne", nav_explore: "🌍 Entdecken", login: "Anmelden",
     h_where: "Wohin geht's?", rem_h: "Reise-Erinnerungen", rem_s: "Am Abend vor der Abreise und jeden Morgen, eine Stunde vor dem ersten Stopp.", rem_denied: "Mitteilungen sind deaktiviert. Erlaube sie in den Telefon-Einstellungen.", rem_off: "Erinnerungen deaktiviert.", rem_none: "Keine kommenden Tage für Erinnerungen.", rem_ok: n => `${n} ${n === 1 ? "Erinnerung" : "Erinnerungen"} geplant`, rem_eve_t: c => `Morgen beginnt deine Reise nach ${c}`, rem_eve_b: (n, f) => `${n} ${n === 1 ? "Tag" : "Tage"} geplant.${f ? " Erster Stopp: " + f : ""}`, rem_day_t: (d, c) => `Tag ${d} in ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "Los geht's mit " + f : ""}`, wz1: "Ziel", wz2: "Stil", wz3: "Tag", wz4: "Erstellen", wz_next: "Weiter →", wz_back: "← Zurück", wz_t: ["Reiseziel", "Wähle deinen Stil", "Dein Tag", "Letzter Schliff"], wz_s: ["Stadt, Anzahl der Tage und wer mitkommt.", "Was dir gefällt und wie schnell du unterwegs bist.", "Zeiten, Fortbewegung und Budget.", "Sprache des Plans und besondere Wünsche. Dann erstellen."], wz_of: n => `Schritt ${n} von 4`, lead: "Sag mir die Stadt und was dich interessiert – ich plane dir jeden Tag.",
@@ -1675,6 +1681,7 @@ function setLang(l) {
   if (view === "explore") loadExplore();
   if (view === "profile" && pfUser) openProfile(pfUser);
   if (view === "plan" && plan) { const on = document.querySelector("#dayTabs button.on"); const i = on ? +on.dataset.i : 0; openPlanHeader(); renderActions(); renderTabs(); selectDay(i); }
+  if (pushTok && user) pushSave();
 }
 document.getElementById("langSw").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.l); });
 
@@ -1718,6 +1725,7 @@ async function loadMyProfile() {
     data = { id: user.id, name, bio: "" };
   }
   myProfile = data; refreshAcct();
+  pushAfterLogin();
   await loadBlocks();
   if (view === "explore") loadExplore();
 }
@@ -1780,10 +1788,12 @@ function showAccount() {
     <div style="color:var(--mut)">${esc(user.email)}</div>
     <button class="go" onclick="closeModal('authBg');openProfile(user.id)">${t("my_profile")}</button>
     <button class="go sec" onclick="closeModal('authBg');go('mine')">${t("my_plans_btn")}</button>
+    <div id="pushRow"></div>
     <button class="go sec" onclick="showBlocked()">${t("blk_list")}</button>
     <button class="go danger" onclick="doLogout()">${t("logout")}</button>
     <div class="accx"><a href="privacy.html?lang=${LANG}">${t("privacy")}</a><button class="link" onclick="askDeleteAccount()">${t("del_acc")}</button></div>`;
   openModal("authBg");
+  renderPushRow();
 }
 function askDeleteAccount() {
   document.getElementById("authBody").innerHTML = `<h3>${t("del_q")}</h3>
@@ -1840,7 +1850,7 @@ async function doNewPass() {
   if (error) return aErr(authMsg(error));
   closeModal("authBg"); toast(t("pass_changed"));
 }
-async function doLogout() { await sb.auth.signOut(); closeModal("authBg"); toast(t("logged_out")); if (view === "mine") loadMine(); }
+async function doLogout() { await pushOff(); await sb.auth.signOut(); closeModal("authBg"); toast(t("logged_out")); if (view === "mine") loadMine(); }
 
 // ================== FORMA ==================
 let days = 3, group = { adults: 2, kids: 0 };
@@ -3691,7 +3701,8 @@ async function openNotifs() {
   notifRows = (data || []).filter(n => !isBlocked(n.actor_id));
   box.innerHTML = notifRows.map((n, i) => {
     const who = `<b>${esc(n.actor_name || "—")}</b>`, city = esc(n.plan_city || "");
-    const txt = n.type === "like" ? t("n_like", who, city) : n.type === "comment" ? t("n_comment", who, city) : t("n_follow", who);
+    const txt = n.type === "like" ? t("n_like", who, city) : n.type === "comment" ? t("n_comment", who, city)
+      : /^grp_/.test(n.type) ? t("n_" + n.type, who, city) : t("n_follow", who);
     return `<div class="nitem ${n.read ? "" : "unread"}" onclick="notifGo(${i})">
       <span class="av" style="background:${avColor(n.actor_id)}">${esc(initials(n.actor_name))}</span>
       <div class="nt">${txt}${n.type === "like" ? " ❤️" : ""}${n.body ? `<span class="nq">“${esc(n.body)}”</span>` : ""}<small>${esc(ago(n.created_at))}</small></div></div>`;
@@ -3737,6 +3748,67 @@ async function shareFile(name, blob, title) {
   try { await SH.share({ title, files: [uri], dialogTitle: title }); }
   catch (e) { if (!/cancel/i.test(String(e?.message || e))) throw e; }
   return true;
+}
+
+// ---- Njoftimet në telefon (Faza 15): vetëm në aplikacion, kur build-i ka Firebase ----
+var pushAvailP = null, pushTok = null;
+const PUSH_KEY = "viaro_push";
+function pushPref() { try { return localStorage.getItem(PUSH_KEY); } catch { return null; } }
+function setPushPref(v) { try { localStorage.setItem(PUSH_KEY, v); } catch {} }
+function pushAvail() {
+  return pushAvailP ||= (async () => {
+    const PN = nPlug("PushNotifications"); if (!PN) return false;
+    try { const r = await fetch("push-cfg.json", { cache: "no-store" }); if (!r.ok || !(await r.json()).push) return false; } catch { return false; }
+    PN.addListener("registration", t => { pushTok = t?.value || null; pushSave(); });
+    PN.addListener("registrationError", () => {});
+    PN.addListener("pushNotificationReceived", () => { if (user) refreshBell(); });
+    PN.addListener("pushNotificationActionPerformed", a => {
+      const d = a?.notification?.data || {};
+      if (d.type === "follow" && d.actor_id) openProfile(d.actor_id);
+      else if (/^[0-9a-f-]{36}$/i.test(d.plan_id || "")) openById(d.plan_id, d.type === "comment");
+    });
+    return true;
+  })();
+}
+async function pushSave() {
+  if (!pushTok || !user || !sb || pushPref() !== "1") return;
+  try { await sb.rpc("register_push", { p_token: pushTok, p_platform: window.Capacitor?.getPlatform?.() === "ios" ? "ios" : "android", p_lang: LANG }); } catch {}
+}
+async function pushRegister(ask) {
+  const PN = nPlug("PushNotifications");
+  if (!PN || !user || !(await pushAvail())) return "off";
+  let p = "prompt";
+  try { p = (await PN.checkPermissions()).receive; } catch {}
+  if (p !== "granted") { if (!ask) return p; try { p = (await PN.requestPermissions()).receive; } catch {} }
+  if (p !== "granted") return p;
+  setPushPref("1");
+  try { await PN.register(); } catch { return "off"; }
+  if (pushTok) pushSave();
+  return "granted";
+}
+async function pushOff() {
+  if (pushTok && user && sb) { try { await sb.rpc("unregister_push", { p_token: pushTok }); } catch {} }
+}
+// Pas kyçjes në aplikacion: herën e parë pyet një herë, më pas regjistro në heshtje.
+async function pushAfterLogin() {
+  if (!isNative() || !(await pushAvail())) return;
+  const pref = pushPref();
+  if (pref === null) { setPushPref("1"); pushRegister(true); }
+  else if (pref === "1") pushRegister(false);
+}
+async function renderPushRow() {
+  const el = document.getElementById("pushRow"); if (!el) return;
+  if (!isNative() || !user || !(await pushAvail())) { el.innerHTML = ""; return; }
+  let perm = "prompt"; try { perm = (await nPlug("PushNotifications").checkPermissions()).receive; } catch {}
+  const on = pushPref() === "1" && perm === "granted";
+  el.innerHTML = `<div class="switch" style="margin:4px 0 12px"><div><b>🔔 ${esc(t("push_h"))}</b><small>${esc(t(perm === "denied" ? "push_denied" : "push_s"))}</small></div>
+    <label class="tog"><input type="checkbox" ${on ? "checked" : ""} ${perm === "denied" ? "disabled" : ""} onchange="setPush(this.checked)"><span></span></label></div>`;
+}
+async function setPush(v) {
+  if (!v) { setPushPref("0"); await pushOff(); toast(t("push_off")); return renderPushRow(); }
+  const r = await pushRegister(true);
+  toast(r === "granted" ? t("push_on") : t("push_denied"));
+  renderPushRow();
 }
 
 // ================== PDF DHE KALENDARI ==================
