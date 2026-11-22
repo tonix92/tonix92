@@ -100,14 +100,20 @@ function sameSecret(a, b) {
 }
 async function handlePush(q, req, env, ctx) {
   if (!env.PUSH_SECRET || !env.FCM_SA) return new Response("push off", { status: 503 });
-  if (!sameSecret(req.headers.get("X-Push-Secret"), env.PUSH_SECRET)) return new Response("forbidden", { status: 403 });
-  let sa; try { sa = JSON.parse(env.FCM_SA); } catch { return new Response("bad FCM_SA", { status: 500 }); }
+  if (!sameSecret(String(req.headers.get("X-Push-Secret") || "").trim(), String(env.PUSH_SECRET).trim())) return new Response("forbidden", { status: 403 });
+  let sa; try { sa = JSON.parse(String(env.FCM_SA).trim()); } catch { return new Response("bad FCM_SA", { status: 500 }); }
+  if (!sa?.private_key || !sa?.client_email || !sa?.project_id) return new Response("bad FCM_SA", { status: 500 });
   const type = String(q?.type || "");
   if (!PUSH_TXT.sq[type]) return new Response("bad type", { status: 400 });
   const cut = (x, n) => String(x || "").replace(/\s+/g, " ").trim().slice(0, n);
   const a = cut(q.actor, 60) || "Viaro", c = cut(q.city, 60), b = cut(q.body, 90);
   const toks = (Array.isArray(q.tokens) ? q.tokens : []).filter(x => x && typeof x.t === "string" && x.t.length >= 20 && x.t.length <= 4096).slice(0, 10);
   const data = { type, plan_id: cut(q.plan_id, 40), actor_id: cut(q.actor_id, 40) };
+  if (q.test === true) {
+    // Provë nga databaza: kontrollon vetëm hyrjen në Firebase, pa dërguar asgjë
+    try { await fcmAccess(sa); return new Response(JSON.stringify({ ok: true, fcm: "ok", project: sa.project_id }), { headers: { "Content-Type": "application/json" } }); }
+    catch (e) { return new Response(JSON.stringify({ ok: false, fcm: String(e.message || e).slice(0, 80) }), { status: 502, headers: { "Content-Type": "application/json" } }); }
+  }
   ctx.waitUntil((async () => {
     try {
       const at = await fcmAccess(sa);
