@@ -5,6 +5,12 @@ name: Viaro Android
 
 on:
   workflow_dispatch:
+    inputs:
+      web:
+        description: "Cila faqe futet në aplikacion (live = faqja kryesore, beta = për provë)"
+        type: choice
+        options: [live, beta]
+        default: live
 
 jobs:
   build:
@@ -28,7 +34,58 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           WEB_SRC=../udhetimi node scripts/prepare-www.mjs
+          if [ "${{ inputs.web }}" = "beta" ]; then
+            cp ../udhetimi/beta/index.html www/index.html
+            if [ -f ../udhetimi/beta/privacy.html ]; then cp ../udhetimi/beta/privacy.html www/privacy.html; fi
+            echo "::notice::Ky build përmban faqen BETA (vetëm për provë)."
+          fi
           npx cap add android
+          # Printimi i telefonit ("Ruaj si PDF") – plugin i vogël i Viaro-s
+          J=android/app/src/main/java/tips/vianto/app
+          cat > $J/ViaroPrintPlugin.java <<'JAVA'
+          package tips.vianto.app;
+
+          import android.content.Context;
+          import android.print.PrintAttributes;
+          import android.print.PrintDocumentAdapter;
+          import android.print.PrintManager;
+          import com.getcapacitor.Plugin;
+          import com.getcapacitor.PluginCall;
+          import com.getcapacitor.PluginMethod;
+          import com.getcapacitor.annotation.CapacitorPlugin;
+
+          @CapacitorPlugin(name = "ViaroPrint")
+          public class ViaroPrintPlugin extends Plugin {
+              @PluginMethod
+              public void print(PluginCall call) {
+                  final String name = call.getString("name", "Viaro");
+                  getActivity().runOnUiThread(() -> {
+                      try {
+                          PrintManager pm = (PrintManager) getActivity().getSystemService(Context.PRINT_SERVICE);
+                          PrintDocumentAdapter adapter = getBridge().getWebView().createPrintDocumentAdapter(name);
+                          pm.print(name, adapter, new PrintAttributes.Builder().build());
+                          call.resolve();
+                      } catch (Exception e) {
+                          call.reject("print_failed", e);
+                      }
+                  });
+              }
+          }
+          JAVA
+          cat > $J/MainActivity.java <<'JAVA'
+          package tips.vianto.app;
+
+          import android.os.Bundle;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  registerPlugin(ViaroPrintPlugin.class);
+                  super.onCreate(savedInstanceState);
+              }
+          }
+          JAVA
           # Leja e vendndodhjes për "Çfarë të vizitoj tani?"
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
           grep -c ACCESS_FINE_LOCATION android/app/src/main/AndroidManifest.xml
