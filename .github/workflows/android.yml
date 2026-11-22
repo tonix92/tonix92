@@ -31,6 +31,8 @@ jobs:
           java-version: 21
 
       - name: Përgatit projektin
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
           npm install --no-audit --no-fund
           WEB_SRC=../udhetimi node scripts/prepare-www.mjs
@@ -39,7 +41,13 @@ jobs:
             if [ -f ../udhetimi/beta/privacy.html ]; then cp ../udhetimi/beta/privacy.html www/privacy.html; fi
             echo "::notice::Ky build përmban faqen BETA (vetëm për provë)."
           fi
+          # Njoftimet push: vetëm kur ekziston sekreti i Firebase (pa të, aplikacioni punon pa push)
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then echo '{"push":true}' > www/push-cfg.json; else echo "::warning::Mungon sekreti GOOGLE_SERVICES_JSON – njoftimet push janë të çaktivizuara në këtë build."; fi
           npx cap add android
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+            node -e "const j=require('./android/app/google-services.json');if(!j.client.some(c=>c.client_info.android_client_info.package_name==='tips.vianto.app'))throw new Error('package')" && echo "Firebase: google-services.json OK"
+          fi
           # Printimi i telefonit ("Ruaj si PDF") – plugin i vogël i Viaro-s
           J=android/app/src/main/java/tips/vianto/app
           cat > $J/ViaroPrintPlugin.java <<'JAVA'
