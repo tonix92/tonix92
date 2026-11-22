@@ -122,8 +122,14 @@ jobs:
           mkdir -p ../out
           cp android/app/build/outputs/apk/debug/app-debug.apk ../out/vianto-test.apk
           AAB=android/app/build/outputs/bundle/release/app-release.aab
+          # Çelësi: ose sekreti ANDROID_KEYSTORE_BASE64, ose app/upload.jks.enc (i enkriptuar me fjalëkalimin)
           if [ -n "$KS_B64" ]; then
             echo "$KS_B64" | base64 -d > upload.jks
+          elif [ -f upload.jks.enc ] && [ -n "$KS_PASS" ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 300000 -in upload.jks.enc -out upload.jks -pass env:KS_PASS || { echo "::error::Fjalëkalimi ANDROID_KEYSTORE_PASSWORD nuk e hap çelësin."; exit 1; }
+            KS_ALIAS="${KS_ALIAS:-viaro}"
+          fi
+          if [ -f upload.jks ]; then
             jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore upload.jks -storepass "$KS_PASS" -keypass "$KS_PASS" "$AAB" "$KS_ALIAS"
             rm upload.jks
             cp "$AAB" ../out/vianto-play.aab
