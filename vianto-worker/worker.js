@@ -61,6 +61,68 @@ function nextMonth(lang) {
   try { return n.toLocaleDateString(loc, { day: "numeric", month: "long", timeZone: "UTC" }); } catch { return n.toISOString().slice(0, 10); }
 }
 
+// ================== NJOFTIMET NË TELEFON (Faza 15) ==================
+// Databaza (trigger + pg_net) thërret /push me sekretin e përbashkët; Worker-i i dërgon përmes Firebase Cloud Messaging.
+const PUSH_TXT = {
+  sq: { like: (a, c) => `${a} pëlqeu planin tënd${c ? " për " + c : ""} ❤️`, comment: (a, c, b) => `${a} komentoi planin tënd${c ? " për " + c : ""}${b ? ": " + b : ""}`,
+        follow: a => `${a} filloi të të ndjekë`, grp_join: (a, c) => `${a} u bashkua në udhëtimin${c ? " për " + c : ""}`,
+        grp_prop: (a, c, b) => `${a} propozoi ${b ? "„" + b + "”" : "një vend"}${c ? " për " + c : ""}`, grp_added: (a, c, b) => `${a} e shtoi ${b ? "„" + b + "”" : "propozimin tënd"} në planin${c ? " për " + c : ""}` },
+  en: { like: (a, c) => `${a} liked your plan${c ? " for " + c : ""} ❤️`, comment: (a, c, b) => `${a} commented on your plan${c ? " for " + c : ""}${b ? ": " + b : ""}`,
+        follow: a => `${a} started following you`, grp_join: (a, c) => `${a} joined the trip${c ? " to " + c : ""}`,
+        grp_prop: (a, c, b) => `${a} suggested ${b ? "“" + b + "”" : "a place"}${c ? " for " + c : ""}`, grp_added: (a, c, b) => `${a} added ${b ? "“" + b + "”" : "your suggestion"} to the plan${c ? " for " + c : ""}` },
+  de: { like: (a, c) => `${a} gefällt dein Plan${c ? " für " + c : ""} ❤️`, comment: (a, c, b) => `${a} hat deinen Plan${c ? " für " + c : ""} kommentiert${b ? ": " + b : ""}`,
+        follow: a => `${a} folgt dir jetzt`, grp_join: (a, c) => `${a} ist der Reise${c ? " nach " + c : ""} beigetreten`,
+        grp_prop: (a, c, b) => `${a} schlägt ${b ? "„" + b + "“" : "einen Ort"}${c ? " für " + c : ""} vor`, grp_added: (a, c, b) => `${a} hat ${b ? "„" + b + "“" : "deinen Vorschlag"} zum Plan${c ? " für " + c : ""} hinzugefügt` },
+};
+let FCM_TOK = null;
+const b64u = s => btoa(s).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
+async function fcmAccess(sa) {
+  if (FCM_TOK && FCM_TOK.exp > Date.now() + 60000) return FCM_TOK.t;
+  const now = Math.floor(Date.now() / 1000);
+  const head = b64u(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claim = b64u(JSON.stringify({ iss: sa.client_email, scope: "https://www.googleapis.com/auth/firebase.messaging", aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600 }));
+  const der = Uint8Array.from(atob(String(sa.private_key).replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")), c => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(head + "." + claim)));
+  const jwt = head + "." + claim + "." + b64u(String.fromCharCode(...sig));
+  const r = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + jwt });
+  const j = await r.json().catch(() => ({}));
+  if (!j.access_token) throw new Error("fcm_auth " + r.status);
+  FCM_TOK = { t: j.access_token, exp: Date.now() + (j.expires_in || 3600) * 1000 };
+  return FCM_TOK.t;
+}
+function sameSecret(a, b) {
+  a = String(a || ""); b = String(b || "");
+  if (!a || a.length !== b.length) return false;
+  let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+async function handlePush(q, req, env, ctx) {
+  if (!env.PUSH_SECRET || !env.FCM_SA) return new Response("push off", { status: 503 });
+  if (!sameSecret(req.headers.get("X-Push-Secret"), env.PUSH_SECRET)) return new Response("forbidden", { status: 403 });
+  let sa; try { sa = JSON.parse(env.FCM_SA); } catch { return new Response("bad FCM_SA", { status: 500 }); }
+  const type = String(q?.type || "");
+  if (!PUSH_TXT.sq[type]) return new Response("bad type", { status: 400 });
+  const cut = (x, n) => String(x || "").replace(/\s+/g, " ").trim().slice(0, n);
+  const a = cut(q.actor, 60) || "Viaro", c = cut(q.city, 60), b = cut(q.body, 90);
+  const toks = (Array.isArray(q.tokens) ? q.tokens : []).filter(x => x && typeof x.t === "string" && x.t.length >= 20 && x.t.length <= 4096).slice(0, 10);
+  const data = { type, plan_id: cut(q.plan_id, 40), actor_id: cut(q.actor_id, 40) };
+  ctx.waitUntil((async () => {
+    try {
+      const at = await fcmAccess(sa);
+      await Promise.all(toks.map(x => {
+        const T = PUSH_TXT[x.l] || PUSH_TXT.sq;
+        const message = { token: x.t, notification: { title: "Viaro", body: T[type](a, c, b) }, data,
+          android: { priority: "HIGH", notification: { tag: type + ":" + (data.plan_id || data.actor_id) } } };
+        return fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
+          method: "POST", headers: { Authorization: "Bearer " + at, "Content-Type": "application/json" }, body: JSON.stringify({ message }) }).catch(() => null);
+      }));
+    } catch (e) { console.log("push", e.message || e); }
+  })());
+  return new Response(JSON.stringify({ ok: true, n: toks.length }), { headers: { "Content-Type": "application/json" } });
+}
+
 async function sha(s) {
   const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
@@ -84,7 +146,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p11.0", kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p15.0", push: !!(env.PUSH_SECRET && env.FCM_SA), kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -102,6 +164,7 @@ export default {
     try { q = await req.json(); } catch { return json({ error: MSG.sq.bad }, 400, H); }
     const M = MSG[q?.ui] || MSG[q?.lang] || MSG.sq;
     const path = new URL(req.url).pathname;
+    if (path === "/push") return handlePush(q, req, env, ctx);
     if (path === "/near") {
       if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
       return handleNear(q, req, env, ctx, H, M);
