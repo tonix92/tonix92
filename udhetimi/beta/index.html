@@ -1351,6 +1351,7 @@ const I18N = {
     quick: "Ose zgjidh:", home_h: "Plane nga udhëtarët", home_more: "Shiko të gjitha", home_by: a => `nga ${a}`,
     take_h: "Merre planin me vete", pdf: "📄 PDF / Printo", cal: "📅 Shto në kalendar",
     cal_h: "Shto në kalendar", cal_sub: "Kur fillon udhëtimi? Çdo ndalesë shtohet si takim me orën e vet.", cal_date: "Data e ditës së parë",
+    cal_shared: "Zgjidh aplikacionin e kalendarit për ta shtuar planin.", pdf_fail: "Kjo nuk funksionoi në këtë telefon. Provo \"Ndaje\".",
     cal_btn: "Shkarko skedarin e kalendarit", cal_done: "U shkarkua. Hape skedarin për ta shtuar në kalendar.", made_with: "Krijuar me Viaro",
     notif_h: "Njoftimet", notif_empty: "Ende asnjë njoftim. Kur dikush pëlqen ose komenton planin tënd, ose fillon të të ndjekë, do ta shohësh këtu.",
     n_like: (a, c) => `${a} pëlqeu planin tënd${c ? " për " + c : ""}`, n_comment: (a, c) => `${a} komentoi planin tënd${c ? " për " + c : ""}`, n_follow: a => `${a} filloi të të ndjekë`,
@@ -1448,6 +1449,7 @@ const I18N = {
     quick: "Or pick one:", home_h: "Plans from travellers", home_more: "See all", home_by: a => `by ${a}`,
     take_h: "Take the plan with you", pdf: "📄 PDF / Print", cal: "📅 Add to calendar",
     cal_h: "Add to calendar", cal_sub: "When does your trip start? Every stop is added as an event at its time.", cal_date: "Date of day 1",
+    cal_shared: "Choose your calendar app to add the plan.", pdf_fail: "That didn't work on this phone. Try \"Share\" instead.",
     cal_btn: "Download calendar file", cal_done: "Downloaded. Open the file to add it to your calendar.", made_with: "Made with Viaro",
     notif_h: "Notifications", notif_empty: "No notifications yet. When someone likes or comments on your plan, or follows you, you'll see it here.",
     n_like: (a, c) => `${a} liked your plan${c ? " for " + c : ""}`, n_comment: (a, c) => `${a} commented on your plan${c ? " for " + c : ""}`, n_follow: a => `${a} started following you`,
@@ -1545,6 +1547,7 @@ const I18N = {
     quick: "Oder wähle:", home_h: "Pläne von Reisenden", home_more: "Alle ansehen", home_by: a => `von ${a}`,
     take_h: "Nimm den Plan mit", pdf: "📄 PDF / Drucken", cal: "📅 In den Kalender",
     cal_h: "In den Kalender", cal_sub: "Wann beginnt deine Reise? Jeder Stopp wird als Termin mit seiner Uhrzeit eingetragen.", cal_date: "Datum von Tag 1",
+    cal_shared: "Wähle deine Kalender-App, um den Plan hinzuzufügen.", pdf_fail: "Das hat auf diesem Telefon nicht funktioniert. Versuch es mit „Teilen“.",
     cal_btn: "Kalenderdatei herunterladen", cal_done: "Heruntergeladen. Öffne die Datei, um sie in deinen Kalender zu übernehmen.", made_with: "Erstellt mit Viaro",
     notif_h: "Benachrichtigungen", notif_empty: "Noch keine Benachrichtigungen. Wenn jemand deinen Plan mag, kommentiert oder dir folgt, siehst du es hier.",
     n_like: (a, c) => `${a} gefällt dein Plan${c ? " für " + c : ""}`, n_comment: (a, c) => `${a} hat deinen Plan${c ? " für " + c : ""} kommentiert`, n_follow: a => `${a} folgt dir jetzt`,
@@ -2189,6 +2192,7 @@ async function loadLikeState() {
   renderActions();
 }
 async function toggleLike() {
+  buzz();
   if (!user) return showAuth("signup", t("like_login"));
   const res = liked ? await sb.from("likes").delete().eq("user_id", user.id).eq("plan_id", row.id)
                     : await sb.from("likes").insert({ user_id: user.id, plan_id: row.id });
@@ -2923,6 +2927,9 @@ async function makeStory() {
 
   const blob = await new Promise(r => c.toBlob(r, "image/png"));
   const file = new File([blob], `udhetimi-${(plan.city?.name || "plan").toLowerCase().replace(/\s+/g, "-")}.png`, { type: "image/png" });
+  if (isNative()) {
+    try { if (await shareFile(file.name, blob, plan.title)) return; } catch {}
+  }
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file], title: plan.title }); return; } catch (e) { if (e.name === "AbortError") return; }
   }
@@ -3246,6 +3253,7 @@ async function leaveGroup() {
   toast(t("grp_left")); go("mine");
 }
 async function voteProp(id, v) {
+  buzz();
   if (!user) return;
   const cur = grp.votes.find(x => x.proposal_id === id && x.user_id === user.id);
   const { error } = cur && cur.value === v ? await sb.from("trip_votes").delete().eq("proposal_id", id).eq("user_id", user.id)
@@ -3259,6 +3267,7 @@ async function delProp(id) {
   await loadProposals(); renderGroup();
 }
 async function acceptProp(id, btn) {
+  buzz();
   const p = grp.props.find(x => x.id === id); if (!p || btn.disabled) return;
   btn.disabled = true; btn.textContent = "…";
   try {
@@ -3344,6 +3353,7 @@ async function runExplore(useGeo) {
 }
 // Shton një vend të verifikuar në ditën e planit: sot pas ndalesës aktuale, ditë të tjera aty ku shton më pak rrugë
 async function addPlace(x, di) {
+  buzz();
   const d = plan.days[di]; let idx = 0;
   if (d.date === todayIso()) {
     const k = rpDefaultIdx(d), s = d.stops[k];
@@ -3376,8 +3386,8 @@ function renderChatGeo() { const b = document.getElementById("chatGeoBtn"); b.cl
 function toggleChatGeo() { chatGeo = !chatGeo; renderChatGeo(); toast(t(chatGeo ? "ch_geo_on" : "ch_geo_off")); }
 function getPos() {
   return new Promise(ok => {
-    if (!navigator.geolocation) return ok(null);
-    navigator.geolocation.getCurrentPosition(p => ok({ lat: +p.coords.latitude.toFixed(5), lon: +p.coords.longitude.toFixed(5) }), () => ok(null), { enableHighAccuracy: true, timeout: 10000, maximumAge: 120000 });
+    if (!navigator.geolocation && !isNative()) return ok(null);
+    geoPos(p => ok({ lat: +p.coords.latitude.toFixed(5), lon: +p.coords.longitude.toFixed(5) }), () => ok(null), { enableHighAccuracy: true, timeout: 10000, maximumAge: 120000 });
   });
 }
 function chatPush(role, html) {
@@ -3451,7 +3461,7 @@ async function runNow(useGeo) {
     transport: f.transport, interests: f.interests, budget: f.budget, lang: f.lang || LANG, ui: LANG };
   if (useGeo) {
     try {
-      const pos = await new Promise((ok, no) => navigator.geolocation ? navigator.geolocation.getCurrentPosition(ok, no, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }) : no(new Error("geo")));
+      const pos = await new Promise((ok, no) => navigator.geolocation || isNative() ? geoPos(ok, no, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }) : no(new Error("geo")));
       body.lat = +pos.coords.latitude.toFixed(5); body.lon = +pos.coords.longitude.toFixed(5);
     } catch { err.textContent = t("now_nogeo"); err.style.display = "block"; document.getElementById("nowPlace").focus(); return; }
   } else {
@@ -3603,8 +3613,8 @@ function editNote(ev, di, si) {
 }
 let meMarker = null;
 function locateMe() {
-  if (!navigator.geolocation) return toast(t("now_nogeo"));
-  navigator.geolocation.getCurrentPosition(p => {
+  if (!navigator.geolocation && !isNative()) return toast(t("now_nogeo"));
+  geoPos(p => {
     const ll = [p.coords.latitude, p.coords.longitude];
     if (meMarker) meMarker.remove();
     meMarker = L.circleMarker(ll, { radius: 8, color: "#fff", weight: 3, fillColor: "#2A7DE1", fillOpacity: 1 }).bindPopup(t("you_here")).addTo(map);
@@ -3698,6 +3708,37 @@ function notifGo(i) {
   else if (n.plan_id) openById(n.plan_id, n.type === "comment");
 }
 
+// ================== FUNKSIONET E TELEFONIT (Faza 14) ==================
+// Në aplikacion përdorim funksionet e vetë telefonit; në shfletues mbetet si më parë.
+function isNative() { return !!window.Capacitor?.isNativePlatform?.(); }
+function nPlug(n) { return isNative() ? (window.Capacitor?.Plugins || {})[n] : null; }
+function geoPos(ok, no, o = {}) {
+  const G = nPlug("Geolocation");
+  const web = () => navigator.geolocation ? navigator.geolocation.getCurrentPosition(ok, no, o) : no(new Error("geo"));
+  if (!G) return web();
+  (async () => {
+    let st;
+    try {
+      st = await G.checkPermissions();
+      if (st.location !== "granted" && st.coarseLocation !== "granted") st = await G.requestPermissions();
+    } catch { return web(); }
+    if (st.location !== "granted" && st.coarseLocation !== "granted") return no(new Error("denied"));
+    try { ok(await G.getCurrentPosition({ enableHighAccuracy: !!o.enableHighAccuracy && st.location === "granted", timeout: o.timeout || 12000, maximumAge: o.maximumAge || 0 })); }
+    catch (e) { no(e); }
+  })();
+}
+function buzz(style) { try { nPlug("Haptics")?.impact?.({ style: style || "LIGHT" })?.catch?.(() => {}); } catch {} }
+// Ruaj skedarin në telefon dhe hap menunë e ndarjes (kalendar, Drive, WhatsApp, Foto...).
+async function shareFile(name, blob, title) {
+  const FS = nPlug("Filesystem"), SH = nPlug("Share");
+  if (!FS || !SH) return false;
+  const data = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1] || ""); r.onerror = no; r.readAsDataURL(blob); });
+  const { uri } = await FS.writeFile({ path: name, data, directory: "CACHE" });
+  try { await SH.share({ title, files: [uri], dialogTitle: title }); }
+  catch (e) { if (!/cancel/i.test(String(e?.message || e))) throw e; }
+  return true;
+}
+
 // ================== PDF DHE KALENDARI ==================
 function printPlan() {
   const p = plan; if (!p) return;
@@ -3714,6 +3755,12 @@ function printPlan() {
     `<div class="pr-foot">${esc(t("made_with"))}${esc(link)}</div>`;
   const old = document.title;
   document.title = `${p.title || p.city?.name || APP_NAME} – ${APP_NAME}`;
+  const PR = nPlug("ViaroPrint");
+  if (PR) {
+    // Android: dialogu i printimit të telefonit, me "Ruaj si PDF".
+    setTimeout(() => PR.print({ name: document.title }).catch(() => toast(t("pdf_fail"))).finally(() => setTimeout(() => { document.title = old; }, 1500)), 60);
+    return;
+  }
   addEventListener("afterprint", () => { document.title = old; }, { once: true });
   setTimeout(() => window.print(), 60);
 }
@@ -3746,8 +3793,14 @@ function downloadIcs() {
   });
   L.push("END:VCALENDAR");
   const blob = new Blob([L.join("\r\n") + "\r\n"], { type: "text/calendar;charset=utf-8" });
+  const fname = `vianto-${(city || "plan").toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-")}.ics`;
+  if (isNative()) {
+    shareFile(fname, blob, plan.title || city).then(ok => { if (ok) { closeModal("calBg"); toast(t("cal_shared")); } else toast(t("pdf_fail")); })
+      .catch(e => toast(t("err") + (e?.message || e)));
+    return;
+  }
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-  a.download = `vianto-${(city || "plan").toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-")}.ics`;
+  a.download = fname;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   closeModal("calBg"); toast(t("cal_done"));
 }
@@ -3794,6 +3847,11 @@ if (IS_APP) {
   }, true);
   applyThemeMeta();
   NP().SplashScreen?.hide?.().catch?.(() => {});
+  // Kur kthehesh në aplikacion: rifresko njoftimet dhe planin e grupit
+  NP().App?.addListener?.("resume", () => {
+    if (user) refreshBell();
+    if (view === "plan" && row?.group) refreshGroupPlan(true);
+  });
   // Butoni "prapa" në Android
   NP().App?.addListener?.("backButton", () => {
     const open = document.querySelector(".modal-bg.on");
