@@ -985,6 +985,19 @@
   .ppcity li{padding:3px 0;font-size:14px}
   .ppcity li.no{color:var(--mut)}
   .ppcity li small{color:var(--mut)}
+  #pfAvatar,#pfAvPrev{width:72px;height:94px;border-radius:6px;box-shadow:0 0 0 3px var(--surface),0 0 0 4px var(--line-2)}
+  #pfAvatar .avimg,#pfAvPrev .avimg{border-radius:6px}
+  .ppdata{background:#F4EFE3;color:#13233A;border-radius:16px;padding:12px 14px 10px;margin:0 0 14px;border:1px solid #E1D6BE}
+  .pdtop{display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.06em;color:#8A7A55}
+  .pdtop span:first-child{color:#1B3F63}
+  .pdmain{display:flex;gap:14px;margin:8px 0}
+  .pdphoto{flex:none;width:84px;height:108px;border-radius:4px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:30px;overflow:hidden;border:1px solid rgba(27,63,99,.3)}
+  .pdphoto img{width:100%;height:100%;object-fit:cover}
+  .ppdata dl{margin:0;min-width:0;flex:1}
+  .ppdata dt{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:#8A7A55;text-transform:uppercase}
+  .ppdata dd{margin:0 0 5px;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ppdata dd.nm{font-family:var(--serif);font-weight:400;font-size:19px}
+  .pdmrz{font-family:"Courier New",ui-monospace,monospace;font-size:10.5px;letter-spacing:.04em;line-height:1.35;overflow:hidden;white-space:nowrap;color:#13233A;opacity:.85}
   .wxwarn{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.wxwarn .wxfix{padding:6px 12px;font-size:13px;min-height:0}
   .daywarn.dinfo{background:color-mix(in srgb,var(--sun) 18%,var(--surface))!important;border-color:color-mix(in srgb,var(--sun) 50%,var(--line))!important}
   /* Faza 10: Smart Budget */
@@ -3139,7 +3152,7 @@ async function openPassport() {
   body.innerHTML = `<div class="empty">${esc(t("pp_loading"))}</div>`; openModal("ppBg");
   const r = ppCompute(await ppItems()); ppLast = r; ppFresh(r);
   const S = r.st;
-  body.innerHTML = `<p class="mut" style="margin:0 0 12px">${esc(t("pp_lead2"))}</p>
+  body.innerHTML = `${ppDataHtml()}<p class="mut" style="margin:0 0 12px">${esc(t("pp_lead2"))}</p>
     <div class="ppstats"><span><b>${S.cities}</b>${esc(t("pp_cities"))}</span><span><b>${S.countries}</b>${esc(t("pp_countries"))}</span><span><b>${S.stops}</b>${esc(t("pp_stops"))}</span><span><b>${S.km}</b>${esc(t("pp_km"))}</span></div>
     <h4>${esc(t("pp_stamps"))}</h4>${r.stamps.length ? `<div class="stamps">${r.stamps.map((c, i) => stampHtml(c, i, false)).join("")}</div>` : `<div class="empty">${esc(t("pp_empty"))}</div>`}
     ${r.planned.length ? `<h4>${esc(t("pp_planned"))}</h4><div class="stamps">${r.planned.map((c, i) => stampHtml(c, i, true)).join("")}</div>` : ""}
@@ -3153,6 +3166,50 @@ function ppMini(r) {
   el.textContent = r ? t("pp_mini", r.st.cities, r.badges.filter(b => b.ok).length) : "";
 }
 async function loadPpMini() { try { ppMini(ppCompute(await ppItems())); } catch {} }
+// ---- Faqja e të dhënave të pasaportës (si te pasaporta e vërtetë) ----
+Object.assign(I18N.sq, { pd_name: "Emri", pd_since: "Udhëtar që nga", pd_no: "Nr. i pasaportës", pd_guest: "Udhëtar", pd_type: "Pasaportë udhëtimi" });
+Object.assign(I18N.en, { pd_name: "Name", pd_since: "Traveller since", pd_no: "Passport no.", pd_guest: "Traveller", pd_type: "Travel passport" });
+Object.assign(I18N.de, { pd_name: "Name", pd_since: "Reisend seit", pd_no: "Pass-Nr.", pd_guest: "Reisende:r", pd_type: "Reisepass" });
+function ppData() {
+  const name = (user && displayName(user)) || t("pd_guest");
+  const id = String(user?.id || "local").replace(/[^a-f0-9]/gi, "");
+  const no = "VR" + (id.slice(0, 7) || "0000000").toUpperCase().padEnd(7, "0");
+  const since = user?.created_at ? new Date(user.created_at) : null;
+  const sinceTxt = since ? `${String(since.getDate()).padStart(2, "0")}.${String(since.getMonth() + 1).padStart(2, "0")}.${since.getFullYear()}` : "—";
+  const asc = v => String(v).normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, "<");
+  const mrz1 = ("P<VIA" + asc(name).replace(/^<|<$/g, "").replace(/</, "<<") + "<".repeat(44)).slice(0, 44);
+  const ymd = since ? String(since.getFullYear()).slice(2) + String(since.getMonth() + 1).padStart(2, "0") + String(since.getDate()).padStart(2, "0") : "000000";
+  const mrz2 = (no + "<<VIA" + ymd + "<" + "<".repeat(44)).slice(0, 44);
+  return { name, no, sinceTxt, mrz1, mrz2, avatar: user ? AVS.get(user.id) || myProfile?.avatar_url || null : null, ini: initials(name), color: avColor(user?.id || "x") };
+}
+function ppDataHtml() {
+  const d = ppData();
+  return `<div class="ppdata"><div class="pdtop"><span>${esc(APP_NAME.toUpperCase())}</span><span>${esc(t("pd_type"))}</span></div>
+    <div class="pdmain"><div class="pdphoto" style="background:${d.color}">${d.avatar && AV_OK(d.avatar) ? `<img src="${esc(d.avatar)}" alt="">` : esc(d.ini)}</div>
+    <dl><dt>${esc(t("pd_name"))}</dt><dd class="nm">${esc(d.name)}</dd><dt>${esc(t("pd_no"))}</dt><dd>${esc(d.no)}</dd><dt>${esc(t("pd_since"))}</dt><dd>${esc(d.sinceTxt)}</dd></dl></div>
+    <div class="pdmrz">${esc(d.mrz1)}<br>${esc(d.mrz2)}</div></div>`;
+}
+async function ppDataCanvas(x, X, Y, w, h, F, SF) {
+  const d = ppData(), M = "'Courier New',ui-monospace,monospace";
+  x.save();
+  x.fillStyle = "#F4EFE3"; x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, 26) : x.rect(X, Y, w, h); x.fill();
+  x.fillStyle = "#1B3F63"; x.font = `700 24px ${F}`; x.fillText(APP_NAME.toUpperCase(), X + 34, Y + 48);
+  x.textAlign = "right"; x.fillStyle = "#8A7A55"; x.font = `600 22px ${F}`; x.fillText(t("pd_type"), X + w - 34, Y + 48); x.textAlign = "left";
+  const px = X + 34, py = Y + 72, pw = 180, ph = 230;
+  x.fillStyle = d.color; x.fillRect(px, py, pw, ph);
+  let ok = false;
+  if (d.avatar && AV_OK(d.avatar)) {
+    const im = await new Promise(res => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => res(i); i.onerror = () => res(null); i.src = d.avatar; setTimeout(() => res(null), 4000); });
+    if (im) { const s = Math.min(im.naturalWidth / pw, im.naturalHeight / ph); const sw = pw * s, sh = ph * s; x.drawImage(im, (im.naturalWidth - sw) / 2, (im.naturalHeight - sh) / 2, sw, sh, px, py, pw, ph); ok = true; }
+  }
+  if (!ok) { x.fillStyle = "#fff"; x.font = `800 76px ${F}`; x.textAlign = "center"; x.fillText(d.ini, px + pw / 2, py + ph / 2 + 26); x.textAlign = "left"; }
+  x.strokeStyle = "rgba(27,63,99,.35)"; x.lineWidth = 2; x.strokeRect(px, py, pw, ph);
+  const fx = px + pw + 40, fw = X + w - 34 - fx;
+  const field = (lbl, val, yy, big) => { x.fillStyle = "#8A7A55"; x.font = `600 20px ${F}`; x.fillText(lbl.toUpperCase(), fx, yy); x.fillStyle = "#13233A"; x.font = big ? `400 44px ${SF}` : `700 30px ${F}`; clip2(x, val, fx, yy + (big ? 48 : 38), fw); };
+  field(t("pd_name"), d.name, py + 24, true); field(t("pd_no"), d.no, py + 118); field(t("pd_since"), d.sinceTxt, py + 194);
+  x.fillStyle = "#13233A"; x.font = `700 23px ${M}`; x.fillText(d.mrz1, X + 34, Y + h - 58); x.fillText(d.mrz2, X + 34, Y + h - 24);
+  x.restore();
+}
 // Foto për Instagram Stories (1080×1920), me logon dhe adresën e Viaro-s
 async function sharePassport() {
   const r = ppLast; if (!r) return;
@@ -3166,17 +3223,16 @@ async function sharePassport() {
   const logo = await new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = "pwa/icon-192.png"; setTimeout(() => ok(null), 2500); });
   if (logo) { x.save(); x.beginPath(); x.arc(150, 160, 56, 0, 7); x.clip(); x.drawImage(logo, 94, 104, 112, 112); x.restore(); }
   x.fillStyle = "#fff"; x.font = `700 64px ${SF}`; x.fillText(APP_NAME.toLowerCase(), logo ? 230 : 90, 182);
-  x.fillStyle = "#C9A962"; x.textAlign = "center"; x.font = `600 34px ${F}`; x.fillText(t("pp_title2"), W / 2, 330);
-  const who = user && displayName(user);
-  if (who) { x.fillStyle = "#fff"; x.font = `400 72px ${SF}`; clip2(x, who, W / 2, 420, W - 200); }
+  x.fillStyle = "#C9A962"; x.textAlign = "right"; x.font = `600 30px ${F}`; x.fillText(t("pp_title2"), W - 90, 178); x.textAlign = "left";
+  await ppDataCanvas(x, 80, 270, W - 160, 420, F, SF);
   // statistikat
   const S = r.st, cols = [[S.cities, t("pp_cities")], [S.countries, t("pp_countries")], [S.stops, t("pp_stops")], [S.km, t("pp_km")]];
-  cols.forEach(([v, l], k) => { const X = 150 + k * 260; x.fillStyle = "#fff"; x.font = `800 72px ${F}`; x.fillText(String(v), X, 560); x.fillStyle = "rgba(255,255,255,.7)"; x.font = `500 28px ${F}`; clip2(x, l, X, 606, 240); });
+  cols.forEach(([v, l], k) => { const X = 150 + k * 260; x.fillStyle = "#fff"; x.textAlign = "center"; x.font = `800 72px ${F}`; x.fillText(String(v), X, 790); x.fillStyle = "rgba(255,255,255,.7)"; x.font = `500 28px ${F}`; clip2(x, l, X, 836, 240); });
   // vulat
   const list = r.stamps.slice(0, 9), cols3 = list.length <= 4 ? 2 : 3, sw = cols3 === 2 ? 380 : 290, sh = cols3 === 2 ? 240 : 200;
   list.forEach((s, k) => {
     const row = Math.floor(k / cols3), inRow = Math.min(cols3, list.length - row * cols3), col = k % cols3;
-    const cx = W / 2 + (col - (inRow - 1) / 2) * (sw + 30), cy = 820 + row * (sh + 50), clr = stampColor(s.name + s.country);
+    const cx = W / 2 + (col - (inRow - 1) / 2) * (sw + 30), cy = 1000 + row * (sh + 50), clr = stampColor(s.name + s.country);
     x.save(); x.translate(cx, cy); x.rotate(stampRot(s.name) * Math.PI / 180);
     x.fillStyle = "rgba(255,255,255,.96)"; x.beginPath(); x.roundRect ? x.roundRect(-sw / 2, -sh / 2, sw, sh, 22) : x.rect(-sw / 2, -sh / 2, sw, sh); x.fill();
     x.strokeStyle = clr; x.lineWidth = 6; roundStroke(x, -sw / 2 + 10, -sh / 2 + 10, sw - 20, sh - 20, 16); x.lineWidth = 2; roundStroke(x, -sw / 2 + 22, -sh / 2 + 22, sw - 44, sh - 44, 12);
@@ -3185,7 +3241,7 @@ async function sharePassport() {
     x.font = `700 24px ${F}`; x.fillText((s.full ? "★ " : "") + fmtShort(s.date), 0, sh / 2 - 44);
     x.restore();
   });
-  const rows = Math.ceil(list.length / cols3); let y = 820 + (rows - 1) * (sh + 50) + sh / 2 + 80;
+  const rows = Math.ceil(list.length / cols3); let y = 1000 + (rows - 1) * (sh + 50) + sh / 2 + 80;
   x.textAlign = "center";
   if (r.stamps.length > list.length) { x.fillStyle = "rgba(255,255,255,.8)"; x.font = `600 32px ${F}`; x.fillText(t("pp_more", r.stamps.length - list.length), W / 2, y); y += 60; }
   // vendet ku ka qenë (të verifikuara)
