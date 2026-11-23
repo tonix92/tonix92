@@ -1936,6 +1936,7 @@ function showAccount() {
     <div style="color:var(--mut)">${esc(user.email)}</div>
     <button class="go" onclick="closeModal('authBg');openProfile(user.id)">${t("my_profile")}</button>
     <button class="go sec" onclick="closeModal('authBg');go('mine')">${t("my_plans_btn")}</button>
+    <button class="go sec" onclick="closeModal('authBg');openPassport()">${t("pp_btn")}</button>
     <div id="pushRow"></div>
     <button class="go sec" onclick="showBlocked()">${t("blk_list")}</button>
     <button class="go danger" onclick="doLogout()">${t("logout")}</button>
