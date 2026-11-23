@@ -1004,12 +1004,13 @@
   .ppdata dd{margin:0 0 5px;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .ppdata dd.nm{font-family:var(--serif);font-weight:400;font-size:19px}
   .pdmrz{font-family:"Courier New",ui-monospace,monospace;font-size:10.5px;letter-spacing:.04em;line-height:1.35;overflow:hidden;white-space:nowrap;color:#13233A;opacity:.85}
-  .acct.in .ava{width:19px!important;height:24px!important;border-radius:4px!important;border:2px solid var(--text);background:transparent no-repeat center 5px/11px 11px!important;color:transparent!important;font-size:0!important;overflow:visible!important;position:relative;margin-top:6px}
+  .acct.in,html[data-theme=dark] .acct.in,html .top .acct.in{background:transparent!important;border:0!important;box-shadow:none!important;outline-offset:2px;overflow:visible!important}
+  .acct.in .ava{width:24px!important;height:30px!important;border-radius:4px!important;border:2px solid var(--text);background:transparent no-repeat center 6px/14px 14px!important;color:transparent!important;font-size:0!important;overflow:visible!important;position:relative;margin-top:6px}
   .acct.in .ava:not(.hasimg){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%232A2420' stroke-width='3.4'%3E%3Ccircle cx='20' cy='20' r='17'/%3E%3Cellipse cx='20' cy='20' rx='7.5' ry='17'/%3E%3Cpath d='M3 20h34M6 11h28M6 29h28'/%3E%3C/svg%3E")!important}
   html[data-theme=dark] .acct.in .ava:not(.hasimg){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23F1E9DA' stroke-width='3.4'%3E%3Ccircle cx='20' cy='20' r='17'/%3E%3Cellipse cx='20' cy='20' rx='7.5' ry='17'/%3E%3Cpath d='M3 20h34M6 11h28M6 29h28'/%3E%3C/svg%3E")!important}
-  .acct.in .ava::before{content:"";position:absolute;left:4px;right:-2px;top:-5px;height:5px;border:1.8px solid var(--text);border-bottom:0;border-radius:2px 4px 0 0;transform:rotate(-6deg);transform-origin:left bottom}
-  .acct.in .ava::after{content:"";position:absolute;left:50%;bottom:2.5px;width:8px;height:2px;margin-left:-4px;border-radius:1px;background:var(--text)}
-  .acct.in .ava .avimg{inset:auto!important;left:2px!important;top:2px!important;width:calc(100% - 4px)!important;height:calc(100% - 9px)!important;border-radius:2px!important}
+  .acct.in .ava::before{content:"";position:absolute;left:5px;right:-2px;top:-6px;height:6px;border:1.8px solid var(--text);border-bottom:0;border-radius:2px 4px 0 0;transform:rotate(-6deg);transform-origin:left bottom}
+  .acct.in .ava::after{content:"";position:absolute;left:50%;bottom:3px;width:11px;height:2px;margin-left:-5.5px;border-radius:1px;background:var(--text)}
+  .acct.in .ava .avimg{inset:auto!important;left:2px!important;top:2px!important;width:calc(100% - 4px)!important;height:calc(100% - 10px)!important;border-radius:2px!important}
   .wxwarn{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.wxwarn .wxfix{padding:6px 12px;font-size:13px;min-height:0}
   .daywarn.dinfo{background:color-mix(in srgb,var(--sun) 18%,var(--surface))!important;border-color:color-mix(in srgb,var(--sun) 50%,var(--line))!important}
   /* Faza 10: Smart Budget */
