@@ -936,7 +936,7 @@
   .swprog{color:var(--mut);font-size:13px;font-weight:600;margin:-4px 0 8px}
   .swdeck{position:relative;height:min(62vh,500px);margin:0 auto;width:100%;max-width:400px}
   .swcard{position:absolute;inset:0;border-radius:20px;overflow:hidden;background:var(--brandnavy);color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.18);touch-action:none;user-select:none;cursor:grab;transform:scale(.95) translateY(10px);transition:transform .25s}
-  .swcard.top{transform:none}
+  .swcard.swtop{transform:none}
   .swph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,var(--navy-2,#2B6293),var(--navy-d,#173A5A))}
   .swk{font-size:72px;opacity:.85}
   .swph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s;pointer-events:none}
@@ -3107,7 +3107,7 @@ async function swOpen() {
   SW.busy = false; swRender();
 }
 function swCard(p, top) {
-  return `<div class="swcard${top ? " top" : ""}" data-wd="${esc(p.wd)}"><div class="swph" data-ph="${esc(p.wiki || "")}"><span class="swk">${SW_KIND[p.kind] || "📍"}</span></div>
+  return `<div class="swcard${top ? " swtop" : ""}" data-wd="${esc(p.wd)}"><div class="swph" data-ph="${esc(p.wiki || "")}"><span class="swk">${SW_KIND[p.kind] || "📍"}</span></div>
     <div class="swtx"><b>${esc(p.name)}</b><small class="swfact" data-fw="${esc(p.wiki || "")}"></small></div>
     <div class="swstamp like">${esc(t("sw_like"))}</div><div class="swstamp nope">${esc(t("sw_skip"))}</div></div>`;
 }
@@ -3123,7 +3123,7 @@ function swRender() {
   document.getElementById("swUndo").disabled = !SW.hist.length;
   const cur = SW.list[SW.i], nx = SW.list[SW.i + 1];
   box.innerHTML = (nx ? swCard(nx, false) : "") + swCard(cur, true);
-  swFill(box); swDrag(box.querySelector(".swcard.top"));
+  swFill(box); swDrag(box.querySelector(".swcard.swtop"));
   const pre = SW.list.slice(SW.i + 2, SW.i + 4).map(p => p.wiki).filter(Boolean); if (pre.length) wikiThumbs(pre, 640);
 }
 async function swFill(box) {
@@ -3152,7 +3152,7 @@ function swDrag(card) {
 }
 function swAct(like) {
   if (SW.busy || SW.i >= SW.list.length) return;
-  const p = SW.list[SW.i], card = document.querySelector("#swDeck .swcard.top");
+  const p = SW.list[SW.i], card = document.querySelector("#swDeck .swcard.swtop");
   SW.like = SW.like.filter(w => w !== p.wd); SW.skip = SW.skip.filter(w => w !== p.wd);
   (like ? SW.like : SW.skip).push(p.wd); SW.hist.push(p.wd); SW.i++;
   buzz(); swRenderCta();
