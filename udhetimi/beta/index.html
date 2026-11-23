@@ -972,6 +972,19 @@
   .wishes .chip.on{background:var(--brandnavy);border-color:var(--brandnavy);color:#fff}
   .ncount{text-align:right;font-size:12px;color:var(--mut);min-height:16px;margin-top:2px}
   .ncount.full{color:var(--terra)}
+  .ckrow.ver span{color:var(--brandnavy)}
+  .switch.auto{margin:6px 0 10px;padding:10px 12px}
+  .switch.auto b{font-size:14px}
+  .switch.auto small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+  button.stamp{font:inherit;cursor:pointer;width:100%}
+  .stamp.planned{border-style:dashed;outline-style:dashed;opacity:.7}
+  .ppcity{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--surface)}
+  .ppcity h4{margin:0 0 8px!important}
+  .ppcity .pph{display:block;font-size:13px;margin:8px 0 4px}
+  .ppcity ul{list-style:none;margin:0;padding:0}
+  .ppcity li{padding:3px 0;font-size:14px}
+  .ppcity li.no{color:var(--mut)}
+  .ppcity li small{color:var(--mut)}
   .wxwarn{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.wxwarn .wxfix{padding:6px 12px;font-size:13px;min-height:0}
   .daywarn.dinfo{background:color-mix(in srgb,var(--sun) 18%,var(--surface))!important;border-color:color-mix(in srgb,var(--sun) 50%,var(--line))!important}
   /* Faza 10: Smart Budget */
@@ -1802,7 +1815,7 @@ let user = null;
 // ================== NAVIGIMI ==================
 let view = "create";
 function go(v) {
-  view = v;
+  view = v; if (typeof auSync === "function") setTimeout(auSync, 0);
   document.querySelectorAll(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
   document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
   if (v !== "plan") setUrlPlan(null);
@@ -2358,7 +2371,7 @@ function sanePlan(p) {
         lat: num(s.lat), lon: num(s.lon), duration_min: num(s.duration_min), travel_min: num(s.travel_min), travel_m: num(s.travel_m),
         travel_mode: pick(s.travel_mode, ["walking", "transit", "driving"]), hours_warn: pick(s.hours_warn, ["closed", "closes"]), fee: pick(s.fee, ["yes", "no"]),
         hours: str(s.hours, 120), hours_raw: str(s.hours_raw, 200), price: str(s.price, 80), address: str(s.address, 200), my_note: str(s.my_note, 300),
-        wiki: /^[a-z]{2,3}(-[a-z]+)?:[^"<>]{1,200}$/.test(s.wiki || "") ? s.wiki : undefined, done: s.done ? 1 : undefined, verified: typeof s.verified === "boolean" ? s.verified : undefined };
+        wiki: /^[a-z]{2,3}(-[a-z]+)?:[^"<>]{1,200}$/.test(s.wiki || "") ? s.wiki : undefined, done: s.done === 2 ? 2 : s.done ? 1 : undefined, verified: typeof s.verified === "boolean" ? s.verified : undefined };
     });
     return out;
   });
@@ -2576,6 +2589,7 @@ function renderDay(i) {
     if (s._marker) { map.setView(s._marker.getLatLng(), 16); s._marker.openPopup(); document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "center" }); }
   });
   fillStopPhotos(card); fillFacts(card);
+  if (typeof auSync === "function") auSync();
 }
 // ---- Ikona të thjeshta (SVG) ----
 const ICP = {
@@ -2880,10 +2894,23 @@ function ckStops(d) { return (d.stops || []).filter(s => s.type !== "meal" && s.
 function ckDayDone(d) { const l = ckStops(d); return l.length > 0 && l.every(s => s.done); }
 function ckShow(d) { return mode === "own" && plan.kind !== "now" && (d.date === todayIso() || (d.stops || []).some(s => s.done)); }
 // Shiriti i progresit + karta "Tjetra" (vetëm në planin tim, kur dita është sot ose ka nisur)
+Object.assign(I18N.sq, { ck_ver: "📍 U verifikua", ck_nover: "✓ U shënua · pa verifikim", ck_far: "U shënua, por nuk je afër vendit, ndaj nuk hyn në pasaportë.", ck_auto_ok: n => `📍 Arrite: ${n}. U shënua vetë.`,
+  au_h: "📍 Shëno vetë kur arrij", au_s: "Ndërsa plani i sotëm është hapur, telefoni e kupton kur je te një ndalesë dhe e shënon vetë. Vendndodhja nuk ruhet askund.", au_on: "Shënimi automatik u aktivizua.", au_off: "Shënimi automatik u çaktivizua.", au_denied: "Vendndodhja është e ndaluar. Lejoje te cilësimet e telefonit.",
+  pp_lead2: "Vulat merren vetëm për vendet ku ke qenë vërtet, të verifikuara me vendndodhje.", pp_planned: "Planifikuar, ende pa vizituar", pp_tap: "Prek një vulë për të parë ku ke qenë dhe ku jo.", pp_been: "Ku kam qenë", pp_notyet: "Ende jo", pp_unver: "pa verifikim", pp_title2: "Pasaporta ime e udhëtimit", pp_cta: "Planifiko udhëtimin tënd me AI", pp_more: n => `+${n} të tjera` });
+Object.assign(I18N.en, { ck_ver: "📍 Verified", ck_nover: "✓ Marked · not verified", ck_far: "Marked, but you're not near this place, so it won't count in your passport.", ck_auto_ok: n => `📍 You've arrived: ${n}. Marked automatically.`,
+  au_h: "📍 Mark places when I arrive", au_s: "While today's plan is open, your phone notices when you reach a stop and marks it. Your location is never stored.", au_on: "Automatic check-in is on.", au_off: "Automatic check-in is off.", au_denied: "Location is blocked. Allow it in your phone settings.",
+  pp_lead2: "Stamps only count places you've really been to, verified with your location.", pp_planned: "Planned, not visited yet", pp_tap: "Tap a stamp to see where you've been and where not.", pp_been: "Where I've been", pp_notyet: "Not yet", pp_unver: "not verified", pp_title2: "My travel passport", pp_cta: "Plan your trip with AI", pp_more: n => `+${n} more` });
+Object.assign(I18N.de, { ck_ver: "📍 Bestätigt", ck_nover: "✓ Markiert · nicht bestätigt", ck_far: "Markiert, aber du bist nicht in der Nähe – zählt nicht für den Pass.", ck_auto_ok: n => `📍 Angekommen: ${n}. Automatisch markiert.`,
+  au_h: "📍 Automatisch markieren, wenn ich ankomme", au_s: "Solange der heutige Plan offen ist, erkennt dein Handy, wenn du an einem Stopp bist, und markiert ihn. Dein Standort wird nie gespeichert.", au_on: "Automatisches Einchecken ist an.", au_off: "Automatisches Einchecken ist aus.", au_denied: "Standort ist blockiert. Erlaube ihn in den Handy-Einstellungen.",
+  pp_lead2: "Stempel gibt es nur für Orte, an denen du wirklich warst – per Standort bestätigt.", pp_planned: "Geplant, noch nicht besucht", pp_tap: "Tippe auf einen Stempel, um zu sehen, wo du warst und wo nicht.", pp_been: "Wo ich war", pp_notyet: "Noch nicht", pp_unver: "nicht bestätigt", pp_title2: "Mein Reisepass", pp_cta: "Plane deine Reise mit KI", pp_more: n => `+${n} weitere` });
+const CK_NEAR = 300, AU_NEAR = 120;
+function geoDist(a, b, c, d) { const R = 6371000, r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r; const h = Math.sin(x / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+function auOn() { try { return localStorage.getItem("viaro_auto") === "1"; } catch { return false; } }
 function ckHead(d, i) {
   if (!ckShow(d)) return "";
   const l = ckStops(d), n = l.filter(s => s.done).length, pc = l.length ? Math.round(n / l.length * 100) : 0;
   let h = `<div class="ckprog"><div class="ckbar"><i style="width:${pc}%"></i></div><span>${esc(t("ck_prog", n, l.length))}</span></div>`;
+  if (d.date === todayIso()) h += `<div class="switch auto"><div><b>${esc(t("au_h"))}</b><small>${esc(t("au_s"))}</small></div><label class="tog"><input type="checkbox" ${auOn() ? "checked" : ""} onchange="setAuto(this.checked)"><span></span></label></div>`;
   const k = d.stops.findIndex(s => s.type !== "meal" && s.name && !s.done);
   if (k >= 0) {
     const s = d.stops[k], last = ckStops(d).filter(x => !x.done).length === 1;
@@ -2898,24 +2925,74 @@ function ckHead(d, i) {
 function ckBtn(d, i, idx) {
   const s = d.stops[idx];
   if (mode !== "own" || plan.kind === "now" || s.type === "meal" || !s.name) return "";
-  return s.done ? `<div class="ckrow on"><span>${esc(t("ck_done"))}</span><button class="lnk" onclick="checkIn(${i},${idx},event)">${esc(t("ck_undo"))}</button></div>`
+  return s.done ? `<div class="ckrow on${s.done === 2 ? " ver" : ""}"><span>${esc(t(s.done === 2 ? "ck_ver" : "ck_nover"))}</span><button class="lnk" onclick="checkIn(${i},${idx},event)">${esc(t("ck_undo"))}</button></div>`
     : `<div class="ckrow"><button class="btn2" onclick="checkIn(${i},${idx},event)">${esc(t("ck_btn"))}</button></div>`;
 }
+// Shënimi me dorë: menjëherë ✓, pastaj kontrollohet vendndodhja; afër (≤300 m) → 📍 e verifikuar
 async function checkIn(di, si, ev) {
   ev?.stopPropagation?.();
   const d = plan.days[di], s = d?.stops?.[si]; if (!s || mode !== "own") return;
-  if (s.done) s.done = undefined;
-  else { s.done = 1; buzz("MEDIUM"); if (s.wiki) FACT_OPEN.add(di + ":" + si); }
+  if (s.done) { s.done = undefined; renderDay(di); return persistPlan(); }
+  s.done = 1; buzz("MEDIUM"); if (s.wiki) FACT_OPEN.add(di + ":" + si);
   renderDay(di);
-  const p = persistPlan();
-  if (s.done) {
-    const others = await ppOthers().catch(() => []);
-    const nb = ppFresh(ppCompute([...others, { plan, when: null }]));
-    if (ckDayDone(d)) dayDone(di, nb);
-    else if (nb.length) toast(t("pp_new", t("bg_" + nb[0].id)));
+  const want = plan;
+  if (s.lat == null) s.done = 2; // ndalesë pa koordinata (p.sh. shëtitje): s'ka çfarë të verifikohet
+  else {
+    const pos = await new Promise(ok => geoPos(p => ok(p), () => ok(null), { enableHighAccuracy: true, timeout: 9000, maximumAge: 30000 }));
+    if (plan !== want || !s.done) return;
+    if (pos) {
+      const dist = geoDist(pos.coords.latitude, pos.coords.longitude, s.lat, s.lon), acc = Math.min(+pos.coords.accuracy || 0, 300);
+      if (dist <= CK_NEAR + acc) s.done = 2; else toast(t("ck_far"));
+    }
+    if (curDay === di) renderDay(di);
   }
+  await ckAfter(d, di);
+}
+async function ckAfter(d, di) {
+  const p = persistPlan();
+  const others = await ppOthers().catch(() => []);
+  const nb = ppFresh(ppCompute([...others, { plan, when: null }]));
+  if (ckDayDone(d)) dayDone(di, nb);
+  else if (nb.length) toast(t("pp_new", t("bg_" + nb[0].id)));
   await p;
 }
+// ---- Shënimi automatik: vetëm ndërsa plani i sotëm është hapur (pa vendndodhje në sfond) ----
+var auWatch = null, auBusy = false;
+async function setAuto(v) {
+  try { localStorage.setItem("viaro_auto", v ? "1" : "0"); } catch {}
+  if (!v) { auStop(); toast(t("au_off")); return; }
+  const ok = await new Promise(r => geoPos(() => r(true), () => r(false), { timeout: 12000 }));
+  if (!ok) { try { localStorage.setItem("viaro_auto", "0"); } catch {} toast(t("au_denied")); if (curDay >= 0) renderDay(curDay); return; }
+  toast(t("au_on")); auSync();
+}
+function auToday() { return view === "plan" && mode === "own" && plan && plan.kind !== "now" && document.visibilityState !== "hidden" && (plan.days || []).findIndex(d => d.date === todayIso()); }
+function auSync() {
+  const di = auOn() ? auToday() : -1;
+  if (typeof di !== "number" || di < 0) return auStop();
+  if (auWatch) return;
+  const G = nPlug("Geolocation"), cb = p => p && auCheck(p.coords);
+  if (G?.watchPosition) { Promise.resolve(G.watchPosition({ enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 }, (p, err) => { if (!err) cb(p); })).then(id => { if (auWatch === "pending") auWatch = { n: id }; else G.clearWatch?.({ id }); }).catch(() => { auWatch = null; }); auWatch = "pending"; }
+  else if (navigator.geolocation) auWatch = { w: navigator.geolocation.watchPosition(cb, () => {}, { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 }) };
+}
+function auStop() {
+  const w = auWatch; auWatch = null; if (!w || w === "pending") return;
+  try { if (w.n != null) nPlug("Geolocation")?.clearWatch?.({ id: w.n }); else navigator.geolocation?.clearWatch(w.w); } catch {}
+}
+async function auCheck(c) {
+  if (auBusy || !c) return;
+  const di = auToday(); if (typeof di !== "number" || di < 0) return auStop();
+  const d = plan.days[di], acc = Math.min(+c.accuracy || 0, 150);
+  const k = d.stops.findIndex(s => s.type !== "meal" && s.name && s.lat != null && s.done !== 2 && geoDist(c.latitude, c.longitude, s.lat, s.lon) <= AU_NEAR + acc);
+  if (k < 0) return;
+  auBusy = true;
+  try {
+    const s = d.stops[k]; s.done = 2; if (s.wiki) FACT_OPEN.add(di + ":" + k);
+    buzz("MEDIUM"); toast(t("ck_auto_ok", s.name));
+    if (curDay === di) renderDay(di);
+    await ckAfter(d, di);
+  } finally { auBusy = false; }
+}
+document.addEventListener("visibilitychange", () => auSync());
 var PP_OTHERS = null;
 async function ppOthers() {
   const key = row?.id || row?.localId || "";
@@ -2932,7 +3009,7 @@ function ppFresh(r) {
 function dayDone(di, nb) {
   const d = plan.days[di], l = ckStops(d);
   const m = d.stops.reduce((a, s, k) => a + (k > 0 && s.travel_m ? +s.travel_m : 0), 0);
-  const trip = plan.days.every(ckDayDone), city = plan.city?.name || plan.request?.city || "";
+  const trip = plan.days.every(ckDayDone) && plan.days.some(x => (x.stops || []).some(y => y.done === 2)), city = plan.city?.name || plan.request?.city || "";
   document.getElementById("ddBody").innerHTML = `<div class="ddemo">${trip ? "🛂" : "🏁"}</div><h3>${esc(t("dd_h", d.day || di + 1))}</h3>
     <p>${esc(t("dd_s", l.length, m >= 300 ? (m / 1000).toFixed(1) : ""))}</p>${trip ? `<p><b>${esc(t("dd_trip", city))}</b></p>` : ""}
     ${nb.length ? `<div class="ddbg">${nb.map(b => `<span>${b.e} ${esc(t("bg_" + b.id))}</span>`).join("")}</div>` : ""}
@@ -3000,27 +3077,29 @@ function ppCompute(items) {
   for (const { plan: p, when } of items) {
     if (!p || p.kind === "now" || !Array.isArray(p.days)) continue;
     let n = 0, all = 0, first = null;
+    const name = p.city?.name || p.request?.city || "?", country = p.city?.country || "", key = (name + "|" + country).toLowerCase();
+    const c = cities.get(key) || { name, country, n: 0, all: 0, date: null, full: false, places: new Map() };
     p.days.forEach(d => {
-      const l = ckStops(d), dn = l.filter(s => s.done).length; all += l.length; n += dn;
+      const l = ckStops(d), dn = l.filter(s => s.done === 2).length; all += l.length; n += dn;
       if (dn) { first = first || d.date || null; best = Math.max(best, dn); if (dn === l.length) fulldays++; }
+      l.forEach(s => { const pk = s.name.toLowerCase(), was = c.places.get(pk); const st = s.done === 2 ? 2 : s.done ? 1 : 0; if (!was || st > was.st) c.places.set(pk, { name: s.name, st }); });
       (d.stops || []).forEach((s, k) => {
-        if (!s.done || s.type === "meal") return;
+        if (s.done !== 2 || s.type === "meal") return;
         if (MUSEUM_RE.test(s.name || "")) museums++;
         const walk = s.travel_mode ? s.travel_mode === "walking" : p.request?.transport !== "vetura";
         if (k > 0 && walk && s.travel_m) m += +s.travel_m;
       });
     });
-    if (!n) continue;
     stops += n;
-    const name = p.city?.name || p.request?.city || "?", country = p.city?.country || "", key = (name + "|" + country).toLowerCase();
-    const c = cities.get(key) || { name, country, n: 0, all: 0, date: null, full: false };
-    c.n += n; c.all += all; c.full = c.full || n === all;
-    const dt = first || (when ? new Date(when).toISOString().slice(0, 10) : null);
+    c.n += n; c.all += all; c.full = c.full || (n > 0 && n === all);
+    const dt = n ? first || (when ? new Date(when).toISOString().slice(0, 10) : null) : null;
     if (dt && (!c.date || dt < c.date)) c.date = dt;
     cities.set(key, c);
   }
-  const st = { stops, museums, km: Math.floor(m / 1000), cities: cities.size, countries: new Set([...cities.values()].map(c => c.country).filter(Boolean)).size, fulldays, best };
-  return { st, stamps: [...cities.values()].sort((a, b) => String(b.date || "").localeCompare(String(a.date || ""))),
+  const list = [...cities.values()].map(c => ({ ...c, places: [...c.places.values()].sort((a, b) => b.st - a.st) }));
+  const vis = list.filter(c => c.n > 0);
+  const st = { stops, museums, km: Math.floor(m / 1000), cities: vis.length, countries: new Set(vis.map(c => c.country).filter(Boolean)).size, fulldays, best };
+  return { st, stamps: vis.sort((a, b) => String(b.date || "").localeCompare(String(a.date || ""))), planned: list.filter(c => !c.n),
     badges: BADGES.map(([id, e, k, goal]) => ({ id, e, goal, v: st[k], ok: st[k] >= goal })) };
 }
 async function ppItems() {
@@ -3041,9 +3120,18 @@ async function ppItems() {
 function stampColor(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) | 0; return ["#214F78", "#C8202F", "#6E8A3C", "#8A5A2B", "#5B4A8B", "#1F6F6B"][Math.abs(h) % 6]; }
 function stampRot(s) { let h = 7; for (const ch of s) h = (h * 17 + ch.charCodeAt(0)) | 0; return (Math.abs(h) % 11) - 5; }
 function fmtShort(iso) { if (!iso) return ""; const [y, m, d] = iso.split("-"); return `${d}.${m}.${y}`; }
-function stampHtml(c) {
-  const col = stampColor(c.name + c.country);
-  return `<div class="stamp${c.full ? " full" : ""}" style="--sc:${col};transform:rotate(${stampRot(c.name)}deg)"><small>${esc(c.country)}</small><b>${esc(c.name)}</b><span>${esc(fmtShort(c.date))}</span><i>${c.full ? "★ " + esc(t("pp_full")) : esc(t("pp_vis", c.n))}</i></div>`;
+function stampHtml(c, i, planned) {
+  const col = planned ? "#8A8178" : stampColor(c.name + c.country);
+  return `<button type="button" class="stamp${c.full ? " full" : ""}${planned ? " planned" : ""}" style="--sc:${col};transform:rotate(${planned ? 0 : stampRot(c.name)}deg)" onclick="ppCity(${planned ? 1 : 0},${i})"><small>${esc(c.country)}</small><b>${esc(c.name)}</b>${planned ? `<i>${esc(t("pp_notyet"))}</i>` : `<span>${esc(fmtShort(c.date))}</span><i>${c.full ? "★ " + esc(t("pp_full")) : esc(t("pp_vis", c.n))}</i>`}</button>`;
+}
+function ppCity(planned, i) {
+  const c = (planned ? ppLast?.planned : ppLast?.stamps)?.[i]; if (!c) return;
+  const box = document.getElementById("ppCityBox"); if (!box) return;
+  const been = c.places.filter(p => p.st), not = c.places.filter(p => !p.st);
+  box.innerHTML = `<div class="ppcity"><h4>${esc(c.name)}${c.country ? `, ${esc(c.country)}` : ""}</h4>
+    ${been.length ? `<b class="pph">${esc(t("pp_been"))}</b><ul>${been.map(p => `<li class="${p.st === 2 ? "ok" : "half"}">${p.st === 2 ? "📍" : "✓"} ${esc(p.name)}${p.st === 1 ? ` <small>(${esc(t("pp_unver"))})</small>` : ""}</li>`).join("")}</ul>` : ""}
+    ${not.length ? `<b class="pph">${esc(t("pp_notyet"))}</b><ul>${not.map(p => `<li class="no">○ ${esc(p.name)}</li>`).join("")}</ul>` : ""}</div>`;
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 var ppLast = null;
 async function openPassport() {
@@ -3051,9 +3139,11 @@ async function openPassport() {
   body.innerHTML = `<div class="empty">${esc(t("pp_loading"))}</div>`; openModal("ppBg");
   const r = ppCompute(await ppItems()); ppLast = r; ppFresh(r);
   const S = r.st;
-  body.innerHTML = `<p class="mut" style="margin:0 0 12px">${esc(t("pp_lead"))}</p>
+  body.innerHTML = `<p class="mut" style="margin:0 0 12px">${esc(t("pp_lead2"))}</p>
     <div class="ppstats"><span><b>${S.cities}</b>${esc(t("pp_cities"))}</span><span><b>${S.countries}</b>${esc(t("pp_countries"))}</span><span><b>${S.stops}</b>${esc(t("pp_stops"))}</span><span><b>${S.km}</b>${esc(t("pp_km"))}</span></div>
-    <h4>${esc(t("pp_stamps"))}</h4>${r.stamps.length ? `<div class="stamps">${r.stamps.map(stampHtml).join("")}</div>` : `<div class="empty">${esc(t("pp_empty"))}</div>`}
+    <h4>${esc(t("pp_stamps"))}</h4>${r.stamps.length ? `<div class="stamps">${r.stamps.map((c, i) => stampHtml(c, i, false)).join("")}</div>` : `<div class="empty">${esc(t("pp_empty"))}</div>`}
+    ${r.planned.length ? `<h4>${esc(t("pp_planned"))}</h4><div class="stamps">${r.planned.map((c, i) => stampHtml(c, i, true)).join("")}</div>` : ""}
+    ${r.stamps.length || r.planned.length ? `<p class="mut" style="margin:10px 0 0;font-size:13px">${esc(t("pp_tap"))}</p><div id="ppCityBox"></div>` : ""}
     <h4>${esc(t("pp_badges"))}</h4><div class="badges">${r.badges.map(b => `<div class="bdg${b.ok ? " ok" : ""}"><span class="be">${b.e}</span><b>${esc(t("bg_" + b.id))}</b><small>${esc(t("bg_" + b.id + "_s"))}</small>${b.ok ? "" : `<div class="bp"><i style="width:${Math.min(100, Math.round(b.v / b.goal * 100))}%"></i></div><small>${Math.min(b.v, b.goal)}/${b.goal}</small>`}</div>`).join("")}</div>
     ${r.stamps.length ? `<button class="go" onclick="sharePassport()">${esc(t("pp_share"))}</button><img id="ppPrev" alt="" style="display:none;width:100%;border-radius:14px;margin-top:12px"><div id="ppHelp" class="mut" style="display:none;margin-top:8px"></div>` : ""}`;
   ppMini(r);
@@ -3063,28 +3153,60 @@ function ppMini(r) {
   el.textContent = r ? t("pp_mini", r.st.cities, r.badges.filter(b => b.ok).length) : "";
 }
 async function loadPpMini() { try { ppMini(ppCompute(await ppItems())); } catch {} }
+// Foto për Instagram Stories (1080×1920), me logon dhe adresën e Viaro-s
 async function sharePassport() {
   const r = ppLast; if (!r) return;
-  const W = 1080, H = 1350, c = document.createElement("canvas"); c.width = W; c.height = H;
-  const x = c.getContext("2d"), F = "system-ui,-apple-system,'Segoe UI',sans-serif";
-  x.fillStyle = "#F7F2EA"; x.fillRect(0, 0, W, H);
-  x.fillStyle = "#214F78"; x.fillRect(0, 0, W, 250);
-  x.fillStyle = "rgba(255,255,255,.8)"; x.font = `600 38px ${F}`; x.fillText(APP_NAME, 70, 95);
-  x.fillStyle = "#fff"; x.font = `800 76px ${F}`; x.fillText(t("pp_title"), 70, 190);
+  const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d"), F = "system-ui,-apple-system,'Segoe UI',sans-serif", SF = "'Young Serif',Georgia,serif";
+  try { await document.fonts?.load?.(`64px "Young Serif"`); } catch {}
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#1B3F63"); g.addColorStop(1, "#0F2740");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.strokeStyle = "rgba(201,169,98,.55)"; x.lineWidth = 4; roundStroke(x, 40, 40, W - 80, H - 80, 36);
+  // logo
+  const logo = await new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = "pwa/icon-192.png"; setTimeout(() => ok(null), 2500); });
+  if (logo) { x.save(); x.beginPath(); x.arc(150, 160, 56, 0, 7); x.clip(); x.drawImage(logo, 94, 104, 112, 112); x.restore(); }
+  x.fillStyle = "#fff"; x.font = `700 64px ${SF}`; x.fillText(APP_NAME.toLowerCase(), logo ? 230 : 90, 182);
+  x.fillStyle = "#C9A962"; x.textAlign = "center"; x.font = `600 34px ${F}`; x.fillText(t("pp_title2"), W / 2, 330);
+  const who = user && displayName(user);
+  if (who) { x.fillStyle = "#fff"; x.font = `400 72px ${SF}`; clip2(x, who, W / 2, 420, W - 200); }
+  // statistikat
   const S = r.st, cols = [[S.cities, t("pp_cities")], [S.countries, t("pp_countries")], [S.stops, t("pp_stops")], [S.km, t("pp_km")]];
-  cols.forEach(([v, l], k) => { const X = 70 + k * 245; x.fillStyle = "#2A2420"; x.font = `800 64px ${F}`; x.fillText(String(v), X, 345); x.fillStyle = "#756B60"; x.font = `500 28px ${F}`; clip(x, l, X, 385, 225); });
-  const list = r.stamps.slice(0, 9);
+  cols.forEach(([v, l], k) => { const X = 150 + k * 260; x.fillStyle = "#fff"; x.font = `800 72px ${F}`; x.fillText(String(v), X, 560); x.fillStyle = "rgba(255,255,255,.7)"; x.font = `500 28px ${F}`; clip2(x, l, X, 606, 240); });
+  // vulat
+  const list = r.stamps.slice(0, 9), cols3 = list.length <= 4 ? 2 : 3, sw = cols3 === 2 ? 380 : 290, sh = cols3 === 2 ? 240 : 200;
   list.forEach((s, k) => {
-    const cx = 70 + (k % 3) * 320 + 150, cy = 560 + Math.floor(k / 3) * 230, col = stampColor(s.name + s.country);
+    const row = Math.floor(k / cols3), inRow = Math.min(cols3, list.length - row * cols3), col = k % cols3;
+    const cx = W / 2 + (col - (inRow - 1) / 2) * (sw + 30), cy = 820 + row * (sh + 50), clr = stampColor(s.name + s.country);
     x.save(); x.translate(cx, cy); x.rotate(stampRot(s.name) * Math.PI / 180);
-    x.strokeStyle = col; x.lineWidth = 6; roundStroke(x, -140, -90, 280, 180, 22); x.lineWidth = 2; roundStroke(x, -128, -78, 256, 156, 16);
-    x.fillStyle = col; x.textAlign = "center"; x.font = `600 22px ${F}`; clip2(x, s.country, 0, -40, 230);
-    x.font = `800 40px ${F}`; clip2(x, s.name, 0, 8, 240); x.font = `600 24px ${F}`; x.fillText((s.full ? "★ " : "") + fmtShort(s.date), 0, 50);
+    x.fillStyle = "rgba(255,255,255,.96)"; x.beginPath(); x.roundRect ? x.roundRect(-sw / 2, -sh / 2, sw, sh, 22) : x.rect(-sw / 2, -sh / 2, sw, sh); x.fill();
+    x.strokeStyle = clr; x.lineWidth = 6; roundStroke(x, -sw / 2 + 10, -sh / 2 + 10, sw - 20, sh - 20, 16); x.lineWidth = 2; roundStroke(x, -sw / 2 + 22, -sh / 2 + 22, sw - 44, sh - 44, 12);
+    x.fillStyle = clr; x.textAlign = "center"; x.font = `600 24px ${F}`; clip2(x, s.country, 0, -sh / 2 + 62, sw - 70);
+    x.font = `400 ${cols3 === 2 ? 50 : 42}px ${SF}`; clip2(x, s.name, 0, 14, sw - 60);
+    x.font = `700 24px ${F}`; x.fillText((s.full ? "★ " : "") + fmtShort(s.date), 0, sh / 2 - 44);
     x.restore();
   });
+  const rows = Math.ceil(list.length / cols3); let y = 820 + (rows - 1) * (sh + 50) + sh / 2 + 80;
+  x.textAlign = "center";
+  if (r.stamps.length > list.length) { x.fillStyle = "rgba(255,255,255,.8)"; x.font = `600 32px ${F}`; x.fillText(t("pp_more", r.stamps.length - list.length), W / 2, y); y += 60; }
+  // vendet ku ka qenë (të verifikuara)
+  const been = r.stamps.flatMap(c => c.places.filter(p => p.st === 2).map(p => p.name)), maxY = H - 420;
+  if (been.length && y < maxY - 120) {
+    x.fillStyle = "#C9A962"; x.font = `600 32px ${F}`; x.fillText(t("pp_been"), W / 2, y + 10); y += 70;
+    const two = been.length > 5, per = two ? Math.ceil(Math.min(been.length, 14) / 2) : been.length, lh = 54;
+    const fit = Math.max(1, Math.floor((maxY - y) / lh)), n = Math.min(per, fit), shown = two ? n * 2 : n;
+    x.font = `500 32px ${F}`; x.fillStyle = "#fff";
+    been.slice(0, shown).forEach((nm, k) => { const c2 = two ? Math.floor(k / n) : 0, rr = two ? k % n : k; const X = two ? (c2 ? W / 2 + 30 : 130) : W / 2;
+      x.textAlign = two ? "left" : "center"; clip2(x, "📍 " + nm, X, y + rr * lh, two ? W / 2 - 170 : W - 220); });
+    x.textAlign = "center"; y += n * lh + 10;
+    if (been.length > shown) { x.fillStyle = "rgba(255,255,255,.75)"; x.font = `600 28px ${F}`; x.fillText(t("pp_more", been.length - shown), W / 2, y + 10); y += 50; }
+  }
   const ok = r.badges.filter(b => b.ok);
-  x.textAlign = "left"; x.font = `400 56px ${F}`; x.fillText(ok.map(b => b.e).join("  "), 70, H - 170);
-  x.fillStyle = "#214F78"; x.font = `800 34px ${F}`; x.textAlign = "center"; x.fillText(APP_URL.replace("https://", "").replace(/\/$/, ""), W / 2, H - 70); x.textAlign = "left";
+  if (ok.length) { x.font = `400 60px ${F}`; x.fillText(ok.map(b => b.e).join("  "), W / 2, Math.min(y + 60, H - 330)); }
+  // reklama
+  x.fillStyle = "#C9A962"; x.beginPath(); x.roundRect ? x.roundRect(140, H - 280, W - 280, 150, 75) : x.rect(140, H - 280, W - 280, 150); x.fill();
+  x.fillStyle = "#0F2740"; x.font = `700 38px ${F}`; x.fillText(t("pp_cta"), W / 2, H - 213);
+  x.font = `800 34px ${F}`; x.fillText(APP_URL.replace("https://", "").replace(/\/$/, ""), W / 2, H - 163);
+  x.textAlign = "left";
   const blob = await new Promise(ok2 => c.toBlob(ok2, "image/png")), file = new File([blob], "viaro-pasaporta.png", { type: "image/png" });
   if (isNative()) { try { if (await shareFile(file.name, blob, t("pp_title"))) return; } catch {} }
   if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: t("pp_title") }); return; } catch (e) { if (e.name === "AbortError") return; } }
