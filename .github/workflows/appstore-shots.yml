@@ -1,0 +1,39 @@
+# Ngarkon screenshots e iPhone dhe iPad (nga udhetimi/store/) te App Store Connect.
+# Fotot i bën më parë workflow-i "Viaro screenshots".
+name: Viaro App Store screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      lang:
+        description: "Gjuha e fotove"
+        type: choice
+        options: [en, de, sq]
+        default: en
+
+jobs:
+  upload:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Përgatit fotot
+        run: |
+          mkdir -p shots/en-US
+          cp udhetimi/store/iphone-${{ inputs.lang }}-*.png shots/en-US/
+          for f in udhetimi/store/ipad-${{ inputs.lang }}-*.png; do cp "$f" "shots/en-US/ipadPro129-$(basename $f)"; done
+          ls -la shots/en-US
+
+      - name: Ngarko me fastlane
+        env:
+          KID: ${{ secrets.ASC_KEY_ID }}
+          ISS: ${{ secrets.ASC_ISSUER_ID }}
+          P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          gem install fastlane --no-document >/dev/null 2>&1 || sudo gem install fastlane --no-document >/dev/null
+          node -e 'const fs=require("fs");fs.writeFileSync("api.json",JSON.stringify({key_id:process.env.KID,issuer_id:process.env.ISS,key:process.env.P8,in_house:false}))'
+          fastlane deliver --api_key_path api.json --app_identifier tips.vianto.app --platform ios \
+            --skip_binary_upload true --skip_metadata true --skip_app_version_update true \
+            --screenshots_path shots --overwrite_screenshots true --force true \
+            --run_precheck_before_submit false --submit_for_review false
+          rm -f api.json
