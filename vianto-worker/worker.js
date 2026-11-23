@@ -1504,7 +1504,7 @@ async function handleCands(q, req, env, ctx, H, M) {
   const city = String(q.city || "").trim().slice(0, 80);
   if (city.length < 2) return json({ error: M.city }, 400, H);
   const cache = caches.default;
-  const ck = new Request("https://cands.local/v1/" + await sha(city.toLowerCase()));
+  const ck = new Request("https://cands.local/v2/" + await sha(city.toLowerCase()));
   const hit = await cache.match(ck);
   if (hit) return json(await hit.json(), 200, H);
   const day = new Date().toISOString().slice(0, 10);
@@ -1517,7 +1517,8 @@ async function handleCands(q, req, env, ctx, H, M) {
     if (!place) return json({ error: M.nocity(city) }, 404, H);
     const pois = await fetchPois(place.lat, place.lon, place.radius);
     await addPopularity(pois);
-    const list = pois.filter(x => x.wd && x.name && !["artwork", "memorial"].includes(x.kind)).sort((a, b) => b.pop - a.pop).slice(0, 18)
+    const AREA = /^(former |historic )?(province|region|county|metropolitan city|comune|frazione|rione|quarter|district|municipality|commune)\b/i;
+    const list = pois.filter(x => x.wd && x.name && !["artwork", "memorial"].includes(x.kind) && !AREA.test(x.kind || "") && !/^(Province|Metropolitan City|Region) of /.test(x.name)).sort((a, b) => b.pop - a.pop).slice(0, 18)
       .map(x => ({ wd: x.wd, name: x.name, kind: String(x.kind || "").slice(0, 40), wiki: /^[a-z]{2,3}(-[a-z]+)?:[^"<>]{1,200}$/.test(x.wiki || "") ? x.wiki : undefined, lat: x.lat, lon: x.lon }));
     const out = { city: { name: place.name, country: place.country }, places: list };
     if (list.length >= 5) ctx.waitUntil(cache.put(ck, new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json", "Cache-Control": "max-age=604800" } })));
