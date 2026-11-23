@@ -152,7 +152,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p15.0", push: !!(env.PUSH_SECRET && env.FCM_SA), kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p16.0", push: !!(env.PUSH_SECRET && env.FCM_SA), kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -171,6 +171,10 @@ export default {
     const M = MSG[q?.ui] || MSG[q?.lang] || MSG.sq;
     const path = new URL(req.url).pathname;
     if (path === "/push") return handlePush(q, req, env, ctx);
+    if (path === "/cands") {
+      if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
+      return handleCands(q, req, env, ctx, H, M);
+    }
     if (path === "/near") {
       if (origin && H["Access-Control-Allow-Origin"] !== origin) return json({ error: M.origin }, 403, H);
       return handleNear(q, req, env, ctx, H, M);
@@ -197,7 +201,7 @@ export default {
 
     // --- 1. A kemi plan të gatshëm për të njëjtën kërkesë? (falas, pa AI) ---
     const planKey = new Request("https://plans.local/v3/" + await sha(JSON.stringify([p.date,
-      p.city.toLowerCase(), p.days, p.start, p.end, p.pace, p.transport, p.budget, p.lang, [...p.interests].sort(), p.notes.trim().toLowerCase(), p.adults, p.kids, [...p.kidAges].sort()])));
+      p.city.toLowerCase(), p.days, p.start, p.end, p.pace, p.transport, p.budget, p.lang, [...p.interests].sort(), p.notes.trim().toLowerCase(), p.adults, p.kids, [...p.kidAges].sort(), ...(p.like.length || p.skip.length ? [[...p.like].sort(), [...p.skip].sort()] : [])])));
     if (!q.fresh) {
       const hit = await cache.match(planKey);
       if (hit) { const cached = await hit.json(); cached.cached = true; return json(cached, 200, H); }
@@ -236,8 +240,11 @@ export default {
       // 3. Popullariteti nga Wikidata (sa Wikipedia e kanë artikullin)
       await addPopularity(pois);
       pois.sort((a, b) => b.pop - a.pop);
+      // Vendet e zgjedhura me rrëshqitje: "po" del përpara dhe shënohet MUST, "jo" hiqet (nëse mbeten mjaftueshëm)
+      if (p.skip.length) { const sk = new Set(p.skip), rest = pois.filter(x => !sk.has(x.wd)); if (rest.length >= 8) pois = rest; }
+      if (p.like.length) { const lk = new Set(p.like); pois = pois.filter(x => lk.has(x.wd)).map(x => ({ ...x, must: true })).concat(pois.filter(x => !lk.has(x.wd))); }
       const perDay = { qete: 4, normal: 6, intensiv: 8 }[p.pace];
-      const take = Math.min(pois.length, Math.max(15, Math.min(70, Math.round(p.days * perDay * 1.8))));
+      const take = Math.min(pois.length, Math.max(15, Math.min(70, Math.round(p.days * perDay * 1.8)), pois.filter(x => x.must).length + 8));
       pois = pois.slice(0, take).map((x, i) => ({ ...x, id: "P" + (i + 1) }));
 
       // 4. Ndarja në zona (një zonë ≈ një ditë)
@@ -334,7 +341,9 @@ function sanitize(q) {
   const kidAges = kids ? (Array.isArray(q.kidAges) ? q.kidAges : []).filter(a => KID_AGES.includes(a)) : [];
   let date = /^\d{4}-\d{2}-\d{2}$/.test(q.date || "") ? q.date : null;
   if (date) { const t = Date.parse(date + "T00:00:00Z"), now = Date.now(); if (isNaN(t) || t < now - 2 * 86400000 || t > now + 730 * 86400000) date = null; }
-  return { city, days, start, end, pace, transport, interests, budget, lang, notes, adults, kids, kidAges, date };
+  const qids = (a, n) => [...new Set((Array.isArray(a) ? a : []).filter(x => /^Q\d{1,12}$/.test(x)))].slice(0, n);
+  const like = qids(q.like, 25), skip = qids(q.skip, 40).filter(x => !like.includes(x));
+  return { city, days, start, end, pace, transport, interests, budget, lang, notes, adults, kids, kidAges, date, like, skip };
 }
 
 // ---------- Gjeokodimi ----------
@@ -487,7 +496,7 @@ async function askClaude(key, p, place, pois, M, dates = []) {
     return c.length ? `|CLOSED on day ${c.join(",")}` : "";
   };
   const list = pois.map(x =>
-    `${x.id}|${x.name}${x.local ? " (" + x.local + ")" : ""}|${x.kind}${x.religion ? "/" + x.religion : ""}|zone ${x.zone}|${x.lat},${x.lon}|pop ${Math.round(x.pop)}${x.oh ? "|hours: " + x.oh.slice(0, 80) : ""}${closedOn(x)}${x.fee ? "|fee: " + x.fee : ""}`
+    `${x.id}|${x.name}${x.local ? " (" + x.local + ")" : ""}|${x.kind}${x.religion ? "/" + x.religion : ""}|zone ${x.zone}|${x.lat},${x.lon}|pop ${Math.round(x.pop)}${x.must ? "|MUST" : ""}${x.oh ? "|hours: " + x.oh.slice(0, 80) : ""}${closedOn(x)}${x.fee ? "|fee: " + x.fee : ""}`
   ).join("\n");
 
   const system = `You are an expert local travel planner. You build realistic, walkable day-by-day itineraries.
@@ -496,7 +505,8 @@ Rules:
 - Each day should mostly stay within one zone (places in the same zone are close together). Order stops to minimise walking/backtracking, using the coordinates.
 - Never schedule a place on a day marked "CLOSED on day N". Respect the daily time window, pace and opening hours where given. Most museums are closed on Monday in many European cities — mention it in tips if relevant.
 - Include a lunch stop (and dinner if the day ends after 19:00) as {"poi": null, "type": "meal"} with a suggestion of the neighbourhood and a typical local dish. Do not name specific restaurants.
-- Prioritise famous places (higher "pop") and the traveller's interests. Do not repeat a place.
+- Prioritise famous places (higher "pop") and the traveller's interests. Do not repeat a place.${pois.some(x => x.must) ? `
+- Places marked MUST were hand-picked by the traveller: include every one of them (unless it is closed on all days). If they do not all fit the pace, include as many as fit and prefer them over any other place.` : ""}
 - Give realistic visit durations (big museums 2–3h, viewpoints 20–30 min) and travel time between stops.
 - Keep each day geographically compact: group stops by neighbourhood, order them so consecutive stops are close, and never put two consecutive stops more than ~40 minutes apart (on foot) or ~50 minutes (public transport). Far-away places go on their own day with nearby stops, or are left out.
 - If children are travelling: pick child-friendly stops first, keep museum visits short, add a rest or playground/park break every 2–3 hours, avoid long walks between stops, and mention family/child tickets. For children aged 0–3 add stroller/nap tips; for teenagers prefer interactive and active places.
@@ -1489,6 +1499,32 @@ async function nearbyKind(lat, lon, kind) {
   await caches.default.put(key, new Response(JSON.stringify(out), { headers: { "Cache-Control": "max-age=" + 86400 * 7 } }));
   return out;
 }
+// ---------- Vendet për rrëshqitje (pa AI): më të njohurat e qytetit, ruhen 7 ditë ----------
+async function handleCands(q, req, env, ctx, H, M) {
+  const city = String(q.city || "").trim().slice(0, 80);
+  if (city.length < 2) return json({ error: M.city }, 400, H);
+  const cache = caches.default;
+  const ck = new Request("https://cands.local/v1/" + await sha(city.toLowerCase()));
+  const hit = await cache.match(ck);
+  if (hit) return json(await hit.json(), 200, H);
+  const day = new Date().toISOString().slice(0, 10);
+  const rk = new Request(`https://rl.local/c/${day}/${(await sha("cands|" + (req.headers.get("CF-Connecting-IP") || "anon") + "|" + day)).slice(0, 32)}`);
+  const used = +(await (await cache.match(rk))?.text() || 0);
+  if (used >= 40) return json({ error: M.busy }, 429, H);
+  ctx.waitUntil(cache.put(rk, new Response(String(used + 1), { headers: { "Cache-Control": "max-age=90000" } })));
+  try {
+    const place = await geocode(city);
+    if (!place) return json({ error: M.nocity(city) }, 404, H);
+    const pois = await fetchPois(place.lat, place.lon, place.radius);
+    await addPopularity(pois);
+    const list = pois.filter(x => x.wd && x.name && !["artwork", "memorial"].includes(x.kind)).sort((a, b) => b.pop - a.pop).slice(0, 18)
+      .map(x => ({ wd: x.wd, name: x.name, kind: String(x.kind || "").slice(0, 40), wiki: /^[a-z]{2,3}(-[a-z]+)?:[^"<>]{1,200}$/.test(x.wiki || "") ? x.wiki : undefined, lat: x.lat, lon: x.lon }));
+    const out = { city: { name: place.name, country: place.country }, places: list };
+    if (list.length >= 5) ctx.waitUntil(cache.put(ck, new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json", "Cache-Control": "max-age=604800" } })));
+    return json(out, 200, H);
+  } catch (e) { return json({ error: M.fail + (e.message || e) }, 502, H); }
+}
+
 async function handleNear(q, req, env, ctx, H, M) {
   const cat = ["see", "food", "cafe"].includes(q.cat) ? q.cat : "see";
   let lat = parseFloat(q.lat), lon = parseFloat(q.lon);
