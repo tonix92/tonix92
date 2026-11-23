@@ -1,0 +1,85 @@
+# Bën screenshots të Viaro-s nga faqja live (për Google Play dhe App Store)
+# dhe i ruan te udhetimi/store/ (dalin edhe në GitHub Pages).
+name: Viaro screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      plan:
+        description: "ID e një plani publik për fotot e planit"
+        default: "7fc5ccc1-51b1-4caf-9fb9-354655b8f482"
+
+permissions:
+  contents: write
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bëj fotot
+        env:
+          PLAN: ${{ inputs.plan }}
+        run: |
+          mkdir -p /tmp/sh && cd /tmp/sh
+          npm init -y >/dev/null
+          npm i playwright@1 --no-audit --no-fund >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          cat > shots.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const URL = 'https://tonix92.github.io/tonix92/udhetimi/';
+          const OUT = process.env.GITHUB_WORKSPACE + '/udhetimi/store';
+          const sets = [
+            { name: 'play', w: 360, h: 640, dsf: 3 },     // 1080x1920
+            { name: 'iphone', w: 430, h: 932, dsf: 3 },   // 1290x2796
+            { name: 'ipad', w: 1024, h: 1366, dsf: 2 },   // 2048x2732
+          ];
+          const langs = ['en', 'de', 'sq'];
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          const b = await chromium.launch();
+          for (const s of sets) for (const lang of langs) {
+            const ctx = await b.newContext({ viewport: { width: s.w, height: s.h }, deviceScaleFactor: s.dsf, colorScheme: 'dark', isMobile: s.name !== 'ipad', hasTouch: true, locale: lang });
+            const pg = await ctx.newPage();
+            await pg.goto(URL, { waitUntil: 'networkidle' });
+            await pg.evaluate(l => { try { setLang(l); } catch (e) {} }, lang);
+            await pg.addStyleTag({ content: 'html,body,*{scrollbar-width:none!important}*::-webkit-scrollbar{display:none!important}' });
+            await sleep(2500);
+            const shot = async n => { await pg.screenshot({ path: `${OUT}/${s.name}-${lang}-${n}.png` }); console.log(s.name, lang, n); };
+            await pg.evaluate(() => scrollTo(0, 0)); await sleep(800);
+            await shot(1);
+            await pg.evaluate(() => { try { go('explore'); } catch (e) {} }); await sleep(5000);
+            await pg.evaluate(() => scrollTo(0, 0)); await sleep(800);
+            await shot(2);
+            await pg.evaluate(id => { try { openById(id); } catch (e) {} }, process.env.PLAN); await sleep(7000);
+            await pg.evaluate(() => { const m = document.getElementById('map'); if (m) scrollTo(0, m.getBoundingClientRect().top + scrollY - 150); });
+            await sleep(1500);
+            await pg.evaluate(() => { try { map.invalidateSize(); map.zoomIn(); } catch (e) {} });
+            await pg.waitForLoadState('networkidle').catch(() => {}); await sleep(4000);
+            await shot(3);
+            await pg.evaluate(h => scrollBy(0, h), Math.round(s.h * 0.8)); await sleep(3000);
+            await shot(4);
+            await ctx.close();
+          }
+          await b.close();
+          JS
+          mkdir -p $GITHUB_WORKSPACE/udhetimi/store
+          node shots.mjs
+          ls -la $GITHUB_WORKSPACE/udhetimi/store
+
+      - name: Ruaj fotot në repo
+        run: |
+          git config user.name "viaro-bot"
+          git config user.email "viaro-bot@users.noreply.github.com"
+          git add udhetimi/store
+          git commit -m "Screenshots për dyqanet (run ${{ github.run_number }})" || echo "Pa ndryshime"
+          git push
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viaro-screenshots-${{ github.run_number }}
+          path: udhetimi/store/
