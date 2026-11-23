@@ -967,6 +967,11 @@
   .pfavb{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
   .pfavb label.btn2{cursor:pointer;margin:0;display:inline-flex;align-items:center;min-height:38px}
   .pfavb small{flex-basis:100%}
+  .wishes{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+  .wishes .chip{font-size:13px;padding:6px 11px}
+  .wishes .chip.on{background:var(--brandnavy);border-color:var(--brandnavy);color:#fff}
+  .ncount{text-align:right;font-size:12px;color:var(--mut);min-height:16px;margin-top:2px}
+  .ncount.full{color:var(--terra)}
   .wxwarn{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.wxwarn .wxfix{padding:6px 12px;font-size:13px;min-height:0}
   .daywarn.dinfo{background:color-mix(in srgb,var(--sun) 18%,var(--surface))!important;border-color:color-mix(in srgb,var(--sun) 50%,var(--line))!important}
   /* Faza 10: Smart Budget */
@@ -1164,12 +1169,13 @@
     </div>
     <div class="wstep" data-step="4"><div class="wsh"><span class="wn" id="wzN4"></span><h2 id="wzT4"></h2><p id="wzS4"></p></div>
     <div class="wzsum" id="wzSum"></div>
+    <label for="notes" data-i18n="notes"></label>
+    <div class="wishes keepemo" id="wishes"></div>
+    <textarea id="notes" maxlength="500" data-i18n-ph="notes_ph"></textarea>
+    <div class="ncount" id="notesCount"></div>
     <div id="swCta"></div>
     <label data-i18n="plang"></label>
     <div class="seg" data-name="lang"><button data-v="en">English</button><button data-v="de">Deutsch</button><button data-v="sq" class="on">Shqip</button></div>
-
-    <label for="notes" data-i18n="notes"></label>
-    <textarea id="notes" data-i18n-ph="notes_ph"></textarea>
     </div>
     <div class="wzbar"><button type="button" class="wzback" id="wzBack" onclick="wzGo(wz - 1)" data-i18n="wz_back"></button><button type="button" class="go wznext" id="wzNext" onclick="wzGo(wz + 1)" data-i18n="wz_next"></button><button class="go" id="goBtn" onclick="makePlan()" data-i18n="go" hidden></button></div>
     <div class="quota" id="quota"></div>
@@ -1469,7 +1475,7 @@ const I18N = {
     i_histori: "🏛️ Histori", i_muze: "🖼️ Muze", i_art: "🎨 Art", i_arkitekture: "🏰 Arkitekturë", i_natyre: "🌳 Natyrë & parqe", i_pamje: "🌅 Pamje",
     i_ushqim: "🍝 Ushqim lokal", i_blerje: "🛍️ Blerje", i_nate: "🌙 Jetë nate", i_femije: "👨‍👩‍👧 Me fëmijë", i_fe: "⛪ Vende fetare", i_fotografi: "📸 Fotografi",
     budget: "Buxheti", b_ulet: "€ I ulët", b_mesem: "€€ Mesatar", b_larte: "€€€ I lartë",
-    plang: "Gjuha e planit", notes: "Dëshira të tjera (opsionale)",
+    plang: "Gjuha e planit", notes: "Çfarë do të bësh në këtë udhëtim? (opsionale)",
     notes_ph: "p.sh. Mbërrij ditën e parë në 14:00. Dua ta shoh perëndimin e diellit.",
     go: "✨ Krijo planin", load_sub: "Zakonisht zgjat 15–40 sekonda", creating: "Po krijohet plani…", retry: "Provo përsëri", err_h: "Plani nuk u krijua", ld_steps: ["Po kërkoj atraksionet e qytetit", "Po kontrolloj oraret dhe popullaritetin", "Po i rendit sipas zonave dhe rrugës", "Po e shkruaj itinerarin ditë për ditë"], ph_credit: "Fotot: Wikipedia", theme_d: "Pamja e errët", theme_l: "Pamja e çelët", d_stops: n => `${n} ${n === 1 ? "ndalesë" : "ndalesa"}`,
     loads: ["Po kërkoj atraksionet…", "Po shoh cilat janë më të njohurat…", "Po i ndaj sipas zonave…", "Po e shkruaj planin ditë për ditë…", "Edhe pak…"],
@@ -1569,7 +1575,7 @@ const I18N = {
     i_histori: "🏛️ History", i_muze: "🖼️ Museums", i_art: "🎨 Art", i_arkitekture: "🏰 Architecture", i_natyre: "🌳 Nature & parks", i_pamje: "🌅 Viewpoints",
     i_ushqim: "🍝 Local food", i_blerje: "🛍️ Shopping", i_nate: "🌙 Nightlife", i_femije: "👨‍👩‍👧 With kids", i_fe: "⛪ Religious sites", i_fotografi: "📸 Photography",
     budget: "Budget", b_ulet: "€ Low", b_mesem: "€€ Medium", b_larte: "€€€ High",
-    plang: "Plan language", notes: "Anything else? (optional)",
+    plang: "Plan language", notes: "What do you want to do on this trip? (optional)",
     notes_ph: "e.g. I arrive on day one at 2 pm. I'd love to catch the sunset.",
     go: "✨ Create my plan", load_sub: "Usually takes 15–40 seconds", creating: "Creating your plan…", retry: "Try again", err_h: "The plan couldn't be created", ld_steps: ["Finding the city's attractions", "Checking opening hours and popularity", "Ordering them by area and route", "Writing your day-by-day itinerary"], ph_credit: "Photos: Wikipedia", theme_d: "Dark mode", theme_l: "Light mode", d_stops: n => `${n} ${n === 1 ? "stop" : "stops"}`,
     loads: ["Finding attractions…", "Checking which are the most famous…", "Grouping them by area…", "Writing your day-by-day plan…", "Almost there…"],
@@ -1669,7 +1675,7 @@ const I18N = {
     i_histori: "🏛️ Geschichte", i_muze: "🖼️ Museen", i_art: "🎨 Kunst", i_arkitekture: "🏰 Architektur", i_natyre: "🌳 Natur & Parks", i_pamje: "🌅 Aussichtspunkte",
     i_ushqim: "🍝 Lokales Essen", i_blerje: "🛍️ Shopping", i_nate: "🌙 Nachtleben", i_femije: "👨‍👩‍👧 Mit Kindern", i_fe: "⛪ Religiöse Orte", i_fotografi: "📸 Fotografie",
     budget: "Budget", b_ulet: "€ Günstig", b_mesem: "€€ Mittel", b_larte: "€€€ Gehoben",
-    plang: "Sprache des Plans", notes: "Sonstige Wünsche (optional)",
+    plang: "Sprache des Plans", notes: "Was möchtest du auf dieser Reise machen? (optional)",
     notes_ph: "z. B. Ich komme am ersten Tag um 14 Uhr an. Ich möchte den Sonnenuntergang sehen.",
     go: "✨ Plan erstellen", load_sub: "Dauert meist 15–40 Sekunden", creating: "Plan wird erstellt…", retry: "Erneut versuchen", err_h: "Der Plan konnte nicht erstellt werden", ld_steps: ["Sehenswürdigkeiten der Stadt suchen", "Öffnungszeiten und Beliebtheit prüfen", "Nach Vierteln und Route ordnen", "Deinen Tagesplan schreiben"], ph_credit: "Fotos: Wikipedia", theme_d: "Dunkler Modus", theme_l: "Heller Modus", d_stops: n => `${n} ${n === 1 ? "Stopp" : "Stopps"}`,
     loads: ["Suche Sehenswürdigkeiten…", "Prüfe, welche am bekanntesten sind…", "Teile sie nach Vierteln auf…", "Schreibe deinen Tagesplan…", "Gleich fertig…"],
@@ -1784,6 +1790,7 @@ function setLang(l) {
   if (view === "profile" && pfUser) openProfile(pfUser);
   if (view === "plan" && plan) { const on = document.querySelector("#dayTabs button.on"); const i = on ? +on.dataset.i : 0; openPlanHeader(); renderActions(); renderTabs(); selectDay(i); }
   if (pushTok && user) pushSave();
+  if (typeof renderWishes === "function") renderWishes();
 }
 document.getElementById("langSw").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.l); });
 
@@ -2672,7 +2679,7 @@ function wzRender() {
     const bits = [r.city, t("days_n", r.days), noE(t("pace_" + r.pace)), noE(t("tr_" + r.transport)).replace(/^\+\s*/, ""), t("b_" + r.budget)]
       .concat(r.interests.map(k => t("i_" + k)));
     document.getElementById("wzSum").innerHTML = bits.filter(Boolean).map(x => `<span>${esc(x)}</span>`).join("");
-    swRenderCta();
+    swRenderCta(); renderWishes();
   }
 }
 document.getElementById("city").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); wzGo(2); } });
@@ -3274,6 +3281,26 @@ async function removeAvatar() {
   const op = avPath(old); if (op && op.startsWith(user.id + "/avatar-")) sb.storage.from("photos").remove([op]).catch(() => {});
   AVS.set(user.id, null); if (myProfile) myProfile.avatar_url = null; avRefresh(); toast(t("av_removed"));
 }
+// ---- Dëshirat e udhëtimit: butona të gatshëm që shtojnë tekst te fusha ----
+Object.assign(I18N.sq, { wishes: [["🌅", "Perëndimi i diellit", "Dua ta shoh perëndimin e diellit nga një vend i bukur."], ["🍝", "Ushqim lokal", "Vetëm ushqim lokal, jo zinxhirë restorantesh."], ["🚫", "Pa muze", "Pa muze."], ["🛍️", "Kohë për blerje", "Lër kohë për blerje."], ["💎", "Vende pak të njohura", "Dua edhe vende më pak turistike."], ["☕", "Mëngjese pa nxitim", "Mëngjeset pa nxitim, nisemi pas orës 10."], ["📸", "Vende për foto", "Dua vende të bukura për foto."], ["🌙", "Jeta e natës", "Pak jetë nate në mbrëmje."]], n_count: (a, b) => `${a}/${b}` });
+Object.assign(I18N.en, { wishes: [["🌅", "Sunset", "I want to watch the sunset from a nice spot."], ["🍝", "Local food", "Only local food, no restaurant chains."], ["🚫", "No museums", "No museums."], ["🛍️", "Time to shop", "Leave time for shopping."], ["💎", "Hidden gems", "I'd like some less touristy places too."], ["☕", "Slow mornings", "Slow mornings, start after 10am."], ["📸", "Photo spots", "I want beautiful photo spots."], ["🌙", "Nightlife", "A bit of nightlife in the evening."]], n_count: (a, b) => `${a}/${b}` });
+Object.assign(I18N.de, { wishes: [["🌅", "Sonnenuntergang", "Ich möchte den Sonnenuntergang an einem schönen Ort sehen."], ["🍝", "Lokales Essen", "Nur lokales Essen, keine Restaurantketten."], ["🚫", "Keine Museen", "Keine Museen."], ["🛍️", "Zeit zum Shoppen", "Etwas Zeit zum Shoppen einplanen."], ["💎", "Geheimtipps", "Gern auch weniger touristische Orte."], ["☕", "Ruhige Morgen", "Ruhige Morgen, Start nach 10 Uhr."], ["📸", "Fotospots", "Ich möchte schöne Fotospots."], ["🌙", "Nachtleben", "Abends etwas Nachtleben."]], n_count: (a, b) => `${a}/${b}` });
+const WISH_ALL = () => ["sq", "en", "de"].flatMap(l => (I18N[l].wishes || []).map(w => w[2]));
+function renderWishes() {
+  const box = document.getElementById("wishes"), ta = document.getElementById("notes"); if (!box || !ta) return;
+  const v = ta.value;
+  box.innerHTML = (t("wishes") || []).map((w, i) => `<button type="button" class="chip${v.includes(w[2]) ? " on" : ""}" data-i="${i}">${w[0]} ${esc(w[1])}</button>`).join("");
+  const c = document.getElementById("notesCount"); if (c) { c.textContent = v.length ? t("n_count", v.length, 500) : ""; c.classList.toggle("full", v.length >= 480); }
+}
+document.getElementById("wishes")?.addEventListener("click", e => {
+  const b = e.target.closest("button[data-i]"); if (!b) return;
+  const ta = document.getElementById("notes"), w = t("wishes")[+b.dataset.i]; if (!w) return;
+  let v = ta.value;
+  if (v.includes(w[2])) v = v.replace(w[2], "").replace(/\s{2,}/g, " ").trim();
+  else { const add = (v.trim() ? v.trim() + " " : "") + w[2]; if (add.length > 500) { toast(t("n_count", v.length, 500)); return; } v = add; }
+  ta.value = v; renderWishes(); buzz?.();
+});
+document.getElementById("notes")?.addEventListener("input", renderWishes);
 // ---- Pamja e errët ----
 function applyThemeMeta() {
   const dark = document.documentElement.dataset.theme === "dark";
