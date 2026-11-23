@@ -152,7 +152,7 @@ export default {
       if (u.pathname === "/status") {
         // Gjendja: versioni, planet dhe kostoja e sotme; me ?osm=1 provon serverët e OpenStreetMap
         const day = new Date().toISOString().slice(0, 10);
-        const out = { version: "p16.0", push: !!(env.PUSH_SECRET && env.FCM_SA), kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
+        const out = { version: "p16.1", push: !!(env.PUSH_SECRET && env.FCM_SA), kv: !!env.LIMITS, ors: !!env.ORS_KEY, today: await limitGet(env, caches.default, `d/${day}`) };
         if (u.searchParams.get("osm")) out.osm = await Promise.all(OVERPASS.map(async ep => {
           const t = Date.now();
           try {
@@ -335,7 +335,7 @@ function sanitize(q) {
   const interests = (Array.isArray(q.interests) ? q.interests : []).filter(i => INTERESTS.includes(i)).slice(0, 8);
   const budget = ["ulet", "mesem", "larte"].includes(q.budget) ? q.budget : "mesem";
   const lang = ["sq", "en", "de"].includes(q.lang) ? q.lang : "sq";
-  const notes = String(q.notes || "").slice(0, 300);
+  const notes = String(q.notes || "").slice(0, 500);
   const adults = Math.max(1, Math.min(12, parseInt(q.adults) || 1));
   const kids = Math.max(0, Math.min(8, parseInt(q.kids) || 0));
   const kidAges = kids ? (Array.isArray(q.kidAges) ? q.kidAges : []).filter(a => KID_AGES.includes(a)) : [];
