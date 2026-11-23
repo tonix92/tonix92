@@ -961,6 +961,12 @@
   .phmk{position:relative;width:44px;height:44px;border-radius:50%;border:3px solid var(--c);background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.35);box-sizing:border-box}
   .phmk img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
   .phmk b{position:absolute;right:-6px;bottom:-5px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:var(--c);color:#fff;font-size:11.5px;font-weight:800;line-height:20px;text-align:center;border:2px solid #fff;box-sizing:border-box}
+  .av,.avatar,.acct .ava{position:relative;overflow:hidden}
+  .avimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+  .pfav{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+  .pfavb{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .pfavb label.btn2{cursor:pointer;margin:0;display:inline-flex;align-items:center;min-height:38px}
+  .pfavb small{flex-basis:100%}
   .wxwarn{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.wxwarn .wxfix{padding:6px 12px;font-size:13px;min-height:0}
   .daywarn.dinfo{background:color-mix(in srgb,var(--sun) 18%,var(--surface))!important;border-color:color-mix(in srgb,var(--sun) 50%,var(--line))!important}
   /* Faza 10: Smart Budget */
@@ -1251,6 +1257,7 @@
   </div>
   <div class="actions" id="pfActions"></div>
   <div id="pfEdit" class="card" style="display:none">
+    <div class="pfav"><div class="avatar" id="pfAvPrev"></div><div class="pfavb"><label class="btn2" for="pfAvIn" id="pfAvBtn" data-i18n="av_change"></label><input type="file" id="pfAvIn" accept="image/*" hidden onchange="pickAvatar(this)"><button type="button" class="lnk" id="pfAvDel" onclick="removeAvatar()" data-i18n="av_remove"></button><small class="mut" data-i18n="av_hint"></small></div></div>
     <label data-i18n="pf_name"></label><input id="pfNameIn" maxlength="40">
     <label data-i18n="pf_bio"></label><textarea id="pfBioIn" maxlength="160"></textarea>
     <button class="go" onclick="saveProfile()" data-i18n="save"></button>
@@ -1813,20 +1820,20 @@ let myProfile = null;
 const displayName = u => (u && myProfile && myProfile.id === u.id && myProfile.name) || u?.user_metadata?.name || (u?.email || "").split("@")[0];
 async function loadMyProfile() {
   if (!sb || !user) { myProfile = null; return; }
-  let { data } = await sb.from("profiles").select("id,name,bio").eq("id", user.id).maybeSingle();
+  let { data } = await sb.from("profiles").select("id,name,bio,avatar_url").eq("id", user.id).maybeSingle();
   if (!data) {
     const name = (user.user_metadata?.name || (user.email || "").split("@")[0]).slice(0, 40);
     await sb.from("profiles").insert({ id: user.id, name });
     data = { id: user.id, name, bio: "" };
   }
-  myProfile = data; refreshAcct();
+  myProfile = data; AVS.set(user.id, data.avatar_url || null); refreshAcct();
   pushAfterLogin();
   await loadBlocks();
   if (view === "explore") loadExplore();
 }
 function refreshAcct() {
   const b = document.getElementById("acctBtn");
-  if (user) { const nm = displayName(user) || "?"; b.innerHTML = `<span class="ava">${esc(nm.trim().charAt(0).toUpperCase())}</span><span class="an">${esc(nm)}</span>`; b.title = nm; }
+  if (user) { const nm = displayName(user) || "?"; b.innerHTML = `<span class="ava" data-uid="${esc(user.id)}">${esc(nm.trim().charAt(0).toUpperCase())}</span><span class="an">${esc(nm)}</span>`; b.title = nm; }
   else { b.textContent = t("login"); b.removeAttribute("title"); }
   b.classList.toggle("in", !!user);
   refreshQuota(); refreshBell();
@@ -2195,7 +2202,7 @@ function coverHtml(r) {
 function feedCard(r, liked) {
   const name = r.author_name || "—";
   return `<article class="post">
-    <header><span class="av" style="background:${avColor(r.user_id)}" onclick="openProfile('${r.user_id}')">${esc(initials(name))}</span>
+    <header><span class="av" data-uid="${esc(r.user_id)}" style="background:${avColor(r.user_id)}" onclick="openProfile('${r.user_id}')">${esc(initials(name))}</span>
       <div><a onclick="openProfile('${r.user_id}')">${esc(name)}</a><small>${esc([r.city, r.country].filter(Boolean).join(", "))} · ${esc(t("days_n", r.days))}</small></div></header>
     <div class="pimg" onclick="openById('${r.id}')">${coverHtml(r)}</div>
     <div class="pact"><button class="lk ${liked ? "on" : ""}" onclick="feedLike('${r.id}',this)">${HEART(liked)}<span>${r.likes || 0}</span></button>
@@ -2216,11 +2223,11 @@ async function feedLike(id, btn) {
 async function loadUserSearch(s) {
   const ub = document.getElementById("exUsers");
   if (!s || s.length < 2) { ub.innerHTML = ""; return; }
-  let { data } = await sb.from("profiles").select("id,name,bio").ilike("name", `%${s}%`).limit(8);
+  let { data } = await sb.from("profiles").select("id,name,bio,avatar_url").ilike("name", `%${s}%`).limit(8);
   if (aVal("exSearch").replace(/[%_,()]/g, "").trim() !== s) return;
   if (data) data = data.filter(u => !isBlocked(u.id));
   ub.innerHTML = (data || []).length ? `<div class="uhead">${esc(t("users_h"))}</div><div class="ulist">` + data.map(u =>
-    `<button class="uchip" onclick="openProfile('${u.id}')"><span class="av" style="background:${avColor(u.id)}">${esc(initials(u.name))}</span><span><b>${esc(u.name || "—")}</b>${u.bio ? `<small>${esc(u.bio.slice(0, 60))}</small>` : ""}</span></button>`).join("") + `</div>` : "";
+    `<button class="uchip" onclick="openProfile('${u.id}')"><span class="av" data-uid="${esc(u.id)}" style="background:${avColor(u.id)}">${esc(initials(u.name))}</span><span><b>${esc(u.name || "—")}</b>${u.bio ? `<small>${esc(u.bio.slice(0, 60))}</small>` : ""}</span></button>`).join("") + `</div>` : "";
 }
 
 // ================== PROFILI ==================
@@ -2236,7 +2243,7 @@ async function openProfile(id) {
   document.getElementById("pfList").innerHTML = `<div class="empty">${t("loading")}</div>`;
   const isMe = user && user.id === id;
   const [{ data: prof }, plansRes, fol, fing, amI] = await Promise.all([
-    sb.from("profiles").select("id,name,bio").eq("id", id).maybeSingle(),
+    sb.from("profiles").select("id,name,bio,avatar_url").eq("id", id).maybeSingle(),
     (() => { let q = sb.from("plans").select("id,city,country,days,title,is_public,saves,likes,photo_url,created_at").eq("user_id", id); if (!isMe) q = q.eq("is_public", true); return q.order("created_at", { ascending: false }).limit(60); })(),
     sb.from("follows").select("follower", { count: "exact", head: true }).eq("followee", id),
     sb.from("follows").select("followee", { count: "exact", head: true }).eq("follower", id),
@@ -2246,7 +2253,7 @@ async function openProfile(id) {
   const name = prof?.name || "—";
   const plans = plansRes.data || [];
   const likesTotal = plans.filter(p => p.is_public).reduce((s, p) => s + (p.likes || 0), 0);
-  const av = document.getElementById("pfAvatar"); av.textContent = initials(name); av.style.background = avColor(id);
+  const av = document.getElementById("pfAvatar"); av.textContent = initials(name); av.style.background = avColor(id); AVS.set(id, prof?.avatar_url || null); av.dataset.uid = id; av.dataset.ini = initials(name); av.classList.remove("hasimg"); avFill(av); av.onclick = isMe ? () => document.getElementById("pfAvIn").click() : null; av.style.cursor = isMe ? "pointer" : "";
   document.getElementById("pfName").textContent = name;
   document.getElementById("pfBio").textContent = prof?.bio || "";
   document.getElementById("pfStats").innerHTML = `<span><b>${plans.filter(p => isMe ? true : p.is_public).length}</b> ${t("pf_n_plans")}</span>
@@ -2262,14 +2269,14 @@ async function openProfile(id) {
     || `<div class="empty">${t("pf_empty")}</div>`;
   if (isMe) { document.getElementById("pfNameIn").value = prof?.name || ""; document.getElementById("pfBioIn").value = prof?.bio || ""; }
 }
-function toggleEdit() { const e = document.getElementById("pfEdit"); e.style.display = e.style.display === "none" ? "block" : "none"; }
+function toggleEdit() { const e = document.getElementById("pfEdit"); e.style.display = e.style.display === "none" ? "block" : "none"; if (e.style.display === "block") avPrev(); }
 async function saveProfile() {
   const name = aVal("pfNameIn"), bio = aVal("pfBioIn");
   if (name.length < 1) return toast(t("need_name"));
   const { error } = await sb.from("profiles").update({ name, bio }).eq("id", user.id);
   if (error) return toast(t("err") + error.message);
   await sb.from("plans").update({ author_name: name }).eq("user_id", user.id);
-  myProfile = { id: user.id, name, bio }; refreshAcct();
+  myProfile = { ...myProfile, id: user.id, name, bio }; refreshAcct();
   toast(t("saved_ok_short")); openProfile(user.id);
 }
 async function toggleFollow() {
@@ -3191,6 +3198,82 @@ document.addEventListener("keydown", e => {
   if (!document.getElementById("swBg")?.classList.contains("on")) return;
   if (e.key === "ArrowRight") { e.preventDefault(); swAct(true); } else if (e.key === "ArrowLeft") { e.preventDefault(); swAct(false); } else if (e.key === "Escape") swFinish();
 });
+// ---- Foto e profilit: ruhet te photos/<id>/avatar-*.jpg; kudo ku del rrethi me inicialet, del fotoja ----
+Object.assign(I18N.sq, { av_change: "📷 Ndrysho foton", av_add: "📷 Shto foto", av_remove: "Hiq foton", av_hint: "Fotoja e profilit duket nga të gjithë.", av_saving: "Duke ruajtur foton…", av_saved: "Fotoja u ruajt.", av_removed: "Fotoja u hoq." });
+Object.assign(I18N.en, { av_change: "📷 Change photo", av_add: "📷 Add photo", av_remove: "Remove photo", av_hint: "Your profile photo is visible to everyone.", av_saving: "Saving photo…", av_saved: "Photo saved.", av_removed: "Photo removed." });
+Object.assign(I18N.de, { av_change: "📷 Foto ändern", av_add: "📷 Foto hinzufügen", av_remove: "Foto entfernen", av_hint: "Dein Profilfoto ist für alle sichtbar.", av_saving: "Foto wird gespeichert…", av_saved: "Foto gespeichert.", av_removed: "Foto entfernt." });
+var AVS = new Map(), avWant = new Set(), avTimer = null;
+const AV_OK = u => typeof u === "string" && u.startsWith(SUPABASE_URL + "/storage/v1/object/public/photos/") && !/[\s"'<>\\]/.test(u);
+function avFill(el) {
+  const id = el.dataset.uid; if (!id) return;
+  if (!AVS.has(id)) { avWant.add(id); clearTimeout(avTimer); avTimer = setTimeout(avLoad, 60); return; }
+  const u = AVS.get(id), img = el.querySelector(":scope > img.avimg");
+  if (u && AV_OK(u)) {
+    if (img && img.getAttribute("src") === u) return;
+    if (!el.dataset.ini) el.dataset.ini = el.textContent;
+    el.textContent = ""; const im = new Image(); im.className = "avimg"; im.alt = ""; im.src = u; im.onerror = () => { im.remove(); el.textContent = el.dataset.ini || ""; };
+    el.appendChild(im); el.classList.add("hasimg");
+  } else if (img) { img.remove(); el.textContent = el.dataset.ini || ""; el.classList.remove("hasimg"); }
+}
+async function avLoad() {
+  const ids = [...avWant].filter(id => /^[0-9a-f-]{36}$/i.test(id) && !AVS.has(id)); avWant.clear();
+  if (!ids.length || !sb) return;
+  try {
+    for (let o = 0; o < ids.length; o += 100) {
+      const part = ids.slice(o, o + 100);
+      const { data, error } = await sb.from("profiles").select("id,avatar_url").in("id", part);
+      if (error) return;
+      part.forEach(id => AVS.set(id, null)); (data || []).forEach(p => AVS.set(p.id, p.avatar_url || null));
+    }
+  } catch { return; }
+  document.querySelectorAll("[data-uid]").forEach(avFill);
+}
+new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) { if (n.nodeType !== 1) continue; if (n.dataset?.uid) avFill(n); n.querySelectorAll?.("[data-uid]").forEach(avFill); } })
+  .observe(document.body, { childList: true, subtree: true });
+function avPrev() {
+  const el = document.getElementById("pfAvPrev"); if (!el || !user) return;
+  el.style.background = avColor(user.id); el.dataset.ini = ""; el.textContent = initials(displayName(user)); el.dataset.uid = user.id; el.classList.remove("hasimg"); avFill(el);
+  const has = !!AVS.get(user.id);
+  document.getElementById("pfAvBtn").textContent = t(has ? "av_change" : "av_add");
+  document.getElementById("pfAvDel").hidden = !has;
+}
+function avRefresh() { document.querySelectorAll(`[data-uid="${user.id}"]`).forEach(el => { el.classList.remove("hasimg"); avFill(el); }); avPrev(); }
+async function avCrop(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const im = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+    const S = 400, side = Math.min(im.naturalWidth, im.naturalHeight); if (!side) throw 0;
+    const c = document.createElement("canvas"); c.width = c.height = S;
+    c.getContext("2d").drawImage(im, (im.naturalWidth - side) / 2, (im.naturalHeight - side) / 2, side, side, 0, 0, S, S);
+    return await new Promise(ok => c.toBlob(ok, "image/jpeg", .86));
+  } finally { URL.revokeObjectURL(url); }
+}
+function avPath(u) { const m = /\/storage\/v1\/object\/public\/photos\/(.+)$/.exec(u || ""); return m ? decodeURIComponent(m[1]) : null; }
+async function pickAvatar(inp) {
+  const f = inp.files?.[0]; inp.value = ""; if (!f || !user || !sb) return;
+  if (f.size > 25e6 || !/^image\//.test(f.type || "image/")) return toast(t("photo_big"));
+  toast(t("av_saving"));
+  let blob; try { blob = await avCrop(f); } catch { blob = null; }
+  if (!blob) return toast(t("photo_big"));
+  try {
+    const old = AVS.get(user.id), path = `${user.id}/avatar-${Date.now()}.jpg`;
+    const up = await sb.storage.from("photos").upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000" });
+    if (up.error) throw up.error;
+    const url = sb.storage.from("photos").getPublicUrl(path).data.publicUrl;
+    const { error } = await sb.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+    if (error) { sb.storage.from("photos").remove([path]).catch(() => {}); throw error; }
+    const op = avPath(old); if (op && op.startsWith(user.id + "/avatar-")) sb.storage.from("photos").remove([op]).catch(() => {});
+    AVS.set(user.id, url); if (myProfile) myProfile.avatar_url = url; avRefresh(); toast(t("av_saved")); buzz?.();
+  } catch (e) { toast(t("err") + (e.message || e)); }
+}
+async function removeAvatar() {
+  if (!user || !sb) return;
+  const old = AVS.get(user.id);
+  const { error } = await sb.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+  if (error) return toast(t("err") + error.message);
+  const op = avPath(old); if (op && op.startsWith(user.id + "/avatar-")) sb.storage.from("photos").remove([op]).catch(() => {});
+  AVS.set(user.id, null); if (myProfile) myProfile.avatar_url = null; avRefresh(); toast(t("av_removed"));
+}
 // ---- Pamja e errët ----
 function applyThemeMeta() {
   const dark = document.documentElement.dataset.theme === "dark";
@@ -3341,7 +3424,7 @@ async function loadComments() {
   const list = (data || []).filter(c => !isBlocked(c.user_id) && !wasReported("comment", c.id));
   row.comments = list.length; document.getElementById("cmtH").textContent = `${t("cm_h")} (${list.length})`;
   document.getElementById("cmtList").innerHTML = list.length ? list.map(c => `<div class="cmt">
-      <span class="av" style="background:${avColor(c.user_id)}" onclick="openProfile('${c.user_id}')">${esc(initials(c.author_name))}</span>
+      <span class="av" data-uid="${esc(c.user_id)}" style="background:${avColor(c.user_id)}" onclick="openProfile('${c.user_id}')">${esc(initials(c.author_name))}</span>
       <div><b onclick="openProfile('${c.user_id}')">${esc(c.author_name || "—")}</b> ${esc(c.body)}<small>${esc(ago(c.created_at))}${user && (user.id === c.user_id || user.id === row.user_id) ? ` · <a onclick="delComment('${c.id}')">${esc(t("cm_del"))}</a>` : ""}${!user || user.id !== c.user_id ? ` · <a onclick="openReport('comment','${c.id}','${c.user_id}',${esc(JSON.stringify(c.author_name || "—"))})">${esc(t("rep_short"))}</a>` : ""}</small></div></div>`).join("")
     : `<div class="empty" style="padding:14px 0">${esc(t("cm_empty"))}</div>`;
 }
@@ -3436,7 +3519,7 @@ async function showBlocked() {
   BLOCKED = new Set(ids);
   let names = {};
   if (ids.length) { const { data: pr } = await sb.from("profiles").select("id,name").in("id", ids); (pr || []).forEach(p => names[p.id] = p.name); }
-  B.innerHTML = `<h3>${esc(t("blk_list"))}</h3>` + (ids.length ? `<div class="blist">${ids.map(id => `<div class="bitem"><span class="av" style="background:${avColor(id)}">${esc(initials(names[id]))}</span><b>${esc(names[id] || "—")}</b><button class="btn2" onclick="unblockUser('${id}')">${esc(t("unblk_btn"))}</button></div>`).join("")}</div>`
+  B.innerHTML = `<h3>${esc(t("blk_list"))}</h3>` + (ids.length ? `<div class="blist">${ids.map(id => `<div class="bitem"><span class="av" data-uid="${esc(id)}" style="background:${avColor(id)}">${esc(initials(names[id]))}</span><b>${esc(names[id] || "—")}</b><button class="btn2" onclick="unblockUser('${id}')">${esc(t("unblk_btn"))}</button></div>`).join("")}</div>`
     : `<div class="empty">${esc(t("blk_none"))}</div>`) + `<button class="go sec" onclick="showAccount()">${esc(t("back"))}</button>`;
 }
 
@@ -4286,7 +4369,7 @@ async function openNotifs() {
     const txt = n.type === "like" ? t("n_like", who, city) : n.type === "comment" ? t("n_comment", who, city)
       : /^grp_/.test(n.type) ? t("n_" + n.type, who, city) : t("n_follow", who);
     return `<div class="nitem ${n.read ? "" : "unread"}" onclick="notifGo(${i})">
-      <span class="av" style="background:${avColor(n.actor_id)}">${esc(initials(n.actor_name))}</span>
+      <span class="av" data-uid="${esc(n.actor_id || "")}" style="background:${avColor(n.actor_id)}">${esc(initials(n.actor_name))}</span>
       <div class="nt">${txt}${n.type === "like" ? " ❤️" : ""}${n.body ? `<span class="nq">“${esc(n.body)}”</span>` : ""}<small>${esc(ago(n.created_at))}</small></div></div>`;
   }).join("") || `<div class="empty">${esc(t("notif_empty"))}</div>`;
   if (notifRows.some(n => !n.read)) {
