@@ -21,6 +21,7 @@ jobs:
         run: |
           mkdir -p shots/en-US
           cp udhetimi/store/iphone-${{ inputs.lang }}-*.png shots/en-US/
+          for f in udhetimi/store/iphone61-${{ inputs.lang }}-*.png; do [ -f "$f" ] && cp "$f" shots/en-US/; done
           for f in udhetimi/store/ipad-${{ inputs.lang }}-*.png; do cp "$f" "shots/en-US/ipadPro129-$(basename $f)"; done
           ls -la shots/en-US
 
