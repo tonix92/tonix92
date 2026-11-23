@@ -31,6 +31,8 @@ jobs:
           P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           gem install fastlane --no-document >/dev/null 2>&1 || sudo gem install fastlane --no-document >/dev/null
+          mkdir -p fastlane && echo 'app_identifier("tips.vianto.app")' > fastlane/Deliverfile
+          export FASTLANE_SKIP_UPDATE_CHECK=1 FASTLANE_OPT_OUT_USAGE=1 CI=true
           node -e 'const fs=require("fs");fs.writeFileSync("api.json",JSON.stringify({key_id:process.env.KID,issuer_id:process.env.ISS,key:process.env.P8,in_house:false}))'
           fastlane deliver --api_key_path api.json --app_identifier tips.vianto.app --platform ios \
             --skip_binary_upload true --skip_metadata true --skip_app_version_update true \
