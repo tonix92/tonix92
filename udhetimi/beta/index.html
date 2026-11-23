@@ -874,6 +874,7 @@
   .gact .btn2{font-size:13px!important;padding:6px 12px!important;margin-left:auto}
   /* Faza 11: Planner më realist */
   .okv{font-size:11.5px;font-weight:700;color:#2F7D4F;white-space:nowrap}html[data-theme=dark] .okv{color:#7BCB97}
+  .wxwarn{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.wxwarn .wxfix{padding:6px 12px;font-size:13px;min-height:0}
   .daywarn.dinfo{background:color-mix(in srgb,var(--sun) 18%,var(--surface))!important;border-color:color-mix(in srgb,var(--sun) 50%,var(--line))!important}
   /* Faza 10: Smart Budget */
   .bhead{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}.bhead small{color:var(--mut);font-size:12.5px}
@@ -2307,11 +2308,11 @@ function openPlanHeader() {
     : "";
   document.getElementById("rTips").innerHTML = (p.tips || []).map(x => `<li>${esc(x)}</li>`).join("");
   document.getElementById("rCost").textContent = p.cost_estimate ? "💶 " + p.cost_estimate : "";
-  renderBudget(); renderOffBtn(); renderRem();
+  renderBudget(); renderOffBtn(); renderRem(); wxRefresh();
   if (p.kind === "now" && p.weather) document.getElementById("rGroup").textContent = t("wx", p.weather.temp, p.weather.rain || p.weather.snow);
 }
 function renderTabs() {
-  document.getElementById("dayTabs").innerHTML = plan.days.map((d, i) => `<button data-i="${i}">${t("day")} ${d.day || i + 1}${d.date ? `<small>${esc(fmtDayDate(d.date).split(",")[0])}</small>` : ""}</button>`).join("") + `<button data-i="-1">${t("all")}</button>`;
+  document.getElementById("dayTabs").innerHTML = plan.days.map((d, i) => `<button data-i="${i}">${t("day")} ${d.day || i + 1}${d.date ? `<small>${esc(fmtDayDate(d.date).split(",")[0])}${wxFor(plan, d.date) ? " " + wxIcon(wxFor(plan, d.date).code) : ""}</small>` : ""}</button>`).join("") + `<button data-i="-1">${t("all")}</button>`;
   document.querySelectorAll("#dayTabs button").forEach(b => b.onclick = () => selectDay(+b.dataset.i));
 }
 function renderActions() {
@@ -2435,8 +2436,9 @@ function renderDay(i) {
   const span = first && last ? `${first.start}–${last.duration_min ? addMin(last.start, last.duration_min) : last.start}` : "";
   const stats = [`<span>${IC("pin")}${esc(t("d_stops", nPts))}</span>`];
   if (span) stats.push(`<span>${IC("clock")}${esc(span)}</span>`);
+  const wxc = wxChip(d); if (wxc) stats.push(wxc);
   if (mvMin) stats.push(`<span>${IC(defIc)}${anyEst ? "~" : ""}${fmtDur(mvMin)}${mvM ? ` · ${(mvM / 1000).toFixed(1)} km` : ""}</span>`);
-  const warn = (d.overtime_min ? `<div class="daywarn">${t("overtime", d.overtime_min)}</div>` : "") +
+  const warn = wxBanner(d, i, isOwn) + (d.overtime_min ? `<div class="daywarn">${t("overtime", d.overtime_min)}</div>` : "") +
     (d.far_removed?.length ? `<div class="daywarn dinfo">${esc(t("far_removed", d.far_removed.join(", ")))}</div>` : "") +
     (d.moved_in?.length ? `<div class="daywarn dinfo">${esc(t("moved_in", d.moved_in.join(", ")))}</div>` : "");
   card.classList.remove("fade"); void card.offsetWidth; card.classList.add("fade");
@@ -2573,6 +2575,7 @@ async function scheduleTripReminders(p, r, ask) {
   try {
     let perm = (await LN.checkPermissions()).display;
     if (perm !== "granted") { if (!ask) return -1; perm = (await LN.requestPermissions()).display; if (perm !== "granted") return -1; }
+    try { await wxLoad(p); } catch {}
     await cancelTripReminders(r);
     const b = planRemId(r), city = p.city?.name || p.request?.city || "", now = new Date(), extra = { rid: r?.id || null, lid: r?.localId || null }, list = [];
     const eve = remAt(days[0].date, 19); eve.setDate(eve.getDate() - 1);
@@ -2581,7 +2584,7 @@ async function scheduleTripReminders(p, r, ask) {
       const first = (d.stops || []).find(x => x.start)?.start || "09:00";
       let [hh, mm] = first.split(":").map(Number); hh -= 1; if (hh < 6) { hh = 6; mm = 0; }
       const at = remAt(d.date, hh, mm);
-      if (at > now) list.push({ id: b + 1 + i, title: t("rem_day_t", d.day || i + 1, city), body: t("rem_day_b", d.theme || "", remFirst(d)), schedule: { at, allowWhileIdle: true }, extra });
+      if (at > now) list.push({ id: b + 1 + i, title: t("rem_day_t", d.day || i + 1, city), body: t("rem_day_b", d.theme || "", remFirst(d)) + wxRemTxt(p, d.date), schedule: { at, allowWhileIdle: true }, extra });
     });
     if (list.length) await LN.schedule({ notifications: list });
     return list.length;
@@ -2609,6 +2612,98 @@ if (window.Capacitor?.isNativePlatform?.()) window.Capacitor?.Plugins?.LocalNoti
   const x = e?.notification?.extra || {};
   if (x.rid) openById(x.rid); else if (x.lid) openLocal(x.lid);
 });
+// ---- Moti real për ditët e planit (Open-Meteo, falas, pa çelës) ----
+Object.assign(I18N.sq, { wx_rain_at: h => `🌧 Pritet shi nga ora ${h}.`, wx_rain_day: "🌧 Pritet shi gjatë ditës.", wx_hot: n => `🥵 Ditë e nxehtë, deri në ${n}°.`, wx_cold: n => `🥶 Ditë e ftohtë, maksimumi ${n}°.`, wx_fix: "Përshtate ditën", wx_src: "Parashikimi: Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
+Object.assign(I18N.en, { wx_rain_at: h => `🌧 Rain expected from ${h}.`, wx_rain_day: "🌧 Rain expected during the day.", wx_hot: n => `🥵 Hot day, up to ${n}°.`, wx_cold: n => `🥶 Cold day, high of ${n}°.`, wx_fix: "Adapt the day", wx_src: "Forecast: Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
+Object.assign(I18N.de, { wx_rain_at: h => `🌧 Regen ab ${h} Uhr erwartet.`, wx_rain_day: "🌧 Tagsüber Regen erwartet.", wx_hot: n => `🥵 Heißer Tag, bis ${n}°.`, wx_cold: n => `🥶 Kalter Tag, höchstens ${n}°.`, wx_fix: "Tag anpassen", wx_src: "Vorhersage: Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
+var WX = {}, wxBusy = null;
+const WX_RAIN = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
+function wxIcon(c) { return c === 0 ? "☀️" : c <= 2 ? "🌤" : c === 3 ? "☁️" : c <= 48 ? "🌫" : (c >= 71 && c <= 77) || c === 85 || c === 86 ? "🌨" : c >= 95 ? "⛈" : WX_RAIN.includes(c) ? "🌧" : "🌤"; }
+function wxKey(lat, lon) { return `${(+lat).toFixed(2)},${(+lon).toFixed(2)}`; }
+function wxAddDays(iso, n) { const [y, m, d] = iso.split("-").map(Number), x = new Date(y, m - 1, d + n); return `${x.getFullYear()}-${pad2(x.getMonth() + 1)}-${pad2(x.getDate())}`; }
+// Kthen parashikimin për një datë (ose null). Ruhet në pajisje 3 orë.
+function wxFor(p, date) {
+  if (!p?.city || p.city.lat == null || !date) return null;
+  return WX[wxKey(p.city.lat, p.city.lon)]?.days?.[date] || null;
+}
+async function wxLoad(p) {
+  p = p || plan;
+  if (!p?.city || p.city.lat == null || p.kind === "now") return false;
+  const today = todayIso(), last = wxAddDays(today, 15);
+  const dates = (p.days || []).map(d => d.date).filter(d => d && d >= today && d <= last);
+  if (!dates.length) return false;
+  const k = wxKey(p.city.lat, p.city.lon), LS = "viaro_wx_" + k;
+  const fresh = c => c && Date.now() - c.at < 3 * 3600e3 && dates.every(d => c.days[d]);
+  if (!fresh(WX[k])) { try { const c = JSON.parse(localStorage.getItem(LS) || "null"); if (fresh(c)) WX[k] = c; } catch {} }
+  if (fresh(WX[k])) return true;
+  if (navigator.onLine === false) return !!WX[k];
+  try {
+    const u = `https://api.open-meteo.com/v1/forecast?latitude=${(+p.city.lat).toFixed(3)}&longitude=${(+p.city.lon).toFixed(3)}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&hourly=precipitation_probability,precipitation&timezone=auto&start_date=${today}&end_date=${last}`;
+    const r = await fetch(u, { signal: AbortSignal.timeout ? AbortSignal.timeout(7000) : undefined });
+    if (!r.ok) return false;
+    const j = await r.json(), D = j.daily || {}, H = j.hourly || {}, days = {};
+    (D.time || []).forEach((dt, i) => {
+      let rainAt = null;
+      (H.time || []).forEach((ht, h) => {
+        if (rainAt || !ht.startsWith(dt)) return;
+        const hh = +ht.slice(11, 13);
+        if (hh >= 8 && hh <= 21 && (H.precipitation_probability?.[h] ?? 0) >= 55 && (H.precipitation?.[h] ?? 0) >= 0.2) rainAt = ht.slice(11, 16);
+      });
+      const code = D.weather_code?.[i] ?? 0, sum = D.precipitation_sum?.[i] ?? 0, prob = D.precipitation_probability_max?.[i] ?? 0;
+      days[dt] = { code, max: Math.round(D.temperature_2m_max?.[i] ?? 0), min: Math.round(D.temperature_2m_min?.[i] ?? 0), mm: sum, prob,
+        rain: !!rainAt || (sum >= 1.5 && prob >= 55 && WX_RAIN.includes(code)), rainAt };
+    });
+    WX[k] = { at: Date.now(), days };
+    try { localStorage.setItem(LS, JSON.stringify(WX[k])); } catch {}
+    return true;
+  } catch { return false; }
+}
+// Ndalesat në natyrë: kur bie shi, ato duhen ndryshuar
+const WX_OUT = /park|garden|gard|kopsht|view|panoram|beach|plazh|strand|walk|shët|spazier|square|sheshi|platz|piazza|bridge|ura\b|brücke|market|treg|markt|outdoor|zoo|hill|kodr|berg|lake|liqen|see\b|river|lum|fluss|promenad|harbou?r|port|hafen|tour/i;
+function wxOutIdx(d, from) {
+  const st = d.stops || [];
+  const fromMin = from ? toMinF(from) : 0;
+  const ok = (s) => s.type !== "meal" && s.name && (!s.start || toMinF(s.start) + (+s.duration_min || 0) > fromMin);
+  let k = st.findIndex(s => ok(s) && (WX_OUT.test(s.type || "") || WX_OUT.test(s.name || "") || WX_OUT.test(s.kind || "")));
+  if (k < 0) k = st.findIndex(ok);
+  return k;
+}
+function wxChip(d) {
+  const w = wxFor(plan, d.date); if (!w) return "";
+  return `<span title="${esc(t("wx_src"))}">${wxIcon(w.code)} ${w.min}–${w.max}°${w.prob >= 30 ? ` · ${w.prob}%` : ""}</span>`;
+}
+function wxBanner(d, i, isOwn) {
+  const w = wxFor(plan, d.date); if (!w) return "";
+  let txt = "", kind = "";
+  if (w.rain) { txt = w.rainAt ? t("wx_rain_at", w.rainAt) : t("wx_rain_day"); kind = "rain"; }
+  else if (w.max >= 32) { txt = t("wx_hot", w.max); kind = "hot"; }
+  else if (w.max <= 1) { txt = t("wx_cold", w.max); kind = "cold"; }
+  if (!txt) return "";
+  const idx = wxOutIdx(d, kind === "rain" ? w.rainAt : null);
+  const btn = isOwn && idx >= 0 ? ` <button class="btn2 wxfix" onclick="openReplanWx(${i}, '${kind}', ${idx})">${esc(t("wx_fix"))}</button>` : "";
+  return `<div class="daywarn dinfo wxwarn"><span>${esc(txt)}</span>${btn}</div>`;
+}
+function wxRemTxt(p, date) {
+  const w = wxFor(p, date); if (!w) return "";
+  return t("wx_rem", wxIcon(w.code), w.min, w.max) + (w.rain ? " " + (w.rainAt ? t("wx_rain_at", w.rainAt) : t("wx_rain_day")).replace(/^🌧\s*/, "") : "");
+}
+function openReplanWx(i, kind, idx) {
+  openReplan(i); rpPick("weather");
+  document.querySelectorAll("#rpWx button").forEach(b => b.classList.toggle("on", b.dataset.v === kind));
+  const sel = document.getElementById("rpStop");
+  if (sel && [...sel.options].some(o => +o.value === idx)) sel.value = String(idx);
+}
+async function wxRefresh() {
+  if (!plan || wxBusy) return;
+  const p = plan;
+  wxBusy = wxLoad(p);
+  const ok = await wxBusy; wxBusy = null;
+  if (!ok || plan !== p) return;
+  renderTabs();
+  document.querySelectorAll("#dayTabs button").forEach(b => { const on = +b.dataset.i === curDay; b.classList.toggle("on", on); b.style.setProperty("--dc", +b.dataset.i < 0 ? "#214F78" : COLORS[+b.dataset.i % COLORS.length]); });
+  renderDay(curDay);
+  if (typeof remOn === "function" && remOn() && mode === "own") scheduleTripReminders(plan, row, false);
+}
 // ---- Pamja e errët ----
 function applyThemeMeta() {
   const dark = document.documentElement.dataset.theme === "dark";
