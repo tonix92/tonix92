@@ -488,6 +488,18 @@
   .acct.in{background:var(--surface)!important;color:var(--navy)!important;border:1px solid var(--line)!important;padding:0 12px 0 3px!important}
   .acct .ava{flex:none;width:28px;height:28px;border-radius:50%;background:var(--terra);color:#fff;display:grid;place-items:center;font-size:12.5px;font-weight:700}
   .acct .an{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .langsw{position:relative}
+  .langsw .lcur{display:flex!important;align-items:center;gap:5px;min-width:0!important;padding:6px 11px!important;color:var(--text)!important;background:var(--surface)!important;box-shadow:var(--sh-1)}
+  .langsw .lcur svg{opacity:.7}
+  .langsw .lmenu{position:absolute;top:calc(100% + 8px);right:0;z-index:300;min-width:180px;display:flex;flex-direction:column;gap:2px;padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh-3)}
+  .langsw .lmenu[hidden]{display:none}
+  .langsw .lmenu button{display:flex!important;align-items:center;gap:12px;width:100%;text-align:left;border-radius:12px!important;padding:10px 12px!important;font-size:15px!important;font-weight:600!important;letter-spacing:0!important;color:var(--text)!important;background:none!important;box-shadow:none!important}
+  .langsw .lmenu button b{min-width:26px;font-size:12px;letter-spacing:.5px;color:var(--mut)}
+  .langsw .lmenu button:hover{background:var(--surface-2)!important}
+  .langsw .lmenu button.on{background:var(--surface-3)!important}
+  .langsw .lmenu button.on::after{content:"✓";margin-left:auto;color:var(--navy)}
+  .seg[data-name=lang]{flex-wrap:wrap}
+  .seg[data-name=lang] button{flex:1 1 calc(33.33% - 8px)!important;min-width:0}
   @media(max-width:420px){.acct.in .an{display:none}.acct.in{padding:0 3px!important;width:36px;justify-content:center}.langsw button{padding:5px 6px!important;min-width:26px}}
 
   /* Navigimi: shirit poshtë në telefon, brenda header-it në desktop */
@@ -1134,7 +1146,7 @@
 <div class="top">
   <div class="topin">
     <div class="brand" onclick="go('create')" role="link" aria-label="Viaro"><svg class="lg" aria-hidden="true" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"><rect width="160" height="160" rx="36" fill="#C8202F"/><path d="M46 52 L80 110 L114 52" fill="none" stroke="#FAF4EC" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="52" r="14" fill="#F6C945"/><circle cx="114" cy="52" r="14" fill="#EBB2B0"/><circle cx="80" cy="110" r="15" fill="#FAF4EC"/><circle cx="80" cy="110" r="6" fill="#C8202F"/></svg><span class="wmt" aria-hidden="true">viaro</span><span id="brandName" class="sr">Viaro</span></div>
-    <div class="langsw" id="langSw"><button data-l="en">EN</button><button data-l="de">DE</button><button data-l="sq">SQ</button></div>
+    <div class="langsw" id="langSw"><button class="lcur" id="langCur" aria-haspopup="menu" aria-expanded="false" aria-label="Language"><span id="langCurT">EN</span><svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="lmenu" id="langMenu" role="menu" hidden><button data-l="en" role="menuitemradio"><b>EN</b>English</button><button data-l="de" role="menuitemradio"><b>DE</b>Deutsch</button><button data-l="it" role="menuitemradio"><b>IT</b>Italiano</button><button data-l="es" role="menuitemradio"><b>ES</b>Español</button><button data-l="fr" role="menuitemradio"><b>FR</b>Français</button><button data-l="sq" role="menuitemradio"><b>SQ</b>Shqip</button></div></div>
     <button class="thm" id="thmBtn" type="button" onclick="toggleTheme()"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button>
     <button class="bell" id="bellBtn" onclick="openNotifs()" style="display:none"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4zM10 20.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="bdg" id="bellN"></span></button>
     <button class="acct" id="acctBtn" onclick="acctClick()">Hyr</button>
@@ -1214,7 +1226,7 @@
     <div class="ncount" id="notesCount"></div>
     <div id="swCta"></div>
     <label data-i18n="plang"></label>
-    <div class="seg" data-name="lang"><button data-v="en">English</button><button data-v="de">Deutsch</button><button data-v="sq" class="on">Shqip</button></div>
+    <div class="seg" data-name="lang"><button data-v="en">English</button><button data-v="de">Deutsch</button><button data-v="it">Italiano</button><button data-v="es">Español</button><button data-v="fr">Français</button><button data-v="sq" class="on">Shqip</button></div>
     </div>
     <div class="wzbar"><button type="button" class="wzback" id="wzBack" onclick="wzGo(wz - 1)" data-i18n="wz_back"></button><button type="button" class="go wznext" id="wzNext" onclick="wzGo(wz + 1)" data-i18n="wz_next"></button><button class="go" id="goBtn" onclick="makePlan()" data-i18n="go" hidden></button></div>
     <div class="quota" id="quota"></div>
@@ -1760,6 +1772,306 @@ const I18N = {
     followed: "Du folgst jetzt ✓", unfollowed: "Nicht mehr gefolgt", like_login: "Erstelle ein Konto, um Pläne zu liken.",
     locale: "de-DE",
   },
+  it: {
+    privacy: "Privacy", del_acc: "Elimina account", del_q: "Eliminare definitivamente il tuo account?",
+    del_txt: "Il tuo account, i piani, le foto, i like, i commenti e i follower verranno eliminati subito. Non si può annullare.",
+    del_yes: "Sì, elimina definitivamente", del_no: "Annulla", del_done: "Il tuo account è stato eliminato.", del_err: "L’eliminazione non è riuscita. Riprova tra poco.",
+    date_q: "Quando inizia il viaggio?", date_hint: "Facoltativo: con una data, gli orari di apertura vengono controllati per ogni giorno.", h_closed: "Chiuso quel giorno", h_closes: "Chiude prima che tu finisca la visita", h_unconf: "orari non confermati", h_unknown: "Orari sconosciuti: verifica prima di andare", free: "Ingresso gratuito", fee_yes: "Ingresso a pagamento (prezzo sconosciuto)", unverified: "Non confermato", overtime: m => `Questa giornata dura circa ${m} min in più rispetto al tempo scelto.`, est_note: "~ = tempo stimato, non misurato.", gm_leg: "Percorso ↗",
+    bud_h: "Budget", bud_est: "Stima per tutto il gruppo: i prezzi reali possono variare.", bud_none: "Questo piano non ha ancora una stima del budget.", bud_calc: "Stima il budget con l’IA", bud_msg: "Stima il budget per questo piano", bud_total: "Totale", bud_pp: n => `A persona (${n})`, bud_my: "Il tuo budget", bud_left: "Rimanente", bud_over: "Fuori budget", bud_ver: "Prezzi da OpenStreetMap (verificati)", bud_free: "Alternative gratuite", bk_tickets: "Biglietti", bk_food: "Cibo", bk_transport: "Trasporti", bk_parking: "Parcheggio", bk_activities: "Attività", bk_other: "Altro", off_save: "⬇ Salva per l’uso offline", off_remove: "✓ Salvato offline · Rimuovi", off_hint: "Il piano, gli orari, gli indirizzi e le note si aprono senza internet. Offline la mappa mostra solo i segnaposto.", off_saved: "Piano salvato su questo dispositivo.", off_removed: "Rimosso da questo dispositivo.", off_full: "Spazio insufficiente su questo dispositivo.", off_list: "Salvati per l’uso offline", off_later: "Nessuna connessione: la modifica verrà salvata quando tornerai online.", off_synced: n => `${n} piani sincronizzati.`, off_mode: "Sei offline. Ecco i piani salvati su questo dispositivo.", note_add: "＋ Nota", note_edit: "Modifica nota", loc: "Dove sono", you_here: "Sei qui",
+    grp_h: "Viaggio di gruppo", grp_intro: "Invita gli amici con un link: tutti possono vedere e modificare il piano, proporre luoghi e votare. Le modifiche appaiono subito per tutti.", grp_need_acct: "Salva il piano nel tuo account per condividerlo con un gruppo.", grp_unavail: "I viaggi di gruppo non sono ancora attivi.",
+    grp_invite: "Invita amici", grp_invite_more: "Invita altri", grp_new_link: "Nuovo link", grp_renew_q: "Il vecchio link smetterà di funzionare. Chi è già entrato resta nel gruppo. Continuare?", grp_invite_text: c => `Pianifichiamo insieme il nostro viaggio a ${c} su Viaro!`, grp_link_copied: "Link d’invito copiato", grp_link: "Link d’invito",
+    grp_owner: "organizzatore", grp_remove: "Rimuovi dal gruppo", grp_leave: "Esci dal gruppo", grp_leave_q: "Uscire da questo viaggio di gruppo?", grp_left: "Sei uscito dal gruppo", grp_removed: "Non fai più parte di questo gruppo.",
+    grp_live: "Le modifiche si sincronizzano con il gruppo in tempo reale.", grp_props: "Proposte", grp_no_props: "Nessuna proposta ancora. Tocca “Proponi un luogo” per suggerire qualcosa.", grp_propose: "Proponi un luogo", grp_propose_btn: "Proponi", grp_proposed: "Proposto", grp_note_q: "Nota per il gruppo (facoltativa):",
+    grp_by: n => `di ${n}`, grp_st_added: "aggiunto", grp_st_rejected: "rifiutato", grp_up: "A favore", grp_down: "Contro",
+    grp_updated: "Il piano è stato aggiornato dal gruppo", grp_conflict: "Qualcun altro ha modificato il piano nello stesso momento. Ho caricato l’ultima versione, riprova.",
+    grp_join_login: "Accedi o crea un account per unirti al viaggio.", grp_joined: "Ti sei unito al viaggio!", grp_invalid: "Questo link d’invito non funziona più. Chiedi all’organizzatore un link nuovo.", grp_full: "Il gruppo è al completo (max 12 persone).", grp_mine: "Viaggi di gruppo",
+    h_ver: "orari verificati", far_removed: n => `Rimosso da questo giorno: ${n}, perché era troppo lontano dalle altre tappe.`, moved_in: n => `Spostato in questo giorno: ${n}, perché è più vicino alle sue tappe.`, bk_stay: "Alloggio", bud_spent: "Speso", bud_planned: "Previsto", bud_pct: p => `${p}% del budget speso`, bud_w_near: "⚠️ Ti stai avvicinando al limite del budget (oltre l’80%).", bud_w_over: "⛔ Hai superato il budget.",
+    bud_cheaper_btn: "Trova alternative più economiche", bud_cheaper_msg: "Rendi il piano più economico: sostituisci i luoghi costosi con alternative gratuite o più economiche nelle vicinanze e abbassa la stima del budget.",
+    bud_add_h: "Le tue spese", bud_amt: "Importo €", bud_note: "Nota (facoltativa), es. cena", bud_add: "Aggiungi", bud_added: "Spesa aggiunta", bud_amt_bad: "Inserisci un importo maggiore di 0.", bud_del: "Elimina",
+    vr_h: "Prossima meta?", vr_sub: "Tocca una città e ottieni un piano in pochi secondi.", vr_cta: "Pianifica →", vr_go: n => `Crea un piano per ${n}`, vr_picked: n => `${n} selezionata. Scegli i giorni e continua.`, vr_cred: "Video: Pexels", nr_btn: "Nei dintorni", nr_h: "Cosa c’è nei dintorni?", nr_sub: "Luoghi verificati vicino a te, aperti oggi, con distanza e tempo di percorrenza.", nr_see: "🏛 Attrazioni", nr_food: "🍽 Cibo", nr_cafe: "☕ Caffè",
+    nr_time: "Quanto tempo hai?", nr_from_stop: "Cerca vicino alla prossima tappa", nr_wait: "Cerco luoghi nei dintorni…", nr_nogeo: "Impossibile ottenere la tua posizione. Consentila nelle impostazioni del telefono.", nr_nogeo_plan: "Impossibile ottenere la tua posizione. Prova “Cerca vicino alla prossima tappa”.",
+    nr_open: o => `Aperto oggi ${o}`, nr_opens: o => `Apre alle ${o}`, nr_hunk: "Orari sconosciuti", nr_found: (n, d) => `${n} ${n === 1 ? "luogo" : "luoghi"} entro ${d}`, nr_none: "Nessun luogo aperto trovato nei dintorni. Prova un’altra categoria o più tempo.",
+    nr_src: "Dati: OpenStreetMap e Wikipedia. Verifica gli orari prima di andare.", nr_add: "Aggiungi al piano", nr_added: "Aggiunto da te", nr_added_ok: n => `${n} è stato aggiunto al piano`, nr_added_at: (n, s) => `${n} è stato aggiunto al piano${s ? " alle " + s : ""}. Gli orari sono stati ricalcolati.`,
+    ch_fab: "Assistente", ch_h: "Assistente di viaggio", ch_sub: "Conosce il tuo piano, l’ora e i luoghi vicini. Consiglia solo luoghi verificati.",
+    ch_hi: "Ciao! Chiedimi cosa fare adesso, dove mangiare o come arrivare alla prossima tappa.", ch_ph: "Scrivi la tua domanda…",
+    ch_q_now: "Cosa posso fare adesso?", ch_q_near: "Cosa c’è di interessante vicino a me?", ch_q_eat: "Dove posso mangiare a un prezzo giusto?", ch_q_go: "Come arrivo alla prossima tappa?", ch_q_change: "Posso cambiare il piano di oggi?",
+    ch_geo_on: "La tua posizione viene usata per i luoghi vicini", ch_geo_off: "La posizione non viene usata", ch_login: "Accedi per chattare con l’assistente.", ch_map: "Mappa", ch_route: "Percorso",
+    ch_dir: n => `Percorso verso ${n}`, ch_do_late: (n, m) => `Sì, sposta il piano di ${m} min`, ch_do_closed: n => `Sì, trova un’alternativa a ${n}`, ch_do_weather: () => "Sì, adatta la giornata al meteo", ch_do_remove: n => `Sì, rimuovi ${n}`,
+    ch_left: n => `${n} messaggi rimasti per oggi.`,
+    rp_btn: "È cambiato qualcosa?", rp_h: "È cambiato qualcosa?", rp_sub: "Cambia solo il resto della giornata. Le tappe precedenti e gli altri giorni restano come sono.",
+    rp_late: "Sono in ritardo", rp_late_s: "Sposta gli orari", rp_closed: "È chiuso", rp_closed_s: "L’IA trova un’alternativa", rp_weather: "Il meteo è cambiato", rp_weather_s: "L’IA adatta la giornata", rp_remove: "Rimuovi", rp_remove_s: "Salta questa tappa",
+    rp_howlate: "Quanto ritardo?", rp_wx: "Che tempo fa?", rp_wx_rain: "🌧 Pioggia", rp_wx_hot: "☀️ Caldo", rp_wx_cold: "❄️ Freddo",
+    rp_which_late: "Da quale tappa riprendi?", rp_which_closed: "Quale luogo è chiuso?", rp_which_weather: "Da quale tappa cambiare?", rp_which_remove: "Quale tappa vuoi rimuovere?",
+    rp_go: "Sistema il piano", rp_wait: "Sistemo il resto della giornata…", rp_login: "Accedi perché l’IA possa trovare alternative.", rp_new: "Nuova alternativa",
+    rp_done_remove: n => `${n} rimosso. Gli orari della giornata sono stati ricalcolati.`, rp_done_late: s => `Orari spostati. Riprendi alle ${s}.`, rp_dropped: n => `Non rientra più oggi: ${n}.`,
+    ed_h: "Modifica il piano con l’IA", ed_sub: "Di’ cosa cambiare. Cambia solo quella parte; il resto rimane.", ed_ph: "es. Togli il museo del giorno 2", ed_send: "Invia", ed_wait: "Modifico il piano…", ed_done: "Il piano è stato modificato.", ed_none: "Non è stato cambiato nulla.", ed_undo: "Annulla", ed_undone: "ripristinato", ed_login: "Accedi per modificare il piano con l’IA.", ed_ex: ["Rendi più tranquillo il giorno 1", "Aggiungi un ristorante vicino", "Trova attrazioni gratuite", "Aggiungi attività per bambini", "Riduci i tratti a piedi"], now_h: "Cosa visitare adesso?", now_sub: "Luoghi aperti vicino a te, per il tempo che hai.", now_btn: "Provalo", now_q: "Quanto tempo hai?", now_time: "Tempo libero", now_geo: "📍 Usa la mia posizione", now_or: "oppure scrivi dove ti trovi", now_ph: "es. Piazza Navona, Roma", now_find: "Cerca", now_wait: "Cerco luoghi aperti nei dintorni… (circa 30 secondi)", now_nogeo: "Impossibile ottenere la tua posizione. Scrivi dove ti trovi.", wx: (c, r) => `Meteo ora: ${c}°C${r ? " · pioggia" : ""}`,
+    who_q: "Chi viaggia?", adults: "Adulti", kids: "Bambini", kid_ages: "Età dei bambini", yrs: "anni",
+    grp: (a, k) => `👥 ${a} ${a === 1 ? "adulto" : "adulti"}${k ? ` · ${k} ${k === 1 ? "bambino" : "bambini"}` : ""}`,
+    quick: "Oppure scegline una:", home_h: "Piani dei viaggiatori", home_more: "Vedi tutti", home_by: a => `di ${a}`,
+    take_h: "Porta il piano con te", pdf: "📄 PDF / Stampa", cal: "📅 Aggiungi al calendario",
+    cal_h: "Aggiungi al calendario", cal_sub: "Quando inizia il viaggio? Ogni tappa viene aggiunta come evento al suo orario.", cal_date: "Data del giorno 1",
+    cal_shared: "Scegli l’app del calendario per aggiungere il piano.", pdf_fail: "Non ha funzionato su questo telefono. Prova con “Condividi”.",
+    cal_btn: "Scarica il file del calendario", cal_done: "Scaricato. Apri il file per aggiungerlo al calendario.", made_with: "Creato con Viaro",
+    notif_h: "Notifiche", notif_empty: "Nessuna notifica ancora. Quando qualcuno mette like o commenta il tuo piano, o inizia a seguirti, lo vedrai qui.",
+    n_grp_join: (a, c) => `${a} si è unito al viaggio${c ? " a " + c : ""}`, n_grp_prop: (a, c) => `${a} ha proposto un luogo${c ? " per " + c : ""}`, n_grp_added: (a, c) => `${a} ha aggiunto la tua proposta al piano${c ? " per " + c : ""}`,
+    push_h: "Notifiche sul telefono", push_s: "Quando qualcuno commenta, ti segue o propone un luogo nel tuo gruppo.", push_denied: "Le notifiche sono bloccate nelle impostazioni del telefono.", push_on: "Notifiche attivate.", push_off: "Notifiche disattivate.",
+    n_like: (a, c) => `A ${a} piace il tuo piano${c ? " per " + c : ""}`, n_comment: (a, c) => `${a} ha commentato il tuo piano${c ? " per " + c : ""}`, n_follow: a => `${a} ha iniziato a seguirti`,
+    nav_create: "✨ Crea", nav_mine: "📁 I miei piani", nav_explore: "🌍 Esplora", login: "Accedi",
+    h_where: "Dove vai?", rem_h: "Promemoria del viaggio", rem_s: "La sera prima della partenza e ogni mattina, un’ora prima della prima tappa.", rem_denied: "Le notifiche sono disattivate. Consentile nelle impostazioni del telefono.", rem_off: "Promemoria disattivati.", rem_none: "Nessun giorno imminente da ricordare.", rem_ok: n => `${n} ${n === 1 ? "promemoria impostato" : "promemoria impostati"}`, rem_eve_t: c => `Domani inizia il tuo viaggio a ${c}`, rem_eve_b: (n, f) => `${n} ${n === 1 ? "giorno pianificato" : "giorni pianificati"}.${f ? " Prima tappa: " + f : ""}`, rem_day_t: (d, c) => `Giorno ${d} a ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "Si parte da " + f : ""}`, wz1: "Dove", wz2: "Stile", wz3: "La tua giornata", wz4: "Crea", wz_next: "Continua →", wz_back: "← Indietro", wz_t: ["Destinazione", "Scegli il tuo stile", "La tua giornata", "Ultimi ritocchi"], wz_s: ["La città, quanti giorni e chi viene.", "Cosa ami e a che ritmo ti piace andare.", "Orari, spostamenti e budget.", "Lingua del piano ed eventuali desideri. Poi crealo."], wz_of: n => `Passo ${n} di 4`, lead: "Dimmi la città e cosa ami: ti preparo il piano giorno per giorno.",
+    city: "Quale città?", city_ph: "es. Roma, Parigi, Barcellona, Vienna, Tirana…",
+    days_q: "Quanti giorni?", days_n: n => `${n} ${n === 1 ? "giorno" : "giorni"}`, start: "Inizio di ogni giorno", end: "Fine",
+    pace: "Ritmo", pace_qete: "🐢 Rilassato", pace_normal: "🚶 Normale", pace_intensiv: "🏃 Intenso",
+    move: "Spostamenti", tr_kembe: "👟 A piedi", tr_publik: "🚇 + Mezzi pubblici", tr_vetura: "🚗 Auto",
+    interests: "Cosa ti interessa?",
+    i_histori: "🏛️ Storia", i_muze: "🖼️ Musei", i_art: "🎨 Arte", i_arkitekture: "🏰 Architettura", i_natyre: "🌳 Natura e parchi", i_pamje: "🌅 Panorami",
+    i_ushqim: "🍝 Cucina locale", i_blerje: "🛍️ Shopping", i_nate: "🌙 Vita notturna", i_femije: "👨‍👩‍👧 Con bambini", i_fe: "⛪ Luoghi religiosi", i_fotografi: "📸 Fotografia",
+    budget: "Budget", b_ulet: "€ Basso", b_mesem: "€€ Medio", b_larte: "€€€ Alto",
+    plang: "Lingua del piano", notes: "Cosa vuoi fare in questo viaggio? (facoltativo)",
+    notes_ph: "es. Arrivo il primo giorno alle 14. Mi piacerebbe vedere il tramonto.",
+    go: "✨ Crea il mio piano", load_sub: "Di solito ci vogliono 15–40 secondi", creating: "Creo il tuo piano…", retry: "Riprova", err_h: "Non è stato possibile creare il piano", ld_steps: ["Cerco le attrazioni della città", "Controllo orari e popolarità", "Le ordino per zona e percorso", "Scrivo l’itinerario giorno per giorno"], ph_credit: "Foto: Wikipedia", theme_d: "Modalità scura", theme_l: "Modalità chiara", d_stops: n => `${n} ${n === 1 ? "tappa" : "tappe"}`,
+    loads: ["Cerco le attrazioni…", "Controllo quali sono le più famose…", "Le raggruppo per zona…", "Scrivo il tuo piano giorno per giorno…", "Quasi fatto…"],
+    q_left: (l, n) => `Ti restano ${l} piani su ${n} questo mese.`, q_none: d => `Hai usato i piani di questo mese. I nuovi arrivano il ${d}.`, q_guest: "Senza account: 1 piano di prova al giorno.", q_guest_link: "Accedi gratis per 5 piani al mese",
+    need_city: "Inserisci una città.", no_conn: "Impossibile raggiungere il server. Controlla la connessione.", bad_resp: "Risposta non valida dal server.",
+    tips: "💡 Consigli", foot: "Verifica orari e prezzi prima di andare. Dati: © OpenStreetMap, Wikidata · Piano: Claude",
+    mine_h: "I miei piani", mine_lead_in: "Tutti i piani che hai creato o salvato.",
+    mine_lead_out: "Accedi o crea un account per conservare i tuoi piani per sempre e condividerli.", mine_local: "I piani sono salvati su questo dispositivo.",
+    create_acct_btn: "Crea account", empty_mine: "Nessun piano ancora.", create_first: "✨ Crea il tuo primo",
+    ex_h: "Esplora viaggi", ex_lead: "Piani condivisi da altri viaggiatori. Filtrali, salvali o copiane uno e personalizzalo con l’IA.", exf_btn: "⚙️ Filtri", exf_country: "Paese", exf_country_ph: "es. Italia", exf_days: "Giorni", exf_type: "Tipo", exf_pop: "Popolarità", exf_any: "Tutti", exf_likes: "Più apprezzati", exf_saves: "Più salvati", exf_cmts: "Più commentati", exf_clear: "Azzera filtri", a_copyai: "✨ Copia e personalizza con l’IA", need_acct_copyai: "Crea un account gratuito per copiare questo piano e personalizzarlo con l’IA.", copyai_ph: "es. Aggiungi un museo il giorno 2 o rendilo più economico…", copyai_ok: "Piano copiato. Scrivi qui cosa vuoi cambiare.", exf_found: n => `${n} ${n === 1 ? "piano" : "piani"}`, ex_ph: "Cerca una città o una persona…", a_post: "📸 Pubblica", a_edit_post: "📸 Modifica post", post_h: "Pubblica il tuo piano", post_edit_h: "Modifica post", post_sub: "Il tuo post appare in “Esplora”, dove gli altri possono mettere like e commentare.", post_photo: "Aggiungi una foto del viaggio (facoltativa)", post_photo_change: "Cambia foto", post_cap_lbl: "Didascalia", post_cap_ph: "Com’è andato il viaggio? Qualche consiglio per gli altri?", post_btn: "Pubblica", post_update: "Salva modifiche", post_unpost: "Rimuovi post", posting: "Pubblicazione…", posted: "Pubblicato!", unposted: "Post rimosso.", post_login: "Crea un account gratuito per pubblicare i tuoi piani.", ex_open: "Vedi piano", cm_h: "Commenti", cm_ph: "Scrivi un commento…", cm_send: "Invia", cm_login: "Accedi per commentare.", cm_empty: "Nessun commento ancora. Sii il primo!", cm_del: "Elimina", users_h: "Persone", photo_big: "La foto è troppo grande o non può essere letta.",
+    ex_empty: "Nessun piano pubblico ancora. Sii il primo a condividerne uno!", ex_empty_q: "Nessun piano per questa città ancora.", ex_off: "Questa sezione si attiva quando il database è collegato.",
+    loading: "Caricamento…",
+    b_public: "pubblico", b_private: "privato", b_local: "solo questo dispositivo", by: a => `di ${a}`, days_badge: n => `${n}<br>${n === 1 ? "giorno" : "giorni"}`,
+    share_h: "Condividi il tuo piano", public_t: "Piano pubblico", public_s: "Chiunque abbia il link può vederlo, e appare in “Esplora”",
+    copy: "Copia", share_more: "📤 Condividi in altre app…", story_btn: "🖼️ Immagine per Storia Instagram / TikTok",
+    story_help: "Tieni premuta l’immagine → <b>Salva in Foto</b>, poi pubblicala su Instagram/TikTok.", download: "⬇️ Scarica",
+    share_need: "Serve un account per condividere con un link.", share_story_only: "Puoi comunque creare un’immagine per la Storia senza account:", share_story_noacct: "Crea un’immagine del tuo piano per i social:",
+    share_own: "Rendilo pubblico così gli amici possono aprirlo con un link.", share_other: "Invia questo piano a qualcuno.",
+    share_text: (n, c) => `${n} giorni a ${c} 🧭 Guarda il mio piano:`,
+    welcome: "Bentornato 👋", tab_login: "Accedi", tab_signup: "Registrati", email: "Email", password: "Password", forgot: "Password dimenticata",
+    signup_h: "Crea il tuo account", signup_sub: "Salva i piani, condividili con gli amici e pubblicali sui social.",
+    name_lbl: "Nome (mostrato sui piani pubblici)", pass8: "Password (almeno 8 caratteri)", create_acct: "Crea account",
+    reset_h: "Reimposta password", reset_sub: "Ti invieremo un link via email.", send_link: "Invia link", back: "← Indietro",
+    newpass_h: "Nuova password", newpass_lbl: "Nuova password", save: "Salva", my_plans_btn: "📁 I miei piani", logout: "Esci",
+    e_invalid: "Email o password errate.", e_exists: "Questa email ha già un account. Prova ad accedere.", e_unconfirmed: "Conferma prima la tua email (controlla la posta).",
+    e_rate: "Troppi tentativi. Riprova tra qualche minuto.", e_pass: "La password deve avere almeno 8 caratteri.", need_name: "Inserisci il tuo nome.",
+    check_email: "📧 Ti abbiamo inviato un’email. Clicca sul link per confermare l’account, poi accedi qui.", reset_sent: "📧 Se questa email ha un account, ti abbiamo inviato un link per reimpostare la password.",
+    logged_in: "Accesso effettuato ✓", acct_created: "Account creato ✓", pass_changed: "Password cambiata ✓", logged_out: "Disconnesso",
+    accounts_off: "Gli account non sono ancora attivi.", need_acct_save: "Crea un account (o accedi) per salvare questo piano.",
+    a_share: "🔗 Condividi / Pubblica", a_regen: "🔄 Creane un altro", a_copy: "📋 Copia", a_save: "⭐ Salva nei miei piani", a_share2: "🔗 Condividi", a_similar: "✏️ Creane uno simile",
+    local_note: "💾 Questo piano è salvato solo su questo dispositivo.", local_btn: "Crea un account per salvarlo e condividerlo",
+    saved_ok: "Salvato nei tuoi piani ✓", deleted: "Piano eliminato", copied: "Piano copiato ✓", link_copied: "Link copiato ✓", copy_fail: "Copia non consentita",
+    press_again: "Tocca di nuovo per eliminare", pub_on: "Il piano è pubblico ✓", pub_off: "Il piano è privato", err: "Errore: ", not_found: "Piano non trovato o privato.",
+    migrated: n => `${n} piano/i salvati nel tuo account ✓`, edit_create: "Cambia ciò che vuoi e crea il tuo", not_saved: "Il piano non è stato salvato nel tuo account: ",
+    day: "Giorno", all: "🗺️ Tutti", gmaps: "🧭 Percorso in Google Maps", map: "📍 Mappa", h: "h",
+    plan_by: a => `Piano di ${a}`, saved_times: n => `⭐ salvato ${n} volte`,
+    story_days: (n, c) => `${n} ${n === 1 ? "giorno" : "giorni"}${c ? " · " + c : ""}`, story_more: n => `+ altri ${n} giorni`, story_free: "Crea gratis il tuo piano:",
+    tips_label: "Consigli:", ex_new: "🆕 Nuovi", ex_top: "🔥 Più apprezzati", ex_following: "👥 Seguiti",
+    pf_name: "Nome", pf_bio: "Su di me (facoltativo)", pf_plans: "Piani", my_profile: "👤 Il mio profilo",
+    follow_login: "Crea un account per seguire altri viaggiatori.", follow_none: "Non segui ancora nessuno. Apri il profilo di qualcuno in “Esplora” e tocca “Segui”.",
+    pf_n_plans: "piani", pf_followers: "follower", pf_following: "seguiti", pf_edit: "✏️ Modifica profilo",
+    follow: "➕ Segui", unfollow: "✓ Segui già", pf_empty: "Nessun piano pubblico ancora.", saved_ok_short: "Salvato ✓",
+    followed: "Ora segui ✓", unfollowed: "Non segui più", like_login: "Crea un account per mettere like ai piani.",
+    locale: "it-IT",
+  },
+  es: {
+    privacy: "Privacidad", del_acc: "Eliminar cuenta", del_q: "¿Eliminar tu cuenta de forma permanente?",
+    del_txt: "Tu cuenta, planes, fotos, me gusta, comentarios y seguidores se eliminarán de inmediato. No se puede deshacer.",
+    del_yes: "Sí, eliminar para siempre", del_no: "Cancelar", del_done: "Tu cuenta se ha eliminado.", del_err: "No se pudo eliminar. Inténtalo de nuevo en un momento.",
+    date_q: "¿Cuándo empieza el viaje?", date_hint: "Opcional: con una fecha se comprueban los horarios de apertura de cada día.", h_closed: "Cerrado ese día", h_closes: "Cierra antes de que termines la visita", h_unconf: "horario no confirmado", h_unknown: "Horario desconocido: compruébalo antes de ir", free: "Entrada gratuita", fee_yes: "Entrada de pago (precio desconocido)", unverified: "No confirmado", overtime: m => `Este día dura unos ${m} min más que el tiempo que elegiste.`, est_note: "~ = tiempo estimado, no medido.", gm_leg: "Ruta ↗",
+    bud_h: "Presupuesto", bud_est: "Estimación para todo el grupo: los precios reales pueden variar.", bud_none: "Este plan aún no tiene una estimación de presupuesto.", bud_calc: "Estimar el presupuesto con IA", bud_msg: "Estima el presupuesto de este plan", bud_total: "Total", bud_pp: n => `Por persona (${n})`, bud_my: "Tu presupuesto", bud_left: "Restante", bud_over: "Por encima del presupuesto", bud_ver: "Precios de OpenStreetMap (verificados)", bud_free: "Alternativas gratuitas", bk_tickets: "Entradas", bk_food: "Comida", bk_transport: "Transporte", bk_parking: "Aparcamiento", bk_activities: "Actividades", bk_other: "Otros", off_save: "⬇ Guardar sin conexión", off_remove: "✓ Guardado sin conexión · Quitar", off_hint: "El plan, los horarios, las direcciones y las notas se abren sin internet. Sin conexión, el mapa solo muestra los marcadores.", off_saved: "Plan guardado en este dispositivo.", off_removed: "Eliminado de este dispositivo.", off_full: "No hay espacio suficiente en este dispositivo.", off_list: "Guardados sin conexión", off_later: "Sin internet: el cambio se guardará cuando vuelvas a estar en línea.", off_synced: n => `${n} planes sincronizados.`, off_mode: "Estás sin conexión. Estos son los planes guardados en este dispositivo.", note_add: "＋ Nota", note_edit: "Editar nota", loc: "Dónde estoy", you_here: "Estás aquí",
+    grp_h: "Viaje en grupo", grp_intro: "Invita a tus amigos con un enlace: todos pueden ver y editar el plan, proponer lugares y votar. Los cambios aparecen al instante para todos.", grp_need_acct: "Guarda el plan en tu cuenta para compartirlo con un grupo.", grp_unavail: "Los viajes en grupo aún no están activados.",
+    grp_invite: "Invitar amigos", grp_invite_more: "Invitar a más", grp_new_link: "Nuevo enlace", grp_renew_q: "El enlace anterior dejará de funcionar. Quienes ya se unieron siguen en el grupo. ¿Continuar?", grp_invite_text: c => `¡Planifiquemos juntos nuestro viaje a ${c} en Viaro!`, grp_link_copied: "Enlace de invitación copiado", grp_link: "Enlace de invitación",
+    grp_owner: "organizador", grp_remove: "Quitar del grupo", grp_leave: "Salir del grupo", grp_leave_q: "¿Salir de este viaje en grupo?", grp_left: "Has salido del grupo", grp_removed: "Ya no formas parte de este grupo.",
+    grp_live: "Los cambios se sincronizan con el grupo en tiempo real.", grp_props: "Propuestas", grp_no_props: "Aún no hay propuestas. Toca “Proponer un lugar” para sugerir algo.", grp_propose: "Proponer un lugar", grp_propose_btn: "Proponer", grp_proposed: "Propuesto", grp_note_q: "Nota para el grupo (opcional):",
+    grp_by: n => `de ${n}`, grp_st_added: "añadido", grp_st_rejected: "rechazado", grp_up: "A favor", grp_down: "En contra",
+    grp_updated: "El grupo ha actualizado el plan", grp_conflict: "Otra persona cambió el plan al mismo tiempo. He cargado la última versión, inténtalo de nuevo.",
+    grp_join_login: "Inicia sesión o crea una cuenta para unirte al viaje.", grp_joined: "¡Te has unido al viaje!", grp_invalid: "Este enlace de invitación ya no funciona. Pide uno nuevo al organizador.", grp_full: "El grupo está completo (máx. 12 personas).", grp_mine: "Viajes en grupo",
+    h_ver: "horario verificado", far_removed: n => `Quitado de este día: ${n}, porque estaba demasiado lejos de las demás paradas.`, moved_in: n => `Movido a este día: ${n}, porque está más cerca de sus paradas.`, bk_stay: "Alojamiento", bud_spent: "Gastado", bud_planned: "Previsto", bud_pct: p => `${p}% del presupuesto gastado`, bud_w_near: "⚠️ Te estás acercando al límite del presupuesto (más del 80%).", bud_w_over: "⛔ Has superado el presupuesto.",
+    bud_cheaper_btn: "Buscar alternativas más baratas", bud_cheaper_msg: "Haz el plan más barato: sustituye los lugares caros por alternativas gratuitas o más baratas cercanas y reduce la estimación del presupuesto.",
+    bud_add_h: "Tus gastos", bud_amt: "Importe €", bud_note: "Nota (opcional), p. ej. cena", bud_add: "Añadir", bud_added: "Gasto añadido", bud_amt_bad: "Introduce un importe mayor que 0.", bud_del: "Eliminar",
+    vr_h: "¿Próximo destino?", vr_sub: "Toca una ciudad y obtén un plan en segundos.", vr_cta: "Planificar →", vr_go: n => `Crear un plan para ${n}`, vr_picked: n => `${n} seleccionada. Elige los días y continúa.`, vr_cred: "Vídeos: Pexels", nr_btn: "Cerca de mí", nr_h: "¿Qué hay cerca?", nr_sub: "Lugares verificados cerca de ti, abiertos hoy, con distancia y tiempo de trayecto.", nr_see: "🏛 Lugares", nr_food: "🍽 Comida", nr_cafe: "☕ Cafés",
+    nr_time: "¿Cuánto tiempo tienes?", nr_from_stop: "Buscar cerca de la próxima parada", nr_wait: "Buscando lugares cercanos…", nr_nogeo: "No se pudo obtener tu ubicación. Permítela en los ajustes del teléfono.", nr_nogeo_plan: "No se pudo obtener tu ubicación. Prueba “Buscar cerca de la próxima parada”.",
+    nr_open: o => `Abierto hoy ${o}`, nr_opens: o => `Abre a las ${o}`, nr_hunk: "Horario desconocido", nr_found: (n, d) => `${n} ${n === 1 ? "lugar" : "lugares"} a menos de ${d}`, nr_none: "No se encontraron lugares abiertos cerca. Prueba otra categoría o más tiempo.",
+    nr_src: "Datos: OpenStreetMap y Wikipedia. Comprueba el horario antes de ir.", nr_add: "Añadir al plan", nr_added: "Añadido por ti", nr_added_ok: n => `${n} se añadió al plan`, nr_added_at: (n, s) => `${n} se añadió al plan${s ? " a las " + s : ""}. Se recalcularon los horarios.`,
+    ch_fab: "Asistente", ch_h: "Asistente de viaje", ch_sub: "Conoce tu plan, la hora y los lugares cercanos. Solo recomienda lugares verificados.",
+    ch_hi: "¡Hola! Pregúntame qué hacer ahora, dónde comer o cómo llegar a tu próxima parada.", ch_ph: "Escribe tu pregunta…",
+    ch_q_now: "¿Qué puedo hacer ahora?", ch_q_near: "¿Qué hay de interesante cerca de mí?", ch_q_eat: "¿Dónde puedo comer a buen precio?", ch_q_go: "¿Cómo llego a la próxima parada?", ch_q_change: "¿Puedo cambiar el plan de hoy?",
+    ch_geo_on: "Se usa tu ubicación para los lugares cercanos", ch_geo_off: "No se usa la ubicación", ch_login: "Inicia sesión para chatear con el asistente.", ch_map: "Mapa", ch_route: "Ruta",
+    ch_dir: n => `Ruta a ${n}`, ch_do_late: (n, m) => `Sí, retrasa el plan ${m} min`, ch_do_closed: n => `Sí, busca una alternativa a ${n}`, ch_do_weather: () => "Sí, adapta el día al tiempo", ch_do_remove: n => `Sí, quita ${n}`,
+    ch_left: n => `Te quedan ${n} mensajes hoy.`,
+    rp_btn: "¿Algo ha cambiado?", rp_h: "¿Algo ha cambiado?", rp_sub: "Solo cambia el resto del día. Las paradas anteriores y los demás días se quedan igual.",
+    rp_late: "Voy con retraso", rp_late_s: "Retrasar el horario", rp_closed: "Está cerrado", rp_closed_s: "La IA busca una alternativa", rp_weather: "Cambió el tiempo", rp_weather_s: "La IA adapta el día", rp_remove: "Quitar", rp_remove_s: "Saltar esta parada",
+    rp_howlate: "¿Cuánto retraso?", rp_wx: "¿Qué tiempo hace?", rp_wx_rain: "🌧 Lluvia", rp_wx_hot: "☀️ Calor", rp_wx_cold: "❄️ Frío",
+    rp_which_late: "¿Desde qué parada continúas?", rp_which_closed: "¿Qué lugar está cerrado?", rp_which_weather: "¿Cambiar desde qué parada?", rp_which_remove: "¿Qué parada quieres quitar?",
+    rp_go: "Arreglar el plan", rp_wait: "Arreglando el resto del día…", rp_login: "Inicia sesión para que la IA busque alternativas.", rp_new: "Nueva alternativa",
+    rp_done_remove: n => `${n} quitado. Se recalcularon los horarios del día.`, rp_done_late: s => `Horario retrasado. Continúas a las ${s}.`, rp_dropped: n => `Ya no cabe hoy: ${n}.`,
+    ed_h: "Cambiar el plan con IA", ed_sub: "Di qué quieres cambiar. Solo cambia esa parte; el resto se queda.", ed_ph: "p. ej. Quita el museo del día 2", ed_send: "Enviar", ed_wait: "Cambiando el plan…", ed_done: "El plan se ha cambiado.", ed_none: "No se cambió nada.", ed_undo: "Deshacer", ed_undone: "restaurado", ed_login: "Inicia sesión para cambiar el plan con IA.", ed_ex: ["Haz el día 1 más tranquilo", "Añade un restaurante cercano", "Busca atracciones gratuitas", "Añade actividades para niños", "Reduce los trayectos a pie"], now_h: "¿Qué visitar ahora?", now_sub: "Lugares abiertos cerca de ti, para el tiempo que tienes.", now_btn: "Probar", now_q: "¿Cuánto tiempo tienes?", now_time: "Tiempo libre", now_geo: "📍 Usar mi ubicación", now_or: "o escribe dónde estás", now_ph: "p. ej. Puerta del Sol, Madrid", now_find: "Buscar", now_wait: "Buscando lugares abiertos cerca… (unos 30 segundos)", now_nogeo: "No se pudo obtener tu ubicación. Escribe dónde estás.", wx: (c, r) => `Tiempo ahora: ${c}°C${r ? " · lluvia" : ""}`,
+    who_q: "¿Quién viaja?", adults: "Adultos", kids: "Niños", kid_ages: "Edades de los niños", yrs: "años",
+    grp: (a, k) => `👥 ${a} ${a === 1 ? "adulto" : "adultos"}${k ? ` · ${k} ${k === 1 ? "niño" : "niños"}` : ""}`,
+    quick: "O elige una:", home_h: "Planes de viajeros", home_more: "Ver todos", home_by: a => `de ${a}`,
+    take_h: "Llévate el plan", pdf: "📄 PDF / Imprimir", cal: "📅 Añadir al calendario",
+    cal_h: "Añadir al calendario", cal_sub: "¿Cuándo empieza tu viaje? Cada parada se añade como evento a su hora.", cal_date: "Fecha del día 1",
+    cal_shared: "Elige tu app de calendario para añadir el plan.", pdf_fail: "No funcionó en este teléfono. Prueba con “Compartir”.",
+    cal_btn: "Descargar archivo de calendario", cal_done: "Descargado. Abre el archivo para añadirlo a tu calendario.", made_with: "Hecho con Viaro",
+    notif_h: "Notificaciones", notif_empty: "Aún no hay notificaciones. Cuando alguien dé me gusta o comente tu plan, o empiece a seguirte, lo verás aquí.",
+    n_grp_join: (a, c) => `${a} se unió al viaje${c ? " a " + c : ""}`, n_grp_prop: (a, c) => `${a} propuso un lugar${c ? " para " + c : ""}`, n_grp_added: (a, c) => `${a} añadió tu propuesta al plan${c ? " para " + c : ""}`,
+    push_h: "Notificaciones en el teléfono", push_s: "Cuando alguien comenta, te sigue o propone un lugar en tu grupo.", push_denied: "Las notificaciones están bloqueadas en los ajustes del teléfono.", push_on: "Notificaciones activadas.", push_off: "Notificaciones desactivadas.",
+    n_like: (a, c) => `A ${a} le gustó tu plan${c ? " para " + c : ""}`, n_comment: (a, c) => `${a} comentó tu plan${c ? " para " + c : ""}`, n_follow: a => `${a} empezó a seguirte`,
+    nav_create: "✨ Crear", nav_mine: "📁 Mis planes", nav_explore: "🌍 Explorar", login: "Iniciar sesión",
+    h_where: "¿Adónde vas?", rem_h: "Recordatorios del viaje", rem_s: "La tarde antes de salir y cada mañana, una hora antes de tu primera parada.", rem_denied: "Las notificaciones están desactivadas. Permítelas en los ajustes del teléfono.", rem_off: "Recordatorios desactivados.", rem_none: "No hay días próximos que recordar.", rem_ok: n => `${n} ${n === 1 ? "recordatorio programado" : "recordatorios programados"}`, rem_eve_t: c => `Mañana empieza tu viaje a ${c}`, rem_eve_b: (n, f) => `${n} ${n === 1 ? "día planificado" : "días planificados"}.${f ? " Primera parada: " + f : ""}`, rem_day_t: (d, c) => `Día ${d} en ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "Empieza en " + f : ""}`, wz1: "Dónde", wz2: "Estilo", wz3: "Tu día", wz4: "Crear", wz_next: "Continuar →", wz_back: "← Atrás", wz_t: ["Destino", "Elige tu estilo", "Tu día", "Últimos detalles"], wz_s: ["La ciudad, cuántos días y quién viene.", "Lo que te gusta y a qué ritmo te gusta ir.", "Horarios, desplazamientos y presupuesto.", "Idioma del plan y tus deseos. Después, créalo."], wz_of: n => `Paso ${n} de 4`, lead: "Dime la ciudad y lo que te gusta: te preparo el plan día a día.",
+    city: "¿Qué ciudad?", city_ph: "p. ej. Roma, París, Barcelona, Viena, Tirana…",
+    days_q: "¿Cuántos días?", days_n: n => `${n} ${n === 1 ? "día" : "días"}`, start: "Inicio de cada día", end: "Fin",
+    pace: "Ritmo", pace_qete: "🐢 Tranquilo", pace_normal: "🚶 Normal", pace_intensiv: "🏃 Intenso",
+    move: "Desplazamientos", tr_kembe: "👟 A pie", tr_publik: "🚇 + Transporte público", tr_vetura: "🚗 Coche",
+    interests: "¿Qué te interesa?",
+    i_histori: "🏛️ Historia", i_muze: "🖼️ Museos", i_art: "🎨 Arte", i_arkitekture: "🏰 Arquitectura", i_natyre: "🌳 Naturaleza y parques", i_pamje: "🌅 Miradores",
+    i_ushqim: "🍝 Comida local", i_blerje: "🛍️ Compras", i_nate: "🌙 Vida nocturna", i_femije: "👨‍👩‍👧 Con niños", i_fe: "⛪ Lugares religiosos", i_fotografi: "📸 Fotografía",
+    budget: "Presupuesto", b_ulet: "€ Bajo", b_mesem: "€€ Medio", b_larte: "€€€ Alto",
+    plang: "Idioma del plan", notes: "¿Qué quieres hacer en este viaje? (opcional)",
+    notes_ph: "p. ej. Llego el primer día a las 14:00. Me encantaría ver la puesta de sol.",
+    go: "✨ Crear mi plan", load_sub: "Suele tardar 15–40 segundos", creating: "Creando tu plan…", retry: "Reintentar", err_h: "No se pudo crear el plan", ld_steps: ["Buscando las atracciones de la ciudad", "Comprobando horarios y popularidad", "Ordenándolas por zona y ruta", "Escribiendo tu itinerario día a día"], ph_credit: "Fotos: Wikipedia", theme_d: "Modo oscuro", theme_l: "Modo claro", d_stops: n => `${n} ${n === 1 ? "parada" : "paradas"}`,
+    loads: ["Buscando atracciones…", "Comprobando cuáles son las más famosas…", "Agrupándolas por zona…", "Escribiendo tu plan día a día…", "Ya casi está…"],
+    q_left: (l, n) => `Te quedan ${l} de ${n} planes este mes.`, q_none: d => `Has usado los planes de este mes. Los nuevos llegan el ${d}.`, q_guest: "Sin cuenta: 1 plan de prueba al día.", q_guest_link: "Inicia sesión gratis para 5 planes al mes",
+    need_city: "Introduce una ciudad.", no_conn: "No se pudo conectar con el servidor. Revisa tu conexión.", bad_resp: "Respuesta no válida del servidor.",
+    tips: "💡 Consejos", foot: "Comprueba horarios y precios antes de ir. Datos: © OpenStreetMap, Wikidata · Plan: Claude",
+    mine_h: "Mis planes", mine_lead_in: "Todos los planes que has creado o guardado.",
+    mine_lead_out: "Inicia sesión o crea una cuenta para guardar tus planes para siempre y compartirlos.", mine_local: "Los planes se guardan en este dispositivo.",
+    create_acct_btn: "Crear cuenta", empty_mine: "Aún no hay planes.", create_first: "✨ Crea el primero",
+    ex_h: "Explorar viajes", ex_lead: "Planes compartidos por otros viajeros. Fíltralos, guárdalos o copia uno y adáptalo con IA.", exf_btn: "⚙️ Filtros", exf_country: "País", exf_country_ph: "p. ej. Italia", exf_days: "Días", exf_type: "Tipo", exf_pop: "Popularidad", exf_any: "Todos", exf_likes: "Más gustados", exf_saves: "Más guardados", exf_cmts: "Más comentados", exf_clear: "Borrar filtros", a_copyai: "✨ Copiar y personalizar con IA", need_acct_copyai: "Crea una cuenta gratis para copiar este plan y personalizarlo con IA.", copyai_ph: "p. ej. Añade un museo el día 2 o hazlo más barato…", copyai_ok: "Plan copiado. Escribe aquí lo que quieres cambiar.", exf_found: n => `${n} ${n === 1 ? "plan" : "planes"}`, ex_ph: "Busca una ciudad o una persona…", a_post: "📸 Publicar", a_edit_post: "📸 Editar publicación", post_h: "Publica tu plan", post_edit_h: "Editar publicación", post_sub: "Tu publicación aparece en “Explorar”, donde otros pueden darle me gusta y comentar.", post_photo: "Añade una foto de tu viaje (opcional)", post_photo_change: "Cambiar foto", post_cap_lbl: "Texto", post_cap_ph: "¿Qué tal el viaje? ¿Algún consejo para otros?", post_btn: "Publicar", post_update: "Guardar cambios", post_unpost: "Quitar publicación", posting: "Publicando…", posted: "¡Publicado!", unposted: "Publicación quitada.", post_login: "Crea una cuenta gratis para publicar tus planes.", ex_open: "Ver plan", cm_h: "Comentarios", cm_ph: "Escribe un comentario…", cm_send: "Enviar", cm_login: "Inicia sesión para comentar.", cm_empty: "Aún no hay comentarios. ¡Sé el primero!", cm_del: "Eliminar", users_h: "Personas", photo_big: "La foto es demasiado grande o no se puede leer.",
+    ex_empty: "Aún no hay planes públicos. ¡Sé el primero en compartir uno!", ex_empty_q: "Aún no hay planes para esta ciudad.", ex_off: "Esta sección se activa cuando la base de datos esté conectada.",
+    loading: "Cargando…",
+    b_public: "público", b_private: "privado", b_local: "solo este dispositivo", by: a => `de ${a}`, days_badge: n => `${n}<br>${n === 1 ? "día" : "días"}`,
+    share_h: "Comparte tu plan", public_t: "Plan público", public_s: "Cualquiera con el enlace puede verlo, y aparece en “Explorar”",
+    copy: "Copiar", share_more: "📤 Compartir en otras apps…", story_btn: "🖼️ Imagen para Historia de Instagram / TikTok",
+    story_help: "Mantén pulsada la imagen → <b>Guardar en Fotos</b>, y luego publícala en Instagram/TikTok.", download: "⬇️ Descargar",
+    share_need: "Necesitas una cuenta para compartir con un enlace.", share_story_only: "Aun así puedes crear una imagen para Historia sin cuenta:", share_story_noacct: "Crea una imagen de tu plan para redes sociales:",
+    share_own: "Hazlo público para que tus amigos lo abran con un enlace.", share_other: "Envía este plan a alguien.",
+    share_text: (n, c) => `${n} días en ${c} 🧭 Mira mi plan:`,
+    welcome: "Hola de nuevo 👋", tab_login: "Iniciar sesión", tab_signup: "Registrarse", email: "Correo electrónico", password: "Contraseña", forgot: "He olvidado la contraseña",
+    signup_h: "Crea tu cuenta", signup_sub: "Guarda planes, compártelos con amigos y publícalos en redes sociales.",
+    name_lbl: "Nombre (visible en los planes públicos)", pass8: "Contraseña (al menos 8 caracteres)", create_acct: "Crear cuenta",
+    reset_h: "Restablecer contraseña", reset_sub: "Te enviaremos un enlace por correo.", send_link: "Enviar enlace", back: "← Atrás",
+    newpass_h: "Nueva contraseña", newpass_lbl: "Nueva contraseña", save: "Guardar", my_plans_btn: "📁 Mis planes", logout: "Cerrar sesión",
+    e_invalid: "Correo o contraseña incorrectos.", e_exists: "Este correo ya tiene una cuenta. Prueba a iniciar sesión.", e_unconfirmed: "Confirma primero tu correo (revisa tu bandeja de entrada).",
+    e_rate: "Demasiados intentos. Inténtalo de nuevo en unos minutos.", e_pass: "La contraseña debe tener al menos 8 caracteres.", need_name: "Introduce tu nombre.",
+    check_email: "📧 Te hemos enviado un correo. Haz clic en el enlace para confirmar tu cuenta y luego inicia sesión aquí.", reset_sent: "📧 Si este correo tiene una cuenta, te hemos enviado un enlace para restablecer la contraseña.",
+    logged_in: "Sesión iniciada ✓", acct_created: "Cuenta creada ✓", pass_changed: "Contraseña cambiada ✓", logged_out: "Sesión cerrada",
+    accounts_off: "Las cuentas aún no están activadas.", need_acct_save: "Crea una cuenta (o inicia sesión) para guardar este plan.",
+    a_share: "🔗 Compartir / Publicar", a_regen: "🔄 Crear otro", a_copy: "📋 Copiar", a_save: "⭐ Guardar en mis planes", a_share2: "🔗 Compartir", a_similar: "✏️ Crear uno parecido",
+    local_note: "💾 Este plan solo está guardado en este dispositivo.", local_btn: "Crea una cuenta para guardarlo y compartirlo",
+    saved_ok: "Guardado en tus planes ✓", deleted: "Plan eliminado", copied: "Plan copiado ✓", link_copied: "Enlace copiado ✓", copy_fail: "No se permite copiar",
+    press_again: "Toca de nuevo para eliminar", pub_on: "El plan es público ✓", pub_off: "El plan es privado", err: "Error: ", not_found: "Plan no encontrado o privado.",
+    migrated: n => `${n} plan(es) guardado(s) en tu cuenta ✓`, edit_create: "Cambia lo que quieras y crea el tuyo", not_saved: "El plan no se guardó en tu cuenta: ",
+    day: "Día", all: "🗺️ Todos", gmaps: "🧭 Ruta en Google Maps", map: "📍 Mapa", h: "h",
+    plan_by: a => `Plan de ${a}`, saved_times: n => `⭐ guardado ${n} veces`,
+    story_days: (n, c) => `${n} ${n === 1 ? "día" : "días"}${c ? " · " + c : ""}`, story_more: n => `+ ${n} días más`, story_free: "Crea tu propio plan gratis:",
+    tips_label: "Consejos:", ex_new: "🆕 Nuevos", ex_top: "🔥 Más gustados", ex_following: "👥 Siguiendo",
+    pf_name: "Nombre", pf_bio: "Sobre mí (opcional)", pf_plans: "Planes", my_profile: "👤 Mi perfil",
+    follow_login: "Crea una cuenta para seguir a otros viajeros.", follow_none: "Aún no sigues a nadie. Abre el perfil de alguien en “Explorar” y toca “Seguir”.",
+    pf_n_plans: "planes", pf_followers: "seguidores", pf_following: "siguiendo", pf_edit: "✏️ Editar perfil",
+    follow: "➕ Seguir", unfollow: "✓ Siguiendo", pf_empty: "Aún no hay planes públicos.", saved_ok_short: "Guardado ✓",
+    followed: "Ahora lo sigues ✓", unfollowed: "Dejaste de seguir", like_login: "Crea una cuenta para dar me gusta a los planes.",
+    locale: "es-ES",
+  },
+  fr: {
+    privacy: "Confidentialité", del_acc: "Supprimer le compte", del_q: "Supprimer définitivement ton compte ?",
+    del_txt: "Ton compte, tes plans, photos, j’aime, commentaires et abonnés seront supprimés immédiatement. C’est irréversible.",
+    del_yes: "Oui, supprimer définitivement", del_no: "Annuler", del_done: "Ton compte a été supprimé.", del_err: "La suppression n’a pas abouti. Réessaie dans un instant.",
+    date_q: "Quand commence le voyage ?", date_hint: "Facultatif : avec une date, les horaires d’ouverture sont vérifiés pour chaque jour.", h_closed: "Fermé ce jour-là", h_closes: "Ferme avant la fin de ta visite", h_unconf: "horaires non confirmés", h_unknown: "Horaires inconnus : vérifie avant d’y aller", free: "Entrée gratuite", fee_yes: "Entrée payante (prix inconnu)", unverified: "Non confirmé", overtime: m => `Cette journée dure environ ${m} min de plus que le temps choisi.`, est_note: "~ = durée estimée, non mesurée.", gm_leg: "Itinéraire ↗",
+    bud_h: "Budget", bud_est: "Estimation pour tout le groupe : les prix réels peuvent varier.", bud_none: "Ce plan n’a pas encore d’estimation de budget.", bud_calc: "Estimer le budget avec l’IA", bud_msg: "Estime le budget de ce plan", bud_total: "Total", bud_pp: n => `Par personne (${n})`, bud_my: "Ton budget", bud_left: "Reste", bud_over: "Budget dépassé", bud_ver: "Prix issus d’OpenStreetMap (vérifiés)", bud_free: "Alternatives gratuites", bk_tickets: "Billets", bk_food: "Repas", bk_transport: "Transports", bk_parking: "Stationnement", bk_activities: "Activités", bk_other: "Autre", off_save: "⬇ Enregistrer hors ligne", off_remove: "✓ Enregistré hors ligne · Retirer", off_hint: "Le plan, les horaires, les adresses et les notes s’ouvrent sans internet. Hors ligne, la carte n’affiche que les repères.", off_saved: "Plan enregistré sur cet appareil.", off_removed: "Retiré de cet appareil.", off_full: "Pas assez d’espace sur cet appareil.", off_list: "Enregistrés hors ligne", off_later: "Pas d’internet : la modification sera enregistrée quand tu seras de nouveau en ligne.", off_synced: n => `${n} plans synchronisés.`, off_mode: "Tu es hors ligne. Voici les plans enregistrés sur cet appareil.", note_add: "＋ Note", note_edit: "Modifier la note", loc: "Où suis-je", you_here: "Tu es ici",
+    grp_h: "Voyage de groupe", grp_intro: "Invite tes amis avec un lien : chacun peut voir et modifier le plan, proposer des lieux et voter. Les changements apparaissent aussitôt pour tous.", grp_need_acct: "Enregistre le plan dans ton compte pour le partager avec un groupe.", grp_unavail: "Les voyages de groupe ne sont pas encore activés.",
+    grp_invite: "Inviter des amis", grp_invite_more: "Inviter d’autres personnes", grp_new_link: "Nouveau lien", grp_renew_q: "L’ancien lien ne fonctionnera plus. Les personnes déjà inscrites restent dans le groupe. Continuer ?", grp_invite_text: c => `Préparons ensemble notre voyage à ${c} sur Viaro !`, grp_link_copied: "Lien d’invitation copié", grp_link: "Lien d’invitation",
+    grp_owner: "organisateur", grp_remove: "Retirer du groupe", grp_leave: "Quitter le groupe", grp_leave_q: "Quitter ce voyage de groupe ?", grp_left: "Tu as quitté le groupe", grp_removed: "Tu ne fais plus partie de ce groupe.",
+    grp_live: "Les changements se synchronisent avec le groupe en temps réel.", grp_props: "Propositions", grp_no_props: "Aucune proposition pour l’instant. Touche « Proposer un lieu » pour suggérer quelque chose.", grp_propose: "Proposer un lieu", grp_propose_btn: "Proposer", grp_proposed: "Proposé", grp_note_q: "Note pour le groupe (facultatif) :",
+    grp_by: n => `par ${n}`, grp_st_added: "ajouté", grp_st_rejected: "refusé", grp_up: "Pour", grp_down: "Contre",
+    grp_updated: "Le plan a été mis à jour par le groupe", grp_conflict: "Quelqu’un d’autre a modifié le plan en même temps. J’ai chargé la dernière version, réessaie.",
+    grp_join_login: "Connecte-toi ou crée un compte pour rejoindre le voyage.", grp_joined: "Tu as rejoint le voyage !", grp_invalid: "Ce lien d’invitation ne fonctionne plus. Demande un nouveau lien à l’organisateur.", grp_full: "Le groupe est complet (12 personnes max.).", grp_mine: "Voyages de groupe",
+    h_ver: "horaires vérifiés", far_removed: n => `Retiré de ce jour : ${n}, car trop éloigné des autres étapes.`, moved_in: n => `Déplacé vers ce jour : ${n}, car plus proche de ses étapes.`, bk_stay: "Hébergement", bud_spent: "Dépensé", bud_planned: "Prévu", bud_pct: p => `${p} % du budget dépensé`, bud_w_near: "⚠️ Tu approches de ton budget (plus de 80 %).", bud_w_over: "⛔ Tu as dépassé ton budget.",
+    bud_cheaper_btn: "Trouver des alternatives moins chères", bud_cheaper_msg: "Rends le plan moins cher : remplace les lieux coûteux par des alternatives gratuites ou moins chères à proximité et baisse l’estimation du budget.",
+    bud_add_h: "Tes dépenses", bud_amt: "Montant €", bud_note: "Note (facultatif), ex. dîner", bud_add: "Ajouter", bud_added: "Dépense ajoutée", bud_amt_bad: "Saisis un montant supérieur à 0.", bud_del: "Supprimer",
+    vr_h: "Prochaine destination ?", vr_sub: "Touche une ville et obtiens un plan en quelques secondes.", vr_cta: "Planifier →", vr_go: n => `Créer un plan pour ${n}`, vr_picked: n => `${n} sélectionnée. Choisis tes jours et continue.`, vr_cred: "Vidéos : Pexels", nr_btn: "Autour de moi", nr_h: "Qu’y a-t-il à proximité ?", nr_sub: "Lieux vérifiés près de toi, ouverts aujourd’hui, avec distance et temps de trajet.", nr_see: "🏛 À voir", nr_food: "🍽 Manger", nr_cafe: "☕ Cafés",
+    nr_time: "Combien de temps as-tu ?", nr_from_stop: "Chercher près de la prochaine étape", nr_wait: "Recherche de lieux à proximité…", nr_nogeo: "Impossible d’obtenir ta position. Autorise-la dans les réglages du téléphone.", nr_nogeo_plan: "Impossible d’obtenir ta position. Essaie « Chercher près de la prochaine étape ».",
+    nr_open: o => `Ouvert aujourd’hui ${o}`, nr_opens: o => `Ouvre à ${o}`, nr_hunk: "Horaires inconnus", nr_found: (n, d) => `${n} ${n === 1 ? "lieu" : "lieux"} à moins de ${d}`, nr_none: "Aucun lieu ouvert trouvé à proximité. Essaie une autre catégorie ou plus de temps.",
+    nr_src: "Données : OpenStreetMap et Wikipédia. Vérifie les horaires avant d’y aller.", nr_add: "Ajouter au plan", nr_added: "Ajouté par toi", nr_added_ok: n => `${n} a été ajouté au plan`, nr_added_at: (n, s) => `${n} a été ajouté au plan${s ? " à " + s : ""}. Les horaires ont été recalculés.`,
+    ch_fab: "Assistant", ch_h: "Assistant de voyage", ch_sub: "Il connaît ton plan, l’heure et les lieux à proximité. Il ne recommande que des lieux vérifiés.",
+    ch_hi: "Salut ! Demande-moi quoi faire maintenant, où manger ou comment rejoindre ta prochaine étape.", ch_ph: "Écris ta question…",
+    ch_q_now: "Que puis-je faire maintenant ?", ch_q_near: "Qu’y a-t-il d’intéressant près de moi ?", ch_q_eat: "Où manger à un prix correct ?", ch_q_go: "Comment rejoindre la prochaine étape ?", ch_q_change: "Puis-je modifier le plan d’aujourd’hui ?",
+    ch_geo_on: "Ta position est utilisée pour les lieux à proximité", ch_geo_off: "La position n’est pas utilisée", ch_login: "Connecte-toi pour discuter avec l’assistant.", ch_map: "Carte", ch_route: "Itinéraire",
+    ch_dir: n => `Itinéraire vers ${n}`, ch_do_late: (n, m) => `Oui, décale le plan de ${m} min`, ch_do_closed: n => `Oui, trouve une alternative à ${n}`, ch_do_weather: () => "Oui, adapte la journée à la météo", ch_do_remove: n => `Oui, retire ${n}`,
+    ch_left: n => `Il te reste ${n} messages aujourd’hui.`,
+    rp_btn: "Un imprévu ?", rp_h: "Un imprévu ?", rp_sub: "Seul le reste de la journée change. Les étapes précédentes et les autres jours restent identiques.",
+    rp_late: "Je suis en retard", rp_late_s: "Décaler le programme", rp_closed: "C’est fermé", rp_closed_s: "L’IA trouve une alternative", rp_weather: "La météo a changé", rp_weather_s: "L’IA adapte la journée", rp_remove: "Retirer", rp_remove_s: "Passer cette étape",
+    rp_howlate: "Combien de retard ?", rp_wx: "Quel temps fait-il ?", rp_wx_rain: "🌧 Pluie", rp_wx_hot: "☀️ Chaleur", rp_wx_cold: "❄️ Froid",
+    rp_which_late: "À partir de quelle étape continues-tu ?", rp_which_closed: "Quel lieu est fermé ?", rp_which_weather: "Changer à partir de quelle étape ?", rp_which_remove: "Quelle étape veux-tu retirer ?",
+    rp_go: "Corriger le plan", rp_wait: "Je corrige le reste de la journée…", rp_login: "Connecte-toi pour que l’IA trouve des alternatives.", rp_new: "Nouvelle alternative",
+    rp_done_remove: n => `${n} retiré. Les horaires de la journée ont été recalculés.`, rp_done_late: s => `Programme décalé. Tu reprends à ${s}.`, rp_dropped: n => `Ne rentre plus aujourd’hui : ${n}.`,
+    ed_h: "Modifier le plan avec l’IA", ed_sub: "Dis ce qu’il faut changer. Seule cette partie change ; le reste ne bouge pas.", ed_ph: "ex. Retire le musée du jour 2", ed_send: "Envoyer", ed_wait: "Modification du plan…", ed_done: "Le plan a été modifié.", ed_none: "Rien n’a été modifié.", ed_undo: "Annuler", ed_undone: "restauré", ed_login: "Connecte-toi pour modifier le plan avec l’IA.", ed_ex: ["Rends le jour 1 plus calme", "Ajoute un restaurant à proximité", "Trouve des attractions gratuites", "Ajoute des activités pour enfants", "Réduis la marche"], now_h: "Que visiter maintenant ?", now_sub: "Des lieux ouverts près de toi, pour le temps dont tu disposes.", now_btn: "Essayer", now_q: "Combien de temps as-tu ?", now_time: "Temps libre", now_geo: "📍 Utiliser ma position", now_or: "ou écris où tu es", now_ph: "ex. Place de la Concorde, Paris", now_find: "Chercher", now_wait: "Recherche de lieux ouverts à proximité… (environ 30 secondes)", now_nogeo: "Impossible d’obtenir ta position. Écris où tu es.", wx: (c, r) => `Météo actuelle : ${c} °C${r ? " · pluie" : ""}`,
+    who_q: "Qui voyage ?", adults: "Adultes", kids: "Enfants", kid_ages: "Âge des enfants", yrs: "ans",
+    grp: (a, k) => `👥 ${a} ${a === 1 ? "adulte" : "adultes"}${k ? ` · ${k} ${k === 1 ? "enfant" : "enfants"}` : ""}`,
+    quick: "Ou choisis-en une :", home_h: "Plans de voyageurs", home_more: "Tout voir", home_by: a => `par ${a}`,
+    take_h: "Emporte ton plan", pdf: "📄 PDF / Imprimer", cal: "📅 Ajouter au calendrier",
+    cal_h: "Ajouter au calendrier", cal_sub: "Quand commence ton voyage ? Chaque étape est ajoutée comme événement à son horaire.", cal_date: "Date du jour 1",
+    cal_shared: "Choisis ton application de calendrier pour ajouter le plan.", pdf_fail: "Ça n’a pas fonctionné sur ce téléphone. Essaie plutôt « Partager ».",
+    cal_btn: "Télécharger le fichier calendrier", cal_done: "Téléchargé. Ouvre le fichier pour l’ajouter à ton calendrier.", made_with: "Créé avec Viaro",
+    notif_h: "Notifications", notif_empty: "Pas encore de notifications. Quand quelqu’un aime ou commente ton plan, ou s’abonne à toi, tu le verras ici.",
+    n_grp_join: (a, c) => `${a} a rejoint le voyage${c ? " à " + c : ""}`, n_grp_prop: (a, c) => `${a} a proposé un lieu${c ? " pour " + c : ""}`, n_grp_added: (a, c) => `${a} a ajouté ta proposition au plan${c ? " pour " + c : ""}`,
+    push_h: "Notifications sur le téléphone", push_s: "Quand quelqu’un commente, s’abonne à toi ou propose un lieu dans ton groupe.", push_denied: "Les notifications sont bloquées dans les réglages du téléphone.", push_on: "Notifications activées.", push_off: "Notifications désactivées.",
+    n_like: (a, c) => `${a} a aimé ton plan${c ? " pour " + c : ""}`, n_comment: (a, c) => `${a} a commenté ton plan${c ? " pour " + c : ""}`, n_follow: a => `${a} s’est abonné à toi`,
+    nav_create: "✨ Créer", nav_mine: "📁 Mes plans", nav_explore: "🌍 Explorer", login: "Connexion",
+    h_where: "Où vas-tu ?", rem_h: "Rappels de voyage", rem_s: "La veille du départ et chaque matin, une heure avant ta première étape.", rem_denied: "Les notifications sont désactivées. Autorise-les dans les réglages du téléphone.", rem_off: "Rappels désactivés.", rem_none: "Aucun jour à venir à rappeler.", rem_ok: n => `${n} ${n === 1 ? "rappel programmé" : "rappels programmés"}`, rem_eve_t: c => `Ton voyage à ${c} commence demain`, rem_eve_b: (n, f) => `${n} ${n === 1 ? "jour prévu" : "jours prévus"}.${f ? " Première étape : " + f : ""}`, rem_day_t: (d, c) => `Jour ${d} à ${c}`, rem_day_b: (th, f) => `${th}${f ? (th ? " · " : "") + "On commence par " + f : ""}`, wz1: "Où", wz2: "Style", wz3: "Ta journée", wz4: "Créer", wz_next: "Continuer →", wz_back: "← Retour", wz_t: ["Destination", "Choisis ton style", "Ta journée", "Dernières touches"], wz_s: ["La ville, combien de jours et qui vient.", "Ce que tu aimes et à quel rythme tu aimes aller.", "Horaires, déplacements et budget.", "Langue du plan et tes envies. Puis crée-le."], wz_of: n => `Étape ${n} sur 4`, lead: "Dis-moi la ville et ce que tu aimes : je te prépare le plan jour par jour.",
+    city: "Quelle ville ?", city_ph: "ex. Rome, Paris, Barcelone, Vienne, Tirana…",
+    days_q: "Combien de jours ?", days_n: n => `${n} ${n === 1 ? "jour" : "jours"}`, start: "Début de chaque jour", end: "Fin",
+    pace: "Rythme", pace_qete: "🐢 Tranquille", pace_normal: "🚶 Normal", pace_intensiv: "🏃 Intense",
+    move: "Déplacements", tr_kembe: "👟 À pied", tr_publik: "🚇 + Transports en commun", tr_vetura: "🚗 Voiture",
+    interests: "Qu’est-ce qui t’intéresse ?",
+    i_histori: "🏛️ Histoire", i_muze: "🖼️ Musées", i_art: "🎨 Art", i_arkitekture: "🏰 Architecture", i_natyre: "🌳 Nature et parcs", i_pamje: "🌅 Points de vue",
+    i_ushqim: "🍝 Cuisine locale", i_blerje: "🛍️ Shopping", i_nate: "🌙 Vie nocturne", i_femije: "👨‍👩‍👧 Avec enfants", i_fe: "⛪ Lieux religieux", i_fotografi: "📸 Photographie",
+    budget: "Budget", b_ulet: "€ Petit", b_mesem: "€€ Moyen", b_larte: "€€€ Élevé",
+    plang: "Langue du plan", notes: "Que veux-tu faire pendant ce voyage ? (facultatif)",
+    notes_ph: "ex. J’arrive le premier jour à 14 h. J’aimerais voir le coucher du soleil.",
+    go: "✨ Créer mon plan", load_sub: "Cela prend généralement 15 à 40 secondes", creating: "Création de ton plan…", retry: "Réessayer", err_h: "Le plan n’a pas pu être créé", ld_steps: ["Recherche des attractions de la ville", "Vérification des horaires et de la popularité", "Classement par quartier et itinéraire", "Rédaction de ton programme jour par jour"], ph_credit: "Photos : Wikipédia", theme_d: "Mode sombre", theme_l: "Mode clair", d_stops: n => `${n} ${n === 1 ? "étape" : "étapes"}`,
+    loads: ["Recherche des attractions…", "Vérification des plus célèbres…", "Regroupement par quartier…", "Rédaction de ton plan jour par jour…", "Presque fini…"],
+    q_left: (l, n) => `Il te reste ${l} plans sur ${n} ce mois-ci.`, q_none: d => `Tu as utilisé les plans de ce mois. Les nouveaux arrivent le ${d}.`, q_guest: "Sans compte : 1 plan d’essai par jour.", q_guest_link: "Connecte-toi gratuitement pour 5 plans par mois",
+    need_city: "Saisis une ville.", no_conn: "Impossible de joindre le serveur. Vérifie ta connexion.", bad_resp: "Réponse du serveur non valide.",
+    tips: "💡 Conseils", foot: "Vérifie les horaires et les prix avant d’y aller. Données : © OpenStreetMap, Wikidata · Plan : Claude",
+    mine_h: "Mes plans", mine_lead_in: "Tous les plans que tu as créés ou enregistrés.",
+    mine_lead_out: "Connecte-toi ou crée un compte pour garder tes plans pour toujours et les partager.", mine_local: "Les plans sont enregistrés sur cet appareil.",
+    create_acct_btn: "Créer un compte", empty_mine: "Aucun plan pour l’instant.", create_first: "✨ Crée ton premier",
+    ex_h: "Explorer des voyages", ex_lead: "Des plans partagés par d’autres voyageurs. Filtre-les, enregistre-les ou copies-en un et adapte-le avec l’IA.", exf_btn: "⚙️ Filtres", exf_country: "Pays", exf_country_ph: "ex. Italie", exf_days: "Jours", exf_type: "Type", exf_pop: "Popularité", exf_any: "Tous", exf_likes: "Les plus aimés", exf_saves: "Les plus enregistrés", exf_cmts: "Les plus commentés", exf_clear: "Effacer les filtres", a_copyai: "✨ Copier et personnaliser avec l’IA", need_acct_copyai: "Crée un compte gratuit pour copier ce plan et le personnaliser avec l’IA.", copyai_ph: "ex. Ajoute un musée le jour 2 ou rends-le moins cher…", copyai_ok: "Plan copié. Écris ici ce que tu veux changer.", exf_found: n => `${n} ${n === 1 ? "plan" : "plans"}`, ex_ph: "Cherche une ville ou une personne…", a_post: "📸 Publier", a_edit_post: "📸 Modifier la publication", post_h: "Publie ton plan", post_edit_h: "Modifier la publication", post_sub: "Ta publication apparaît dans « Explorer », où les autres peuvent l’aimer et la commenter.", post_photo: "Ajoute une photo de ton voyage (facultatif)", post_photo_change: "Changer la photo", post_cap_lbl: "Légende", post_cap_ph: "Comment s’est passé le voyage ? Des conseils pour les autres ?", post_btn: "Publier", post_update: "Enregistrer", post_unpost: "Retirer la publication", posting: "Publication…", posted: "Publié !", unposted: "Publication retirée.", post_login: "Crée un compte gratuit pour publier tes plans.", ex_open: "Voir le plan", cm_h: "Commentaires", cm_ph: "Écris un commentaire…", cm_send: "Envoyer", cm_login: "Connecte-toi pour commenter.", cm_empty: "Pas encore de commentaires. Sois le premier !", cm_del: "Supprimer", users_h: "Personnes", photo_big: "La photo est trop grande ou illisible.",
+    ex_empty: "Pas encore de plans publics. Sois le premier à en partager un !", ex_empty_q: "Pas encore de plans pour cette ville.", ex_off: "Cette section s’active quand la base de données est connectée.",
+    loading: "Chargement…",
+    b_public: "public", b_private: "privé", b_local: "cet appareil uniquement", by: a => `par ${a}`, days_badge: n => `${n}<br>${n === 1 ? "jour" : "jours"}`,
+    share_h: "Partage ton plan", public_t: "Plan public", public_s: "Toute personne ayant le lien peut le voir, et il apparaît dans « Explorer »",
+    copy: "Copier", share_more: "📤 Partager dans d’autres applis…", story_btn: "🖼️ Image pour Story Instagram / TikTok",
+    story_help: "Appuie longuement sur l’image → <b>Enregistrer dans Photos</b>, puis publie-la sur Instagram/TikTok.", download: "⬇️ Télécharger",
+    share_need: "Il te faut un compte pour partager avec un lien.", share_story_only: "Tu peux quand même créer une image Story sans compte :", share_story_noacct: "Crée une image de ton plan pour les réseaux sociaux :",
+    share_own: "Rends-le public pour que tes amis l’ouvrent avec un lien.", share_other: "Envoie ce plan à quelqu’un.",
+    share_text: (n, c) => `${n} jours à ${c} 🧭 Découvre mon plan :`,
+    welcome: "Bon retour 👋", tab_login: "Connexion", tab_signup: "Inscription", email: "E-mail", password: "Mot de passe", forgot: "Mot de passe oublié",
+    signup_h: "Crée ton compte", signup_sub: "Enregistre tes plans, partage-les avec tes amis et publie-les sur les réseaux sociaux.",
+    name_lbl: "Nom (affiché sur les plans publics)", pass8: "Mot de passe (au moins 8 caractères)", create_acct: "Créer un compte",
+    reset_h: "Réinitialiser le mot de passe", reset_sub: "Nous t’enverrons un lien par e-mail.", send_link: "Envoyer le lien", back: "← Retour",
+    newpass_h: "Nouveau mot de passe", newpass_lbl: "Nouveau mot de passe", save: "Enregistrer", my_plans_btn: "📁 Mes plans", logout: "Déconnexion",
+    e_invalid: "E-mail ou mot de passe incorrect.", e_exists: "Cet e-mail a déjà un compte. Essaie de te connecter.", e_unconfirmed: "Confirme d’abord ton e-mail (vérifie ta boîte de réception).",
+    e_rate: "Trop de tentatives. Réessaie dans quelques minutes.", e_pass: "Le mot de passe doit contenir au moins 8 caractères.", need_name: "Saisis ton nom.",
+    check_email: "📧 Nous t’avons envoyé un e-mail. Clique sur le lien pour confirmer ton compte, puis connecte-toi ici.", reset_sent: "📧 Si cet e-mail a un compte, nous t’avons envoyé un lien pour réinitialiser ton mot de passe.",
+    logged_in: "Connecté ✓", acct_created: "Compte créé ✓", pass_changed: "Mot de passe modifié ✓", logged_out: "Déconnecté",
+    accounts_off: "Les comptes ne sont pas encore activés.", need_acct_save: "Crée un compte (ou connecte-toi) pour enregistrer ce plan.",
+    a_share: "🔗 Partager / Publier", a_regen: "🔄 En créer un autre", a_copy: "📋 Copier", a_save: "⭐ Enregistrer dans mes plans", a_share2: "🔗 Partager", a_similar: "✏️ En créer un similaire",
+    local_note: "💾 Ce plan est enregistré uniquement sur cet appareil.", local_btn: "Crée un compte pour l’enregistrer et le partager",
+    saved_ok: "Enregistré dans tes plans ✓", deleted: "Plan supprimé", copied: "Plan copié ✓", link_copied: "Lien copié ✓", copy_fail: "Copie non autorisée",
+    press_again: "Touche à nouveau pour supprimer", pub_on: "Le plan est public ✓", pub_off: "Le plan est privé", err: "Erreur : ", not_found: "Plan introuvable ou privé.",
+    migrated: n => `${n} plan(s) enregistré(s) dans ton compte ✓`, edit_create: "Change ce que tu veux et crée le tien", not_saved: "Le plan n’a pas été enregistré dans ton compte : ",
+    day: "Jour", all: "🗺️ Tous", gmaps: "🧭 Itinéraire dans Google Maps", map: "📍 Carte", h: "h",
+    plan_by: a => `Plan de ${a}`, saved_times: n => `⭐ enregistré ${n} fois`,
+    story_days: (n, c) => `${n} ${n === 1 ? "jour" : "jours"}${c ? " · " + c : ""}`, story_more: n => `+ ${n} jours de plus`, story_free: "Crée ton propre plan gratuitement :",
+    tips_label: "Conseils :", ex_new: "🆕 Nouveaux", ex_top: "🔥 Les plus aimés", ex_following: "👥 Abonnements",
+    pf_name: "Nom", pf_bio: "À propos de moi (facultatif)", pf_plans: "Plans", my_profile: "👤 Mon profil",
+    follow_login: "Crée un compte pour suivre d’autres voyageurs.", follow_none: "Tu ne suis encore personne. Ouvre le profil de quelqu’un dans « Explorer » et touche « Suivre ».",
+    pf_n_plans: "plans", pf_followers: "abonnés", pf_following: "abonnements", pf_edit: "✏️ Modifier le profil",
+    follow: "➕ Suivre", unfollow: "✓ Abonné", pf_empty: "Pas encore de plans publics.", saved_ok_short: "Enregistré ✓",
+    followed: "Tu es maintenant abonné ✓", unfollowed: "Désabonné", like_login: "Crée un compte pour aimer des plans.",
+    locale: "fr-FR",
+  },
 };
 
 let LANG = (() => { try { const l = localStorage.getItem("udhetimi_lang"); if (I18N[l]) return l; } catch {} const n = (navigator.language || "").slice(0, 2); return I18N[n] ? n : "sq"; })();
@@ -1794,6 +2106,51 @@ Object.assign(I18N.en, {
   rules_need: "Accept the community rules to post.",
   cm_rules: u => `Comments that break the <a href="${u}" target="_blank" rel="noopener">rules</a> are removed.`,
 });
+Object.assign(I18N.it, {
+  rep_btn: "⚑ Segnala", rep_user_btn: "⚑ Segnala o blocca", rep_short: "Segnala",
+  rep_h_plan: "Segnala questo piano", rep_h_comment: "Segnala commento", rep_h_user: "Segnala utente",
+  rep_why: "Qual è il problema?", rep_r_spam: "Spam o pubblicità", rep_r_abuse: "Insulti, odio o molestie", rep_r_sexual: "Contenuti sessuali",
+  rep_r_violence: "Violenza o minacce", rep_r_illegal: "Qualcosa di illegale", rep_r_other: "Altro",
+  rep_note: "Dettagli (facoltativi)", rep_send: "Invia segnalazione", rep_pick: "Scegli un motivo.",
+  rep_done: "Grazie. Esaminiamo le segnalazioni entro 24 ore. Non vedrai più questo contenuto.",
+  rep_limit: "Hai inviato troppe segnalazioni oggi. Riprova domani.", rep_login: "Accedi per segnalare o bloccare.",
+  blk_btn: n => `🚫 Blocca ${n}`, blk_sub: "Non vedrai più i suoi piani o commenti. Non potrà commentare i tuoi piani né seguirti.",
+  blk_done: "Bloccato.", unblk_btn: "Sblocca", unblk_done: "Sbloccato.", blk_is: "Hai bloccato questo utente.",
+  blk_list: "🚫 Utenti bloccati", blk_none: "Non hai bloccato nessuno.",
+  rules_ok: u => `Accetto le <a href="${u}" target="_blank" rel="noopener">regole della community</a>: niente insulti, odio, contenuti sessuali, violenza o cose illegali.`,
+  rules_need: "Accetta le regole della community per pubblicare.",
+  cm_rules: u => `I commenti che violano le <a href="${u}" target="_blank" rel="noopener">regole</a> vengono rimossi.`,
+});
+Object.assign(I18N.es, {
+  rep_btn: "⚑ Denunciar", rep_user_btn: "⚑ Denunciar o bloquear", rep_short: "Denunciar",
+  rep_h_plan: "Denunciar este plan", rep_h_comment: "Denunciar comentario", rep_h_user: "Denunciar usuario",
+  rep_why: "¿Qué ocurre?", rep_r_spam: "Spam o publicidad", rep_r_abuse: "Insultos, odio o acoso", rep_r_sexual: "Contenido sexual",
+  rep_r_violence: "Violencia o amenazas", rep_r_illegal: "Algo ilegal", rep_r_other: "Otra cosa",
+  rep_note: "Detalles (opcional)", rep_send: "Enviar denuncia", rep_pick: "Elige un motivo.",
+  rep_done: "Gracias. Revisamos las denuncias en 24 horas. Ya no verás esto.",
+  rep_limit: "Has enviado demasiadas denuncias hoy. Inténtalo mañana.", rep_login: "Inicia sesión para denunciar o bloquear.",
+  blk_btn: n => `🚫 Bloquear a ${n}`, blk_sub: "Ya no verás sus planes ni comentarios. No podrá comentar tus planes ni seguirte.",
+  blk_done: "Bloqueado.", unblk_btn: "Desbloquear", unblk_done: "Desbloqueado.", blk_is: "Has bloqueado a este usuario.",
+  blk_list: "🚫 Usuarios bloqueados", blk_none: "No has bloqueado a nadie.",
+  rules_ok: u => `Acepto las <a href="${u}" target="_blank" rel="noopener">normas de la comunidad</a>: nada de insultos, odio, contenido sexual, violencia ni nada ilegal.`,
+  rules_need: "Acepta las normas de la comunidad para publicar.",
+  cm_rules: u => `Los comentarios que incumplen las <a href="${u}" target="_blank" rel="noopener">normas</a> se eliminan.`,
+});
+Object.assign(I18N.fr, {
+  rep_btn: "⚑ Signaler", rep_user_btn: "⚑ Signaler ou bloquer", rep_short: "Signaler",
+  rep_h_plan: "Signaler ce plan", rep_h_comment: "Signaler le commentaire", rep_h_user: "Signaler l’utilisateur",
+  rep_why: "Quel est le problème ?", rep_r_spam: "Spam ou publicité", rep_r_abuse: "Insultes, haine ou harcèlement", rep_r_sexual: "Contenu sexuel",
+  rep_r_violence: "Violence ou menaces", rep_r_illegal: "Quelque chose d’illégal", rep_r_other: "Autre chose",
+  rep_note: "Détails (facultatif)", rep_send: "Envoyer le signalement", rep_pick: "Choisis un motif.",
+  rep_done: "Merci. Nous examinons les signalements sous 24 heures. Tu ne verras plus ce contenu.",
+  rep_limit: "Tu as envoyé trop de signalements aujourd’hui. Réessaie demain.", rep_login: "Connecte-toi pour signaler ou bloquer.",
+  blk_btn: n => `🚫 Bloquer ${n}`, blk_sub: "Tu ne verras plus ses plans ni ses commentaires. Cette personne ne pourra plus commenter tes plans ni s’abonner à toi.",
+  blk_done: "Bloqué.", unblk_btn: "Débloquer", unblk_done: "Débloqué.", blk_is: "Tu as bloqué cet utilisateur.",
+  blk_list: "🚫 Utilisateurs bloqués", blk_none: "Tu n’as bloqué personne.",
+  rules_ok: u => `J’accepte les <a href="${u}" target="_blank" rel="noopener">règles de la communauté</a> : pas d’insultes, de haine, de contenu sexuel, de violence ni rien d’illégal.`,
+  rules_need: "Accepte les règles de la communauté pour publier.",
+  cm_rules: u => `Les commentaires qui enfreignent les <a href="${u}" target="_blank" rel="noopener">règles</a> sont supprimés.`,
+});
 Object.assign(I18N.de, {
   rep_btn: "⚑ Melden", rep_user_btn: "⚑ Melden oder blockieren", rep_short: "Melden",
   rep_h_plan: "Diesen Plan melden", rep_h_comment: "Kommentar melden", rep_h_user: "Nutzer melden",
@@ -1809,7 +2166,7 @@ Object.assign(I18N.de, {
   rules_need: "Akzeptiere die Community-Regeln, um zu posten.",
   cm_rules: u => `Kommentare, die gegen die <a href="${u}" target="_blank" rel="noopener">Regeln</a> verstoßen, werden entfernt.`,
 });
-const t = (k, ...a) => { const v = I18N[LANG][k] ?? I18N.sq[k] ?? k; return typeof v === "function" ? v(...a) : v; };
+const t = (k, ...a) => { const v = I18N[LANG][k] ?? I18N.en[k] ?? I18N.sq[k] ?? k; return typeof v === "function" ? v(...a) : v; };
 function applyLang() {
   document.documentElement.lang = LANG;
   document.getElementById("brandName").textContent = APP_NAME;
@@ -1817,7 +2174,8 @@ function applyLang() {
   const EMO = /^(?:[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]\uFE0F?\u200D?)+\s*/u;
   document.querySelectorAll("[data-i18n]").forEach(el => { const v = t(el.dataset.i18n); el.textContent = typeof v === "string" && el.closest(".chips,.nav,.seg,.go,.tabsm,.actions") && !el.closest(".keepemo") ? v.replace(EMO, "") : v; });
   document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
-  document.querySelectorAll("#langSw button").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
+  document.querySelectorAll("#langSw [data-l]").forEach(b => { b.classList.toggle("on", b.dataset.l === LANG); b.setAttribute("aria-checked", b.dataset.l === LANG); });
+  document.getElementById("langCurT").textContent = LANG.toUpperCase();
   document.querySelectorAll('.seg[data-name="lang"] button').forEach(b => b.classList.toggle("on", b.dataset.v === LANG));
   chDays(0); renderKidAges(); refreshAcct(); renderQuick(); renderHome(); renderVRail(); fillExTypes(); applyThemeMeta(); wzRender();
 }
@@ -1831,7 +2189,17 @@ function setLang(l) {
   if (pushTok && user) pushSave();
   if (typeof renderWishes === "function") renderWishes();
 }
-document.getElementById("langSw").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.l); });
+function langMenu(open) {
+  const m = document.getElementById("langMenu"), c = document.getElementById("langCur");
+  m.hidden = !open; c.setAttribute("aria-expanded", open);
+}
+document.getElementById("langSw").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "langCur") return langMenu(document.getElementById("langMenu").hidden);
+  langMenu(false); if (b.dataset.l && b.dataset.l !== LANG) setLang(b.dataset.l);
+});
+document.addEventListener("click", e => { if (!e.target.closest("#langSw")) langMenu(false); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") langMenu(false); });
 
 const COLORS = ["#214F78", "#B65B37", "#788747", "#C08A2B", "#9E4A6A", "#2F7C7A", "#4A6A9A"];
 const LOCAL_KEY = "udhetimi_plans_v1";
@@ -1887,7 +2255,7 @@ function refreshAcct() {
 // ---- Kufiri mujor: 5 plane për llogari, rifillon më 1 të muajit ----
 const PLAN_LIMIT = 5;
 let quota = null;
-const nextMonthStr = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() + 1, 1).toLocaleDateString({ sq: "sq-AL", en: "en-GB", de: "de-DE" }[LANG], { day: "numeric", month: "long" }); };
+const nextMonthStr = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() + 1, 1).toLocaleDateString(t("locale"), { day: "numeric", month: "long" }); };
 async function refreshQuota(q) {
   const el = document.getElementById("quota"); if (!el) return;
   if (!user || !sb) { quota = null; el.innerHTML = `${t("q_guest")} <button class="link" onclick="showAuth('signup')">${t("q_guest_link")}</button>`; return; }
@@ -2436,7 +2804,7 @@ function openPlan(p, r, m) { rpNote = null; chatLog = []; chatActs = {};
 function openPlanHeader() {
   const p = plan;
   const ph = document.getElementById("rPhoto"), cap = document.getElementById("rCaption");
-  ph.style.display = row.photo_url && row.is_public ? "block" : "none"; if (row.photo_url) ph.src = row.photo_url;
+  ph.style.display = ownPhoto(row.photo_url) && row.is_public ? "block" : "none"; if (ownPhoto(row.photo_url)) ph.src = row.photo_url;
   cap.style.display = row.caption && row.is_public ? "block" : "none"; cap.textContent = row.caption || "";
   document.getElementById("rTitle").textContent = p.title || p.city?.name;
   renderCover();
@@ -2667,7 +3035,7 @@ async function fillStopPhotos(card) {
 }
 async function renderCover() {
   const box = document.getElementById("rCover"), img = document.getElementById("rCoverImg"), cr = document.getElementById("rCoverCr");
-  const c = plan.city || {}, hasPost = row.photo_url && row.is_public;
+  const c = plan.city || {}, hasPost = ownPhoto(row.photo_url) && row.is_public;
   box.style.display = hasPost ? "none" : "block";
   box.classList.add("nophoto"); img.classList.remove("ok"); img.removeAttribute("src"); cr.style.display = "none";
   document.getElementById("rCoverT").innerHTML = `${esc(c.name || plan.request?.city || "")}${c.country ? `<small>${esc(c.country)}</small>` : ""}`;
@@ -2680,7 +3048,11 @@ async function renderCover() {
     const km = (a, b, x, y) => { const R = 6371, r = Math.PI / 180, dl = (x - a) * r, dn = (y - b) * r; const h = Math.sin(dl / 2) ** 2 + Math.cos(a * r) * Math.cos(x * r) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
     const pg = Object.values(q.pages || {}).find(p => p.thumbnail?.source && p.coordinates?.[0] && km(c.lat, c.lon, p.coordinates[0].lat, p.coordinates[0].lon) < 40);
     if (!pg || plan !== want) return;
-    img.onload = () => { if (plan !== want) return; img.classList.add("ok"); box.classList.remove("nophoto"); cr.style.display = "block"; };
+    img.onload = () => { if (plan !== want) return; img.classList.add("ok"); box.classList.remove("nophoto"); cr.style.display = "block";
+      // postim i vjetër pa foto: ruaj foton e qytetit që të shfaqet edhe te lista e postimeve
+      if (sb && user && row.id && row.is_public && !row.photo_url && row.user_id === user.id)
+        sb.from("plans").update({ photo_url: img.src }).eq("id", row.id).then(({ error }) => { if (!error) row.photo_url = img.src; });
+    };
     cr.href = `https://en.wikipedia.org/wiki/${encodeURIComponent(pg.title.replace(/ /g, "_"))}`;
     img.referrerPolicy = "no-referrer"; img.src = pg.thumbnail.source;
   } catch {}
@@ -2782,6 +3154,9 @@ if (window.Capacitor?.isNativePlatform?.()) window.Capacitor?.Plugins?.LocalNoti
 // ---- Moti real për ditët e planit (Open-Meteo, falas, pa çelës) ----
 Object.assign(I18N.sq, { wx_rain_at: h => `🌧 Pritet shi nga ora ${h}.`, wx_rain_day: "🌧 Pritet shi gjatë ditës.", wx_hot: n => `🥵 Ditë e nxehtë, deri në ${n}°.`, wx_cold: n => `🥶 Ditë e ftohtë, maksimumi ${n}°.`, wx_fix: "Përshtate ditën", wx_src: "Parashikimi: Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
 Object.assign(I18N.en, { wx_rain_at: h => `🌧 Rain expected from ${h}.`, wx_rain_day: "🌧 Rain expected during the day.", wx_hot: n => `🥵 Hot day, up to ${n}°.`, wx_cold: n => `🥶 Cold day, high of ${n}°.`, wx_fix: "Adapt the day", wx_src: "Forecast: Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
+Object.assign(I18N.it, { wx_rain_at: h => `🌧 Pioggia prevista dalle ${h}.`, wx_rain_day: "🌧 Pioggia prevista durante il giorno.", wx_hot: n => `🥵 Giornata calda, fino a ${n}°.`, wx_cold: n => `🥶 Giornata fredda, massima di ${n}°.`, wx_fix: "Adatta la giornata", wx_src: "Previsioni: Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
+Object.assign(I18N.es, { wx_rain_at: h => `🌧 Se espera lluvia desde las ${h}.`, wx_rain_day: "🌧 Se espera lluvia durante el día.", wx_hot: n => `🥵 Día caluroso, hasta ${n}°.`, wx_cold: n => `🥶 Día frío, máxima de ${n}°.`, wx_fix: "Adaptar el día", wx_src: "Previsión: Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
+Object.assign(I18N.fr, { wx_rain_at: h => `🌧 Pluie prévue à partir de ${h}.`, wx_rain_day: "🌧 Pluie prévue dans la journée.", wx_hot: n => `🥵 Journée chaude, jusqu’à ${n}°.`, wx_cold: n => `🥶 Journée froide, max. ${n}°.`, wx_fix: "Adapter la journée", wx_src: "Prévisions : Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
 Object.assign(I18N.de, { wx_rain_at: h => `🌧 Regen ab ${h} Uhr erwartet.`, wx_rain_day: "🌧 Tagsüber Regen erwartet.", wx_hot: n => `🥵 Heißer Tag, bis ${n}°.`, wx_cold: n => `🥶 Kalter Tag, höchstens ${n}°.`, wx_fix: "Tag anpassen", wx_src: "Vorhersage: Open-Meteo", wx_rem: (e, a, b) => ` · ${e} ${a}–${b}°` });
 var WX = {}, wxBusy = null;
 const WX_RAIN = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
@@ -2902,6 +3277,51 @@ Object.assign(I18N.en, {
   bg_walker: "Walker", bg_walker_s: "20 km on foot", bg_cities: "Citizen of the world", bg_cities_s: "5 cities", bg_countries: "No borders", bg_countries_s: "3 countries",
   bg_fullday: "Full day", bg_fullday_s: "Every stop of one day", bg_marathon: "Marathon", bg_marathon_s: "8 stops in one day",
 });
+Object.assign(I18N.it, {
+  ck_btn: "✓ Sono stato qui", ck_done: "✓ Visitato", ck_undo: "Annulla", ck_prog: (a, b) => `${a} di ${b} tappe`, ck_next: "Prossima", ck_dir: "Indicazioni",
+  ck_at: h => `inizia alle ${h}`, ck_walk: m => `a ${m} min`, ck_last: "Ultima tappa della giornata",
+  dd_h: d => `Giorno ${d} completato! 🎉`, dd_s: (n, km) => `${n} tappe${km ? ` · ${km} km` : ""}. Ben fatto!`, dd_trip: c => `Hai completato tutto il viaggio a ${c}. Il timbro è nel tuo passaporto.`,
+  dd_pp: "🛂 Vedi passaporto", dd_close: "Continua",
+  fk_btn: "💡 Lo sapevi?", fk_load: "Cerco informazioni…", fk_none: "Non ho trovato nulla su questo luogo.", fk_src: "Leggi di più su Wikipedia",
+  pp_h: "Il mio passaporto", pp_btn: "🛂 Il mio passaporto", pp_lead: "Timbri delle città e badge si raccolgono segnando le tappe con “Sono stato qui” durante il viaggio.",
+  pp_empty: "Nessun timbro ancora. Apri un piano durante il viaggio e tocca “✓ Sono stato qui” a ogni tappa.",
+  pp_cities: "città", pp_countries: "paesi", pp_stops: "tappe", pp_km: "km a piedi", pp_stamps: "Timbri", pp_badges: "Badge",
+  pp_share: "📤 Condividi passaporto", pp_loading: "Raccolgo i timbri…", pp_mini: (c, b) => `${c} città · ${b} badge`, pp_full: "Completo", pp_vis: n => `${n} tappe`,
+  pp_toast: c => `🛂 Timbro di ${c} aggiunto al passaporto!`, pp_new: b => `🏅 Nuovo badge: ${b}`, pp_title: "Passaporto di viaggio", pp_dl: "Scarica immagine",
+  bg_first: "Primo passo", bg_first_s: "Prima tappa visitata", bg_explorer: "Esploratore", bg_explorer_s: "25 tappe", bg_museum: "Curatore", bg_museum_s: "10 musei o gallerie",
+  bg_walker: "Camminatore", bg_walker_s: "20 km a piedi", bg_cities: "Cittadino del mondo", bg_cities_s: "5 città", bg_countries: "Senza confini", bg_countries_s: "3 paesi",
+  bg_fullday: "Giornata piena", bg_fullday_s: "Tutte le tappe di un giorno", bg_marathon: "Maratona", bg_marathon_s: "8 tappe in un giorno",
+});
+Object.assign(I18N.es, {
+  ck_btn: "✓ Estuve aquí", ck_done: "✓ Visitado", ck_undo: "Deshacer", ck_prog: (a, b) => `${a} de ${b} paradas`, ck_next: "Siguiente", ck_dir: "Cómo llegar",
+  ck_at: h => `empieza a las ${h}`, ck_walk: m => `a ${m} min`, ck_last: "Última parada del día",
+  dd_h: d => `¡Día ${d} completado! 🎉`, dd_s: (n, km) => `${n} paradas${km ? ` · ${km} km` : ""}. ¡Bien hecho!`, dd_trip: c => `Has completado todo tu viaje a ${c}. El sello está en tu pasaporte.`,
+  dd_pp: "🛂 Ver pasaporte", dd_close: "Seguir",
+  fk_btn: "💡 ¿Sabías que…?", fk_load: "Buscando…", fk_none: "No encontré nada sobre este lugar.", fk_src: "Leer más en Wikipedia",
+  pp_h: "Mi pasaporte", pp_btn: "🛂 Mi pasaporte", pp_lead: "Los sellos de ciudades y las insignias se consiguen marcando paradas con “Estuve aquí” durante el viaje.",
+  pp_empty: "Aún no hay sellos. Abre un plan durante tu viaje y toca “✓ Estuve aquí” en cada parada.",
+  pp_cities: "ciudades", pp_countries: "países", pp_stops: "paradas", pp_km: "km a pie", pp_stamps: "Sellos", pp_badges: "Insignias",
+  pp_share: "📤 Compartir pasaporte", pp_loading: "Reuniendo sellos…", pp_mini: (c, b) => `${c} ${c === 1 ? "ciudad" : "ciudades"} · ${b} insignias`, pp_full: "Completo", pp_vis: n => `${n} paradas`,
+  pp_toast: c => `🛂 ¡Sello de ${c} añadido a tu pasaporte!`, pp_new: b => `🏅 Nueva insignia: ${b}`, pp_title: "Pasaporte de viaje", pp_dl: "Descargar imagen",
+  bg_first: "Primer paso", bg_first_s: "Primera parada visitada", bg_explorer: "Explorador", bg_explorer_s: "25 paradas", bg_museum: "Curador", bg_museum_s: "10 museos o galerías",
+  bg_walker: "Caminante", bg_walker_s: "20 km a pie", bg_cities: "Ciudadano del mundo", bg_cities_s: "5 ciudades", bg_countries: "Sin fronteras", bg_countries_s: "3 países",
+  bg_fullday: "Día completo", bg_fullday_s: "Todas las paradas de un día", bg_marathon: "Maratón", bg_marathon_s: "8 paradas en un día",
+});
+Object.assign(I18N.fr, {
+  ck_btn: "✓ J’y étais", ck_done: "✓ Visité", ck_undo: "Annuler", ck_prog: (a, b) => `${a} étapes sur ${b}`, ck_next: "Suivante", ck_dir: "Itinéraire",
+  ck_at: h => `commence à ${h}`, ck_walk: m => `à ${m} min`, ck_last: "Dernière étape de la journée",
+  dd_h: d => `Jour ${d} terminé ! 🎉`, dd_s: (n, km) => `${n} étapes${km ? ` · ${km} km` : ""}. Bravo !`, dd_trip: c => `Tu as terminé tout ton voyage à ${c}. Le tampon est dans ton passeport.`,
+  dd_pp: "🛂 Voir le passeport", dd_close: "Continuer",
+  fk_btn: "💡 Le savais-tu ?", fk_load: "Recherche…", fk_none: "Je n’ai rien trouvé sur ce lieu.", fk_src: "En savoir plus sur Wikipédia",
+  pp_h: "Mon passeport", pp_btn: "🛂 Mon passeport", pp_lead: "Les tampons de villes et les badges s’obtiennent en marquant les étapes avec « J’y étais » pendant le voyage.",
+  pp_empty: "Pas encore de tampons. Ouvre un plan pendant ton voyage et touche « ✓ J’y étais » à chaque étape.",
+  pp_cities: "villes", pp_countries: "pays", pp_stops: "étapes", pp_km: "km à pied", pp_stamps: "Tampons", pp_badges: "Badges",
+  pp_share: "📤 Partager le passeport", pp_loading: "Collecte des tampons…", pp_mini: (c, b) => `${c} ${c === 1 ? "ville" : "villes"} · ${b} badges`, pp_full: "Complet", pp_vis: n => `${n} étapes`,
+  pp_toast: c => `🛂 Tampon de ${c} ajouté à ton passeport !`, pp_new: b => `🏅 Nouveau badge : ${b}`, pp_title: "Passeport de voyage", pp_dl: "Télécharger l’image",
+  bg_first: "Premier pas", bg_first_s: "Première étape visitée", bg_explorer: "Explorateur", bg_explorer_s: "25 étapes", bg_museum: "Conservateur", bg_museum_s: "10 musées ou galeries",
+  bg_walker: "Marcheur", bg_walker_s: "20 km à pied", bg_cities: "Citoyen du monde", bg_cities_s: "5 villes", bg_countries: "Sans frontières", bg_countries_s: "3 pays",
+  bg_fullday: "Journée complète", bg_fullday_s: "Toutes les étapes d’une journée", bg_marathon: "Marathon", bg_marathon_s: "8 étapes en une journée",
+});
 Object.assign(I18N.de, {
   ck_btn: "✓ War hier", ck_done: "✓ Besucht", ck_undo: "Rückgängig", ck_prog: (a, b) => `${a} von ${b} Stopps`, ck_next: "Als Nächstes", ck_dir: "Route",
   ck_at: h => `ab ${h}`, ck_walk: m => `${m} Min. entfernt`, ck_last: "Letzter Stopp des Tages",
@@ -2927,6 +3347,15 @@ Object.assign(I18N.sq, { ck_ver: "📍 U verifikua", ck_nover: "✓ U shënua ·
 Object.assign(I18N.en, { ck_ver: "📍 Verified", ck_nover: "✓ Marked · not verified", ck_far: "Marked, but you're not near this place, so it won't count in your passport.", ck_auto_ok: n => `📍 You've arrived: ${n}. Marked automatically.`,
   au_h: "📍 Mark places when I arrive", au_s: "While today's plan is open, your phone notices when you reach a stop and marks it. Your location is never stored.", au_on: "Automatic check-in is on.", au_off: "Automatic check-in is off.", au_denied: "Location is blocked. Allow it in your phone settings.",
   pp_lead2: "Stamps only count places you've really been to, verified with your location.", pp_planned: "Planned, not visited yet", pp_tap: "Tap a stamp to see where you've been and where not.", pp_been: "Where I've been", pp_notyet: "Not yet", pp_unver: "not verified", pp_title2: "My travel passport", pp_cta: "Plan your trip with AI", pp_more: n => `+${n} more` });
+Object.assign(I18N.it, { ck_ver: "📍 Verificato", ck_nover: "✓ Segnato · non verificato", ck_far: "Segnato, ma non sei vicino a questo luogo, quindi non conta per il passaporto.", ck_auto_ok: n => `📍 Sei arrivato: ${n}. Segnato automaticamente.`,
+  au_h: "📍 Segna i luoghi quando arrivo", au_s: "Mentre il piano di oggi è aperto, il telefono rileva quando raggiungi una tappa e la segna. La tua posizione non viene mai salvata.", au_on: "Check-in automatico attivo.", au_off: "Check-in automatico disattivato.", au_denied: "La posizione è bloccata. Consentila nelle impostazioni del telefono.",
+  pp_lead2: "I timbri contano solo i luoghi dove sei stato davvero, verificati con la tua posizione.", pp_planned: "Pianificato, non ancora visitato", pp_tap: "Tocca un timbro per vedere dove sei stato e dove no.", pp_been: "Dove sono stato", pp_notyet: "Non ancora", pp_unver: "non verificato", pp_title2: "Il mio passaporto di viaggio", pp_cta: "Pianifica il tuo viaggio con l’IA", pp_more: n => `+ altri ${n}` });
+Object.assign(I18N.es, { ck_ver: "📍 Verificado", ck_nover: "✓ Marcado · sin verificar", ck_far: "Marcado, pero no estás cerca de este lugar, así que no cuenta para tu pasaporte.", ck_auto_ok: n => `📍 Has llegado: ${n}. Marcado automáticamente.`,
+  au_h: "📍 Marcar lugares al llegar", au_s: "Mientras el plan de hoy está abierto, el teléfono detecta cuando llegas a una parada y la marca. Tu ubicación nunca se guarda.", au_on: "Check-in automático activado.", au_off: "Check-in automático desactivado.", au_denied: "La ubicación está bloqueada. Permítela en los ajustes del teléfono.",
+  pp_lead2: "Los sellos solo cuentan los lugares donde has estado de verdad, verificados con tu ubicación.", pp_planned: "Planificado, aún no visitado", pp_tap: "Toca un sello para ver dónde has estado y dónde no.", pp_been: "Dónde he estado", pp_notyet: "Todavía no", pp_unver: "sin verificar", pp_title2: "Mi pasaporte de viaje", pp_cta: "Planifica tu viaje con IA", pp_more: n => `+${n} más` });
+Object.assign(I18N.fr, { ck_ver: "📍 Vérifié", ck_nover: "✓ Marqué · non vérifié", ck_far: "Marqué, mais tu n’es pas près de ce lieu, donc il ne compte pas pour ton passeport.", ck_auto_ok: n => `📍 Tu es arrivé : ${n}. Marqué automatiquement.`,
+  au_h: "📍 Marquer les lieux à mon arrivée", au_s: "Tant que le plan du jour est ouvert, ton téléphone détecte quand tu arrives à une étape et la marque. Ta position n’est jamais enregistrée.", au_on: "Check-in automatique activé.", au_off: "Check-in automatique désactivé.", au_denied: "La position est bloquée. Autorise-la dans les réglages du téléphone.",
+  pp_lead2: "Les tampons ne comptent que les lieux où tu es vraiment allé, vérifiés avec ta position.", pp_planned: "Prévu, pas encore visité", pp_tap: "Touche un tampon pour voir où tu es allé et où pas encore.", pp_been: "Où je suis allé", pp_notyet: "Pas encore", pp_unver: "non vérifié", pp_title2: "Mon passeport de voyage", pp_cta: "Planifie ton voyage avec l’IA", pp_more: n => `+${n} de plus` });
 Object.assign(I18N.de, { ck_ver: "📍 Bestätigt", ck_nover: "✓ Markiert · nicht bestätigt", ck_far: "Markiert, aber du bist nicht in der Nähe – zählt nicht für den Pass.", ck_auto_ok: n => `📍 Angekommen: ${n}. Automatisch markiert.`,
   au_h: "📍 Automatisch markieren, wenn ich ankomme", au_s: "Solange der heutige Plan offen ist, erkennt dein Handy, wenn du an einem Stopp bist, und markiert ihn. Dein Standort wird nie gespeichert.", au_on: "Automatisches Einchecken ist an.", au_off: "Automatisches Einchecken ist aus.", au_denied: "Standort ist blockiert. Erlaube ihn in den Handy-Einstellungen.",
   pp_lead2: "Stempel gibt es nur für Orte, an denen du wirklich warst – per Standort bestätigt.", pp_planned: "Geplant, noch nicht besucht", pp_tap: "Tippe auf einen Stempel, um zu sehen, wo du warst und wo nicht.", pp_been: "Wo ich war", pp_notyet: "Noch nicht", pp_unver: "nicht bestätigt", pp_title2: "Mein Reisepass", pp_cta: "Plane deine Reise mit KI", pp_more: n => `+${n} weitere` });
@@ -3183,6 +3612,9 @@ async function loadPpMini() { try { ppMini(ppCompute(await ppItems())); } catch 
 // ---- Faqja e të dhënave të pasaportës (si te pasaporta e vërtetë) ----
 Object.assign(I18N.sq, { pd_name: "Emri", pd_since: "Udhëtar që nga", pd_no: "Nr. i pasaportës", pd_guest: "Udhëtar", pd_type: "Pasaportë udhëtimi" });
 Object.assign(I18N.en, { pd_name: "Name", pd_since: "Traveller since", pd_no: "Passport no.", pd_guest: "Traveller", pd_type: "Travel passport" });
+Object.assign(I18N.it, { pd_name: "Nome", pd_since: "Viaggiatore dal", pd_no: "Passaporto n.", pd_guest: "Viaggiatore", pd_type: "Passaporto di viaggio" });
+Object.assign(I18N.es, { pd_name: "Nombre", pd_since: "Viajero desde", pd_no: "N.º de pasaporte", pd_guest: "Viajero", pd_type: "Pasaporte de viaje" });
+Object.assign(I18N.fr, { pd_name: "Nom", pd_since: "Voyageur depuis", pd_no: "N° de passeport", pd_guest: "Voyageur", pd_type: "Passeport de voyage" });
 Object.assign(I18N.de, { pd_name: "Name", pd_since: "Reisend seit", pd_no: "Pass-Nr.", pd_guest: "Reisende:r", pd_type: "Reisepass" });
 function ppData() {
   const name = (user && displayName(user)) || t("pd_guest");
@@ -3295,6 +3727,18 @@ Object.assign(I18N.en, { sw_cta: "👆 Pick the places you like", sw_cta_s: "Opt
   sw_h: "What do you like?", sw_load: "Finding the best-known places…", sw_err: "I couldn't load the places right now. Try again a bit later.", sw_of: (a, b) => `${a} / ${b}`,
   sw_like: "Yes", sw_skip: "No", sw_undo: "Back", sw_done: "Finish", sw_sum: n => `♥ ${n} ${n === 1 ? "place picked" : "places picked"}`, sw_edit: "Change", sw_clear: "Clear",
   sw_end: (n) => `You picked ${n} ${n === 1 ? "place" : "places"}. The plan will include them.`, sw_end_btn: "Back to the plan", sw_nophoto: "No photo" });
+Object.assign(I18N.it, { sw_cta: "👆 Scegli i luoghi che ti piacciono", sw_cta_s: "Facoltativo: scorri a destra per “sì”, a sinistra per “no”. Il piano viene costruito attorno a questi.",
+  sw_h: "Cosa ti piace?", sw_load: "Cerco i luoghi più famosi…", sw_err: "Non riesco a caricare i luoghi adesso. Riprova tra poco.", sw_of: (a, b) => `${a} / ${b}`,
+  sw_like: "Sì", sw_skip: "No", sw_undo: "Indietro", sw_done: "Fine", sw_sum: n => `♥ ${n} ${n === 1 ? "luogo scelto" : "luoghi scelti"}`, sw_edit: "Cambia", sw_clear: "Azzera",
+  sw_end: (n) => `Hai scelto ${n} ${n === 1 ? "luogo" : "luoghi"}. Il piano li includerà.`, sw_end_btn: "Torna al piano", sw_nophoto: "Nessuna foto" });
+Object.assign(I18N.es, { sw_cta: "👆 Elige los lugares que te gustan", sw_cta_s: "Opcional: desliza a la derecha para “sí” y a la izquierda para “no”. El plan se construye a partir de ellos.",
+  sw_h: "¿Qué te gusta?", sw_load: "Buscando los lugares más conocidos…", sw_err: "No pude cargar los lugares ahora. Inténtalo un poco más tarde.", sw_of: (a, b) => `${a} / ${b}`,
+  sw_like: "Sí", sw_skip: "No", sw_undo: "Atrás", sw_done: "Terminar", sw_sum: n => `♥ ${n} ${n === 1 ? "lugar elegido" : "lugares elegidos"}`, sw_edit: "Cambiar", sw_clear: "Borrar",
+  sw_end: (n) => `Has elegido ${n} ${n === 1 ? "lugar" : "lugares"}. El plan los incluirá.`, sw_end_btn: "Volver al plan", sw_nophoto: "Sin foto" });
+Object.assign(I18N.fr, { sw_cta: "👆 Choisis les lieux qui te plaisent", sw_cta_s: "Facultatif : glisse à droite pour « oui », à gauche pour « non ». Le plan est construit autour d’eux.",
+  sw_h: "Qu’est-ce qui te plaît ?", sw_load: "Recherche des lieux les plus connus…", sw_err: "Impossible de charger les lieux pour le moment. Réessaie un peu plus tard.", sw_of: (a, b) => `${a} / ${b}`,
+  sw_like: "Oui", sw_skip: "Non", sw_undo: "Retour", sw_done: "Terminer", sw_sum: n => `♥ ${n} ${n === 1 ? "lieu choisi" : "lieux choisis"}`, sw_edit: "Modifier", sw_clear: "Effacer",
+  sw_end: (n) => `Tu as choisi ${n} ${n === 1 ? "lieu" : "lieux"}. Le plan les inclura.`, sw_end_btn: "Retour au plan", sw_nophoto: "Pas de photo" });
 Object.assign(I18N.de, { sw_cta: "👆 Wähle Orte, die dir gefallen", sw_cta_s: "Optional: nach rechts wischen für \"ja\", nach links für \"nein\". Der Plan wird um sie herum gebaut.",
   sw_h: "Was gefällt dir?", sw_load: "Die bekanntesten Orte werden gesucht…", sw_err: "Die Orte konnten gerade nicht geladen werden. Versuch es gleich noch einmal.", sw_of: (a, b) => `${a} / ${b}`,
   sw_like: "Ja", sw_skip: "Nein", sw_undo: "Zurück", sw_done: "Fertig", sw_sum: n => `♥ ${n} ${n === 1 ? "Ort gewählt" : "Orte gewählt"}`, sw_edit: "Ändern", sw_clear: "Entfernen",
@@ -3400,6 +3844,9 @@ document.addEventListener("keydown", e => {
 // ---- Foto e profilit: ruhet te photos/<id>/avatar-*.jpg; kudo ku del rrethi me inicialet, del fotoja ----
 Object.assign(I18N.sq, { av_change: "📷 Ndrysho foton", av_add: "📷 Shto foto", av_remove: "Hiq foton", av_hint: "Fotoja e profilit duket nga të gjithë.", av_saving: "Duke ruajtur foton…", av_saved: "Fotoja u ruajt.", av_removed: "Fotoja u hoq." });
 Object.assign(I18N.en, { av_change: "📷 Change photo", av_add: "📷 Add photo", av_remove: "Remove photo", av_hint: "Your profile photo is visible to everyone.", av_saving: "Saving photo…", av_saved: "Photo saved.", av_removed: "Photo removed." });
+Object.assign(I18N.it, { av_change: "📷 Cambia foto", av_add: "📷 Aggiungi foto", av_remove: "Rimuovi foto", av_hint: "La tua foto profilo è visibile a tutti.", av_saving: "Salvo la foto…", av_saved: "Foto salvata.", av_removed: "Foto rimossa." });
+Object.assign(I18N.es, { av_change: "📷 Cambiar foto", av_add: "📷 Añadir foto", av_remove: "Quitar foto", av_hint: "Tu foto de perfil es visible para todos.", av_saving: "Guardando foto…", av_saved: "Foto guardada.", av_removed: "Foto quitada." });
+Object.assign(I18N.fr, { av_change: "📷 Changer la photo", av_add: "📷 Ajouter une photo", av_remove: "Retirer la photo", av_hint: "Ta photo de profil est visible par tous.", av_saving: "Enregistrement de la photo…", av_saved: "Photo enregistrée.", av_removed: "Photo retirée." });
 Object.assign(I18N.de, { av_change: "📷 Foto ändern", av_add: "📷 Foto hinzufügen", av_remove: "Foto entfernen", av_hint: "Dein Profilfoto ist für alle sichtbar.", av_saving: "Foto wird gespeichert…", av_saved: "Foto gespeichert.", av_removed: "Foto entfernt." });
 var AVS = new Map(), avWant = new Set(), avTimer = null;
 const AV_OK = u => typeof u === "string" && u.startsWith(SUPABASE_URL + "/storage/v1/object/public/photos/") && !/[\s"'<>\\]/.test(u);
@@ -3476,8 +3923,11 @@ async function removeAvatar() {
 // ---- Dëshirat e udhëtimit: butona të gatshëm që shtojnë tekst te fusha ----
 Object.assign(I18N.sq, { wishes: [["🌅", "Perëndimi i diellit", "Dua ta shoh perëndimin e diellit nga një vend i bukur."], ["🍝", "Ushqim lokal", "Vetëm ushqim lokal, jo zinxhirë restorantesh."], ["🚫", "Pa muze", "Pa muze."], ["🛍️", "Kohë për blerje", "Lër kohë për blerje."], ["💎", "Vende pak të njohura", "Dua edhe vende më pak turistike."], ["☕", "Mëngjese pa nxitim", "Mëngjeset pa nxitim, nisemi pas orës 10."], ["📸", "Vende për foto", "Dua vende të bukura për foto."], ["🌙", "Jeta e natës", "Pak jetë nate në mbrëmje."]], n_count: (a, b) => `${a}/${b}` });
 Object.assign(I18N.en, { wishes: [["🌅", "Sunset", "I want to watch the sunset from a nice spot."], ["🍝", "Local food", "Only local food, no restaurant chains."], ["🚫", "No museums", "No museums."], ["🛍️", "Time to shop", "Leave time for shopping."], ["💎", "Hidden gems", "I'd like some less touristy places too."], ["☕", "Slow mornings", "Slow mornings, start after 10am."], ["📸", "Photo spots", "I want beautiful photo spots."], ["🌙", "Nightlife", "A bit of nightlife in the evening."]], n_count: (a, b) => `${a}/${b}` });
+Object.assign(I18N.it, { wishes: [["🌅", "Tramonto", "Voglio vedere il tramonto da un bel posto."], ["🍝", "Cucina locale", "Solo cucina locale, niente catene di ristoranti."], ["🚫", "Niente musei", "Niente musei."], ["🛍️", "Tempo per lo shopping", "Lascia del tempo per lo shopping."], ["💎", "Gemme nascoste", "Vorrei anche qualche posto meno turistico."], ["☕", "Mattine lente", "Mattine con calma, inizio dopo le 10."], ["📸", "Posti per foto", "Voglio bei posti per fare foto."], ["🌙", "Vita notturna", "Un po’ di vita notturna la sera."]], n_count: (a, b) => `${a}/${b}` });
+Object.assign(I18N.es, { wishes: [["🌅", "Puesta de sol", "Quiero ver la puesta de sol desde un lugar bonito."], ["🍝", "Comida local", "Solo comida local, nada de cadenas de restaurantes."], ["🚫", "Sin museos", "Sin museos."], ["🛍️", "Tiempo para compras", "Deja tiempo para ir de compras."], ["💎", "Joyas escondidas", "Me gustarían también lugares menos turísticos."], ["☕", "Mañanas tranquilas", "Mañanas tranquilas, empezar después de las 10."], ["📸", "Lugares para fotos", "Quiero lugares bonitos para hacer fotos."], ["🌙", "Vida nocturna", "Algo de vida nocturna por la noche."]], n_count: (a, b) => `${a}/${b}` });
+Object.assign(I18N.fr, { wishes: [["🌅", "Coucher de soleil", "Je veux voir le coucher de soleil depuis un bel endroit."], ["🍝", "Cuisine locale", "Uniquement de la cuisine locale, pas de chaînes de restaurants."], ["🚫", "Pas de musées", "Pas de musées."], ["🛍️", "Temps pour le shopping", "Laisse du temps pour le shopping."], ["💎", "Pépites cachées", "J’aimerais aussi des lieux moins touristiques."], ["☕", "Matinées tranquilles", "Matinées tranquilles, début après 10 h."], ["📸", "Spots photo", "Je veux de beaux endroits pour prendre des photos."], ["🌙", "Vie nocturne", "Un peu de vie nocturne le soir."]], n_count: (a, b) => `${a}/${b}` });
 Object.assign(I18N.de, { wishes: [["🌅", "Sonnenuntergang", "Ich möchte den Sonnenuntergang an einem schönen Ort sehen."], ["🍝", "Lokales Essen", "Nur lokales Essen, keine Restaurantketten."], ["🚫", "Keine Museen", "Keine Museen."], ["🛍️", "Zeit zum Shoppen", "Etwas Zeit zum Shoppen einplanen."], ["💎", "Geheimtipps", "Gern auch weniger touristische Orte."], ["☕", "Ruhige Morgen", "Ruhige Morgen, Start nach 10 Uhr."], ["📸", "Fotospots", "Ich möchte schöne Fotospots."], ["🌙", "Nachtleben", "Abends etwas Nachtleben."]], n_count: (a, b) => `${a}/${b}` });
-const WISH_ALL = () => ["sq", "en", "de"].flatMap(l => (I18N[l].wishes || []).map(w => w[2]));
+const WISH_ALL = () => ["sq", "en", "de", "it", "es", "fr"].flatMap(l => (I18N[l].wishes || []).map(w => w[2]));
 function renderWishes() {
   const box = document.getElementById("wishes"), ta = document.getElementById("notes"); if (!box || !ta) return;
   const v = ta.value;
@@ -3575,8 +4025,9 @@ function openPost() {
   document.getElementById("postH").textContent = posted ? t("post_edit_h") : t("post_h");
   document.getElementById("postCap").value = row.caption || "";
   const prev = document.getElementById("postPrev");
-  prev.style.display = row.photo_url ? "block" : "none"; if (row.photo_url) prev.src = row.photo_url;
-  document.getElementById("postPickTxt").textContent = row.photo_url ? t("post_photo_change") : t("post_photo");
+  const own = ownPhoto(row.photo_url);
+  prev.style.display = own ? "block" : "none"; if (own) prev.src = row.photo_url;
+  document.getElementById("postPickTxt").textContent = own ? t("post_photo_change") : t("post_photo");
   document.getElementById("postBtn").textContent = posted ? t("post_update") : t("post_btn");
   document.getElementById("unpostBtn").style.display = posted ? "block" : "none";
   document.getElementById("postFile").value = "";
@@ -3597,6 +4048,19 @@ async function pickPhoto(file) {
     document.getElementById("postPickTxt").textContent = t("post_photo_change");
   } catch { postBlob = null; toast(t("photo_big")); }
 }
+// Foto e ngarkuar nga përdoruesi (jo foto automatike nga Wikipedia)
+function ownPhoto(u) { return !!u && !/(^|\.)wikimedia\.org\//.test(u.replace(/^https?:\/\//, "")); }
+// Foto që plani e ka tashmë: foto e qytetit, ose e vendit të parë që ka foto
+async function planPhotoUrl() {
+  const cov = document.getElementById("rCoverImg");
+  if (cov?.classList.contains("ok") && cov.src) return cov.src;
+  try {
+    const keys = [...new Set(plan.days.flatMap(d => d.stops).filter(s => s.wiki && s.type !== "meal").map(s => s.wiki))].slice(0, 12);
+    if (!keys.length) return null;
+    const got = await wikiThumbs(keys, 1000);
+    return keys.map(k => got[k]).find(Boolean) || null;
+  } catch { return null; }
+}
 async function postNow() {
   if (!document.getElementById("postRules").checked) return toast(t("rules_need"));
   try { localStorage.setItem("viaro_rules", "1"); } catch {}
@@ -3608,7 +4072,7 @@ async function postNow() {
       const up = await sb.storage.from("photos").upload(path, postBlob, { contentType: "image/jpeg", cacheControl: "31536000" });
       if (up.error) throw up.error;
       photo_url = sb.storage.from("photos").getPublicUrl(path).data.publicUrl;
-    }
+    } else if (!ownPhoto(photo_url)) photo_url = (await planPhotoUrl()) || photo_url;
     const upd = { is_public: true, author_name: displayName(user), caption: document.getElementById("postCap").value.trim().slice(0, 600) || null, photo_url };
     if (!row.is_public) upd.posted_at = new Date().toISOString();
     const { error } = await sb.from("plans").update(upd).eq("id", row.id);
@@ -3782,43 +4246,217 @@ async function nativeShare() {
   try { if (IS_APP && NP().Share) await NP().Share.share({ ...d, dialogTitle: plan.title }); else await navigator.share(d); } catch {}
 }
 
-// ---------- Foto për Story (1080×1920) ----------
-async function makeStory() {
-  const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H;
+// ---------- Foto për Story (1080×1920): foto e qytetit lart, logo Viaro, ditët poshtë ----------
+const VIARO_LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"><rect width="160" height="160" rx="36" fill="#C8202F"/><path d="M46 52 L80 110 L114 52" fill="none" stroke="#FAF4EC" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="52" r="14" fill="#F6C945"/><circle cx="114" cy="52" r="14" fill="#EBB2B0"/><circle cx="80" cy="110" r="15" fill="#FAF4EC"/><circle cx="80" cy="110" r="6" fill="#C8202F"/></svg>';
+function storyImg(src) {
+  return new Promise(ok => {
+    if (!src) return ok(null);
+    const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer";
+    im.onload = () => ok(im); im.onerror = () => ok(null); im.src = src; setTimeout(() => ok(null), 5000);
+  });
+}
+async function drawStoryCards() {
+  const W = 1080, H = 1920, PH = 900, c = document.createElement("canvas"); c.width = W; c.height = H;
   const x = c.getContext("2d");
-  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#2B6293"); g.addColorStop(1, "#173A5A");
+  const F = "Figtree,system-ui,-apple-system,'Segoe UI',sans-serif", SF = "'Young Serif',Georgia,serif";
+  try { await Promise.all([document.fonts?.load?.(`800 74px Fraunces`), document.fonts?.load?.(`120px "Young Serif"`), document.fonts?.load?.(`700 36px Figtree`), document.fonts?.load?.(`600 36px Figtree`)]); } catch {}
+  // sfondi
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#1F4E79"); g.addColorStop(1, "#0E2236");
   x.fillStyle = g; x.fillRect(0, 0, W, H);
-  x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.arc(W - 60, 160, 340, 0, 7); x.fill(); x.beginPath(); x.arc(60, H - 200, 300, 0, 7); x.fill();
-  const F = "system-ui,-apple-system,'Segoe UI',sans-serif";
-  x.fillStyle = "rgba(255,255,255,.85)"; x.font = `600 40px ${F}`; x.fillText(APP_NAME, 80, 150);
-  x.fillStyle = "#fff"; x.font = `800 112px ${F}`;
-  let y = wrap(x, plan.city?.name || plan.title, 80, 300, W - 160, 120, 2);
-  x.font = `500 46px ${F}`; x.fillStyle = "rgba(255,255,255,.85)";
-  x.fillText(t("story_days", plan.days.length, plan.city?.country), 80, y + 85);
-  y += 160;
-  const maxDays = Math.min(plan.days.length, 4), perDay = plan.days.length > 3 ? 3 : plan.days.length === 1 ? 8 : 5;
+  // foto e qytetit (postimi publik ose foto nga Wikipedia)
+  const cov = document.getElementById("rCoverImg");
+  const src = row?.photo_url && row?.is_public ? row.photo_url : (cov?.classList.contains("ok") ? cov.src : "");
+  const [photo, logo] = await Promise.all([storyImg(src), storyImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(VIARO_LOGO_SVG))]);
+  if (photo) {
+    const r = Math.max(W / photo.width, PH / photo.height), dw = photo.width * r, dh = photo.height * r;
+    x.drawImage(photo, (W - dw) / 2, (PH - dh) / 2, dw, dh);
+    const top = x.createLinearGradient(0, 0, 0, 320); top.addColorStop(0, "rgba(8,18,30,.6)"); top.addColorStop(1, "rgba(8,18,30,0)");
+    x.fillStyle = top; x.fillRect(0, 0, W, 320);
+    const bot = x.createLinearGradient(0, PH * .38, 0, PH); bot.addColorStop(0, "rgba(22,52,82,0)"); bot.addColorStop(.75, "rgba(22,52,82,.82)"); bot.addColorStop(1, "#1A4166");
+    x.fillStyle = bot; x.fillRect(0, PH * .38 - 1, W, PH * .62 + 2);
+  } else {
+    x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.arc(W - 40, 220, 360, 0, 7); x.fill();
+    x.fillStyle = "rgba(227,194,90,.85)"; x.beginPath(); x.arc(W - 170, 300, 70, 0, 7); x.fill();
+  }
+  // logo + emri lart
+  x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 18;
+  if (logo) x.drawImage(logo, 72, 76, 108, 108);
+  x.fillStyle = "#fff"; x.font = `800 74px Fraunces,Georgia,serif`; x.letterSpacing = "-3px"; x.fillText(APP_NAME.toLowerCase(), logo ? 204 : 72, 152); x.letterSpacing = "0px";
+  x.restore();
+  // qyteti dhe ditët
+  const city = plan.city?.name || plan.title || "";
+  let fs = 150; x.font = `400 ${fs}px ${SF}`;
+  while (fs > 88 && x.measureText(city).width > W - 150) { fs -= 6; x.font = `400 ${fs}px ${SF}`; }
+  const twoLines = x.measureText(city).width > W - 150;
+  x.save(); x.shadowColor = "rgba(0,0,0,.45)"; x.shadowBlur = 24; x.fillStyle = "#fff";
+  const cy = wrap(x, city, 72, twoLines ? 600 - fs * 1.02 : 600, W - 150, fs * 1.02, 2);
+  x.restore();
+  const sub = t("story_days", plan.days.length, plan.city?.country);
+  x.font = `600 38px ${F}`; const sw = x.measureText(sub).width + 56;
+  roundRect(x, 72, cy + 36, sw, 64, 32, "rgba(255,255,255,.18)");
+  x.fillStyle = "#fff"; x.fillText(sub, 100, cy + 81);
+  // kartat e ditëve
+  let y = cy + 140;
+  const maxDays = Math.min(plan.days.length, 3), perDay = plan.days.length >= 3 ? 5 : plan.days.length === 2 ? 8 : 12, LH = 48;
   for (let k = 0; k < maxDays; k++) {
     const d = plan.days[k], col = COLORS[k % COLORS.length];
-    const cnt = Math.max(1, Math.min(perDay, d.stops.filter(s => s.type !== "meal").length));
-    roundRect(x, 60, y, W - 120, 110 + cnt * 62, 36, "rgba(255,255,255,.96)");
-    x.fillStyle = col; x.font = `800 40px ${F}`; x.fillText(`${t("day").toUpperCase()} ${d.day || k + 1}`, 100, y + 64);
-    x.fillStyle = "#6b7280"; x.font = `500 34px ${F}`; clip(x, d.theme || "", 330, y + 64, W - 450);
     const sts = d.stops.filter(s => s.type !== "meal").slice(0, perDay);
+    const ch = 92 + Math.max(1, sts.length) * LH + 20;
+    if (y + ch > H - 70) break;
+    roundRect(x, 56, y, W - 112, ch, 34, "rgba(255,255,255,.97)");
+    const lab = `${t("day").toUpperCase()} ${d.day || k + 1}`; x.font = `700 30px ${F}`; const lw = x.measureText(lab).width + 40;
+    roundRect(x, 92, y + 26, lw, 50, 25, col);
+    x.fillStyle = "#fff"; x.fillText(lab, 112, y + 62);
+    x.fillStyle = "#5F6B78"; x.font = `500 32px ${F}`; clip(x, d.theme || "", 92 + lw + 22, y + 62, W - 112 - lw - 110);
     sts.forEach((s, j) => {
-      const yy = y + 130 + j * 62;
-      x.fillStyle = col; x.beginPath(); x.arc(122, yy - 12, 22, 0, 7); x.fill();
-      x.fillStyle = "#fff"; x.font = `700 26px ${F}`; x.textAlign = "center"; x.fillText(j + 1, 122, yy - 3); x.textAlign = "left";
-      x.fillStyle = "#1f2933"; x.font = `600 36px ${F}`; clip(x, s.name, 165, yy, W - 290);
+      const yy = y + 130 + j * LH;
+      x.fillStyle = col; x.beginPath(); x.arc(114, yy - 11, 18, 0, 7); x.fill();
+      x.fillStyle = "#fff"; x.font = `700 21px ${F}`; x.textAlign = "center"; x.fillText(j + 1, 114, yy - 3); x.textAlign = "left";
+      x.fillStyle = "#1A2532"; x.font = `600 33px ${F}`; clip(x, s.name, 152, yy, W - 260);
     });
-    y += 110 + cnt * 62 + 30;
-    if (y > H - 260) break;
+    y += ch + 20;
   }
-  if (plan.days.length > maxDays) { x.fillStyle = "#fff"; x.font = `600 38px ${F}`; x.fillText(t("story_more", plan.days.length - maxDays), 80, y + 20); }
-  x.fillStyle = "rgba(255,255,255,.9)"; x.font = `600 34px ${F}`; x.textAlign = "center";
-  x.fillText(t("story_free"), W / 2, H - 150);
-  x.font = `800 38px ${F}`; x.fillText(APP_URL.replace("https://", "").replace(/\/$/, ""), W / 2, H - 95);
-  x.textAlign = "left";
+  if (plan.days.length > maxDays && y < H - 80) { x.fillStyle = "rgba(255,255,255,.9)"; x.font = `600 36px ${F}`; x.textAlign = "center"; x.fillText(t("story_more", plan.days.length - maxDays), W / 2, y + 40); x.textAlign = "left"; }
 
+  return c;
+}
+function rrPath(x, X, Y, w, h, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
+// Story si hartë: rruga e çdo dite dhe rrathë me foto për vendet
+async function drawStoryMap() {
+  const days = plan.days.slice(0, 4), pts = [];
+  days.forEach((d, k) => d.stops.filter(s => s.type !== "meal" && s.lat != null && s.lon != null).slice(0, 7).forEach((s, j) => pts.push({ s, k, j })));
+  if (pts.length < 2) return null;
+  const W = 1080, H = 1920, PH = 760, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  const F = "Figtree,system-ui,-apple-system,'Segoe UI',sans-serif", SF = "'Young Serif',Georgia,serif";
+  try { await Promise.all([document.fonts?.load?.(`800 74px Fraunces`), document.fonts?.load?.(`120px "Young Serif"`), document.fonts?.load?.(`700 36px Figtree`), document.fonts?.load?.(`600 36px Figtree`)]); } catch {}
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#1F4E79"); g.addColorStop(1, "#0E2236");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // fotot: qyteti, logoja dhe fotot e vendeve (njëkohësisht)
+  const cov = document.getElementById("rCoverImg");
+  const src = row?.photo_url && row?.is_public ? row.photo_url : (cov?.classList.contains("ok") ? cov.src : "");
+  const keys = [...new Set(pts.map(p => p.s.wiki).filter(Boolean))];
+  const thumbsP = (navigator.onLine && keys.length ? wikiThumbs(keys, 240).catch(() => ({})) : Promise.resolve({}))
+    .then(got => Promise.all(pts.map(p => storyImg(got[p.s.wiki]))));
+  // projeksioni (Web Mercator)
+  const toV = lat => { const r = lat * Math.PI / 180; return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2; };
+  pts.forEach(p => { p.u = (p.s.lon + 180) / 360; p.v = toV(p.s.lat); });
+  let u0 = Math.min(...pts.map(p => p.u)), u1 = Math.max(...pts.map(p => p.u)), v0 = Math.min(...pts.map(p => p.v)), v1 = Math.max(...pts.map(p => p.v));
+  const minSpan = 3 / 2 ** 15;
+  if (u1 - u0 < minSpan) { const m = (u0 + u1) / 2; u0 = m - minSpan / 2; u1 = m + minSpan / 2; }
+  if (v1 - v0 < minSpan) { const m = (v0 + v1) / 2; v0 = m - minSpan / 2; v1 = m + minSpan / 2; }
+  // koka: logo, qyteti, ditët
+  const [photo, logo] = await Promise.all([storyImg(src), storyImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(VIARO_LOGO_SVG))]);
+  if (photo) {
+    const r = Math.max(W / photo.width, PH / photo.height), dw = photo.width * r, dh = photo.height * r;
+    x.drawImage(photo, (W - dw) / 2, (PH - dh) / 2, dw, dh);
+    const top = x.createLinearGradient(0, 0, 0, 320); top.addColorStop(0, "rgba(8,18,30,.6)"); top.addColorStop(1, "rgba(8,18,30,0)");
+    x.fillStyle = top; x.fillRect(0, 0, W, 320);
+    const bot = x.createLinearGradient(0, PH * .3, 0, PH); bot.addColorStop(0, "rgba(22,52,82,0)"); bot.addColorStop(.7, "rgba(24,58,92,.85)"); bot.addColorStop(1, "#1C4570");
+    x.fillStyle = bot; x.fillRect(0, PH * .3 - 1, W, PH * .7 + 2);
+  } else {
+    x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.arc(W - 40, 200, 340, 0, 7); x.fill();
+    x.fillStyle = "rgba(227,194,90,.85)"; x.beginPath(); x.arc(W - 170, 250, 64, 0, 7); x.fill();
+  }
+  x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 18;
+  if (logo) x.drawImage(logo, 72, 70, 100, 100);
+  x.fillStyle = "#fff"; x.font = `800 70px Fraunces,Georgia,serif`; x.letterSpacing = "-3px"; x.fillText(APP_NAME.toLowerCase(), logo ? 194 : 72, 142); x.letterSpacing = "0px";
+  x.restore();
+  const city = plan.city?.name || plan.title || "";
+  let fs = 124; x.font = `400 ${fs}px ${SF}`;
+  while (fs > 80 && x.measureText(city).width > W - 150) { fs -= 6; x.font = `400 ${fs}px ${SF}`; }
+  const two = x.measureText(city).width > W - 150;
+  x.save(); x.shadowColor = "rgba(0,0,0,.45)"; x.shadowBlur = 24; x.fillStyle = "#fff";
+  const cy = wrap(x, city, 72, two ? 330 - fs * 1.02 : 330, W - 150, fs * 1.02, 2);
+  x.restore();
+  const sub = t("story_days", plan.days.length, plan.city?.country);
+  x.font = `600 36px ${F}`; const sw = x.measureText(sub).width + 52;
+  roundRect(x, 72, cy + 32, sw, 62, 31, "rgba(255,255,255,.18)");
+  x.fillStyle = "#fff"; x.fillText(sub, 98, cy + 75);
+  // harta
+  const MX = 48, MY = cy + 128, MW = W - 96, MH = 900, pad = 100;
+  const k = Math.min((MW - 2 * pad) / (u1 - u0), (MH - 2 * pad) / (v1 - v0));
+  const cu = (u0 + u1) / 2, cvv = (v0 + v1) / 2;
+  const z = Math.max(2, Math.min(16, Math.floor(Math.log2(k / 420)))), n = 2 ** z, TS = k / n;
+  const px = u => MX + MW / 2 + (u - cu) * k, py = v => MY + MH / 2 + (v - cvv) * k;
+  const tx0 = Math.floor((cu - MW / 2 / k) * n), tx1 = Math.floor((cu + MW / 2 / k) * n);
+  const ty0 = Math.max(0, Math.floor((cvv - MH / 2 / k) * n)), ty1 = Math.min(n - 1, Math.floor((cvv + MH / 2 / k) * n));
+  const tl = [];
+  for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) tl.push([tx, ty]);
+  const tileUrl = (lyr, tx, ty) => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${lyr}/MapServer/tile/${z}/${ty}/${((tx % n) + n) % n}`;
+  const [base, ref, thumbs] = await Promise.all([
+    Promise.all(tl.map(([a, b]) => storyImg(tileUrl("World_Light_Gray_Base", a, b)))),
+    Promise.all(tl.map(([a, b]) => storyImg(tileUrl("World_Light_Gray_Reference", a, b)))),
+    thumbsP]);
+  x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 40; x.shadowOffsetY = 12;
+  rrPath(x, MX, MY, MW, MH, 40); x.fillStyle = "#E8E6E1"; x.fill(); x.restore();
+  x.save(); rrPath(x, MX, MY, MW, MH, 40); x.clip();
+  tl.forEach(([a, b], i) => { const X = px(a / n), Y = py(b / n);
+    if (base[i]) x.drawImage(base[i], X, Y, TS + .5, TS + .5);
+    if (ref[i]) x.drawImage(ref[i], X, Y, TS + .5, TS + .5); });
+  // rrugët e ditëve
+  days.forEach((d, kk) => {
+    const ps = pts.filter(p => p.k === kk); if (ps.length < 2) return;
+    const line = () => { x.beginPath(); ps.forEach((p, i) => i ? x.lineTo(px(p.u), py(p.v)) : x.moveTo(px(p.u), py(p.v))); };
+    x.lineJoin = x.lineCap = "round";
+    line(); x.strokeStyle = "rgba(255,255,255,.95)"; x.lineWidth = 17; x.stroke();
+    line(); x.strokeStyle = COLORS[kk % COLORS.length]; x.lineWidth = 8; x.stroke();
+  });
+  // rrathët me foto
+  // madhësia e rrathëve sipas dendësisë (largësia mesatare te fqinji më i afërt)
+  const nn = pts.map(p => Math.min(...pts.filter(q => q !== p).map(q => Math.hypot(px(p.u) - px(q.u), py(p.v) - py(q.v))))).sort((a, b) => a - b);
+  const R = Math.round(Math.max(30, Math.min(52, nn[Math.floor(nn.length / 2)] * .55)));
+  pts.forEach((p, i) => {
+    const X = px(p.u), Y = py(p.v), col = COLORS[p.k % COLORS.length], im = thumbs[i];
+    x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 14; x.shadowOffsetY = 4;
+    x.fillStyle = "#fff"; x.beginPath(); x.arc(X, Y, R + 7, 0, 7); x.fill(); x.restore();
+    x.fillStyle = col; x.beginPath(); x.arc(X, Y, R + 3, 0, 7); x.fill();
+    if (im) {
+      x.save(); x.beginPath(); x.arc(X, Y, R - 2, 0, 7); x.clip();
+      const s2 = Math.max((2 * R) / im.width, (2 * R) / im.height); x.drawImage(im, X - im.width * s2 / 2, Y - im.height * s2 / 2, im.width * s2, im.height * s2);
+      x.restore();
+      const bx = X + R * .72, by = Y + R * .72;
+      x.fillStyle = "#fff"; x.beginPath(); x.arc(bx, by, 21, 0, 7); x.fill();
+      x.fillStyle = col; x.beginPath(); x.arc(bx, by, 17, 0, 7); x.fill();
+      x.fillStyle = "#fff"; x.font = `700 20px ${F}`; x.textAlign = "center"; x.fillText(p.j + 1, bx, by + 7); x.textAlign = "left";
+    } else {
+      x.fillStyle = "#fff"; x.font = `800 ${Math.round(R * .8)}px ${F}`; x.textAlign = "center"; x.fillText(p.j + 1, X, Y + R * .28); x.textAlign = "left";
+    }
+  });
+  x.restore();
+  x.fillStyle = "rgba(60,60,60,.75)"; x.font = `500 17px ${F}`; x.textAlign = "right"; x.fillText("© Esri, HERE, Garmin, © OpenStreetMap", MX + MW - 26, MY + MH - 18); x.textAlign = "left";
+  // legjenda e ditëve
+  let y = MY + MH + 44;
+  const per = Math.min(150, Math.floor((H - 50 - y) / days.length));
+  days.forEach((d, kk) => {
+    if (y + 60 > H - 30) return;
+    const col = COLORS[kk % COLORS.length], lab = `${t("day").toUpperCase()} ${d.day || kk + 1}`;
+    x.font = `700 28px ${F}`; const lw = x.measureText(lab).width + 36;
+    roundRect(x, 60, y, lw, 46, 23, col); x.fillStyle = "#fff"; x.fillText(lab, 78, y + 33);
+    x.fillStyle = "rgba(255,255,255,.75)"; x.font = `500 30px ${F}`; clip(x, d.theme || "", 60 + lw + 20, y + 33, W - 140 - lw);
+    const names = d.stops.filter(s => s.type !== "meal").slice(0, 7).map(s => s.name).join("  ·  ");
+    x.fillStyle = "#fff"; x.font = `600 31px ${F}`;
+    if (per >= 140) wrapClip(x, names, 60, y + 86, W - 120, 40, 2); else clip(x, names, 60, y + 86, W - 120);
+    y += per;
+  });
+  if (plan.days.length > days.length && y < H - 30) { x.fillStyle = "rgba(255,255,255,.85)"; x.font = `600 30px ${F}`; x.fillText(t("story_more", plan.days.length - days.length), 60, Math.min(y + 10, H - 36)); }
+  return c;
+}
+function wrapClip(x, text, X, Y, maxW, lh, maxLines) {
+  const words = String(text).split(" "); let line = "", ln = 1;
+  for (let i = 0; i < words.length; i++) {
+    const tt = line ? line + " " + words[i] : words[i];
+    if (x.measureText(tt).width > maxW && line) {
+      if (ln >= maxLines) { clip(x, line + " " + words.slice(i).join(" "), X, Y, maxW); return; }
+      x.fillText(line, X, Y); Y += lh; ln++; line = words[i];
+    } else line = tt;
+  }
+  x.fillText(line, X, Y);
+}
+async function makeStory() {
+  let c = null;
+  try { c = await drawStoryMap(); } catch (e) { c = null; }
+  if (!c) c = await drawStoryCards();
   const blob = await new Promise(r => c.toBlob(r, "image/png"));
   const file = new File([blob], `udhetimi-${(plan.city?.name || "plan").toLowerCase().replace(/\s+/g, "-")}.png`, { type: "image/png" });
   if (isNative()) {
@@ -3993,14 +4631,14 @@ async function undoReplan() {
 
 // ---- Videot e qyteteve në faqen kryesore (Pexels, licencë falas) ----
 var VCITIES = [
-  { c: "Rome", n: ["Romë", "Rome", "Rom"], id: "36635835", v: "36635835/15532622_640_360_60fps.mp4", p: "36635835/pexels-photo-36635835.jpeg" },
-  { c: "Paris", n: ["Paris", "Paris", "Paris"], id: "19197245", v: "19197245/19197245-sd_360_640_30fps.mp4", p: "19197245/beautiful-sky-eiffel-eiffel-tower-france-19197245.jpeg" },
-  { c: "Barcelona", n: ["Barcelonë", "Barcelona", "Barcelona"], id: "35134148", v: "35134148/14883885_640_360_24fps.mp4", p: "35134148/pexels-photo-35134148.jpeg" },
-  { c: "Istanbul", n: ["Stamboll", "Istanbul", "Istanbul"], id: "34962045", v: "34962045/14810772_640_360_30fps.mp4", p: "34962045/2025-galata-bridge-istanbul-34962045.jpeg" },
-  { c: "Vienna", n: ["Vjenë", "Vienna", "Wien"], id: "37677778", v: "37677778/15974170_640_360_25fps.mp4", p: "37677778/pexels-photo-37677778.jpeg" },
-  { c: "London", n: ["Londër", "London", "London"], id: "29300154", v: "29300154/12635501_360_640_60fps.mp4", p: "29300154/pexels-photo-29300154.jpeg" },
-  { c: "Amsterdam", n: ["Amsterdam", "Amsterdam", "Amsterdam"], id: "40319831", v: "40319831/17223593_640_360_60fps.mp4", p: "40319831/amsterdam-amsterdam-architecture-amsterdam-canal-40319831.jpeg" },
-  { c: "Tirana", n: ["Tiranë", "Tirana", "Tirana"], id: "28495518", v: "28495518/12399345_640_360_30fps.mp4", p: "28495518/albania-architecture-building-city-28495518.jpeg" },
+  { c: "Rome", n: ["Romë", "Rome", "Rom", "Roma", "Roma", "Rome"], id: "36635835", v: "36635835/15532622_640_360_60fps.mp4", p: "36635835/pexels-photo-36635835.jpeg" },
+  { c: "Paris", n: ["Paris", "Paris", "Paris", "Parigi", "París", "Paris"], id: "19197245", v: "19197245/19197245-sd_360_640_30fps.mp4", p: "19197245/beautiful-sky-eiffel-eiffel-tower-france-19197245.jpeg" },
+  { c: "Barcelona", n: ["Barcelonë", "Barcelona", "Barcelona", "Barcellona", "Barcelona", "Barcelone"], id: "35134148", v: "35134148/14883885_640_360_24fps.mp4", p: "35134148/pexels-photo-35134148.jpeg" },
+  { c: "Istanbul", n: ["Stamboll", "Istanbul", "Istanbul", "Istanbul", "Estambul", "Istanbul"], id: "34962045", v: "34962045/14810772_640_360_30fps.mp4", p: "34962045/2025-galata-bridge-istanbul-34962045.jpeg" },
+  { c: "Vienna", n: ["Vjenë", "Vienna", "Wien", "Vienna", "Viena", "Vienne"], id: "37677778", v: "37677778/15974170_640_360_25fps.mp4", p: "37677778/pexels-photo-37677778.jpeg" },
+  { c: "London", n: ["Londër", "London", "London", "Londra", "Londres", "Londres"], id: "29300154", v: "29300154/12635501_360_640_60fps.mp4", p: "29300154/pexels-photo-29300154.jpeg" },
+  { c: "Amsterdam", n: ["Amsterdam", "Amsterdam", "Amsterdam", "Amsterdam", "Ámsterdam", "Amsterdam"], id: "40319831", v: "40319831/17223593_640_360_60fps.mp4", p: "40319831/amsterdam-amsterdam-architecture-amsterdam-canal-40319831.jpeg" },
+  { c: "Tirana", n: ["Tiranë", "Tirana", "Tirana", "Tirana", "Tirana", "Tirana"], id: "28495518", v: "28495518/12399345_640_360_30fps.mp4", p: "28495518/albania-architecture-building-city-28495518.jpeg" },
 ];
 var vObs = null;
 function vAllowed() {
@@ -4009,7 +4647,7 @@ function vAllowed() {
 }
 function renderVRail() {
   const row = document.getElementById("vRow"); if (!row) return;
-  const li = { sq: 0, en: 1, de: 2 }[LANG] ?? 1;
+  const li = { sq: 0, en: 1, de: 2, it: 3, es: 4, fr: 5 }[LANG] ?? 1;
   row.innerHTML = VCITIES.map((x, k) => `<button type="button" class="vcard" onclick="pickVCity(${k})" aria-label="${esc(t("vr_go", x.n[li]))}">
     <video muted playsinline loop preload="none" disablepictureinpicture poster="https://images.pexels.com/videos/${x.p}?auto=compress&cs=tinysrgb&w=360" data-src="https://videos.pexels.com/video-files/${x.v}"></video>
     <span class="vshade"></span><span class="vn">${esc(x.n[li])}</span><span class="vgo">${esc(t("vr_cta"))}</span></button>`).join("");
@@ -4031,7 +4669,7 @@ function pickVCity(k) {
   wzGo(1);
   document.getElementById("wz").scrollIntoView({ behavior: "smooth", block: "start" });
   inp.classList.remove("flash"); void inp.offsetWidth; inp.classList.add("flash");
-  toast(t("vr_picked", x.n[{ sq: 0, en: 1, de: 2 }[LANG] ?? 1]));
+  toast(t("vr_picked", x.n[{ sq: 0, en: 1, de: 2, it: 3, es: 4, fr: 5 }[LANG] ?? 1]));
 }
 
 // ---- Faza 12: Travel Together (udhëtime në grup) ----
@@ -4518,11 +5156,15 @@ function locateMe() {
 const DNAMES = {
   sq: [["e diel", "e hënë", "e martë", "e mërkurë", "e enjte", "e premte", "e shtunë"], ["janar", "shkurt", "mars", "prill", "maj", "qershor", "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor"]],
   en: [["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]],
-  de: [["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"], ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]] };
+  de: [["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"], ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]],
+  it: [["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"], ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]],
+  es: [["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"], ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]],
+  fr: [["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"], ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]] };
 function fmtDayDate(iso) {
   const [y, m, d] = iso.split("-").map(Number), dt = new Date(Date.UTC(y, m - 1, d)), [W, M] = DNAMES[LANG] || DNAMES.en;
   const w = W[dt.getUTCDay()];
-  return LANG === "en" ? `${w}, ${d} ${M[m - 1]}` : LANG === "de" ? `${w}, ${d}. ${M[m - 1]}` : `${w[0].toUpperCase() + w.slice(1)}, ${d} ${M[m - 1]}`;
+  const W2 = w[0].toUpperCase() + w.slice(1);
+  return LANG === "en" ? `${w}, ${d} ${M[m - 1]}` : LANG === "de" ? `${w}, ${d}. ${M[m - 1]}` : LANG === "es" ? `${W2}, ${d} de ${M[m - 1]}` : LANG === "sq" ? `${W2}, ${d} ${M[m - 1]}` : `${W2} ${d} ${M[m - 1]}`;
 }
 function tIcon() { return { kembe: "🚶", publik: "🚶/🚇", vetura: "🚗" }[plan.request?.transport] || "🚶"; }
 function openModal(id) { document.getElementById(id).classList.add("on"); }
@@ -4532,12 +5174,12 @@ let pend = null; function confirmTap(k) { if (pend === k) { pend = null; return 
 document.getElementById("city").addEventListener("keydown", e => { if (e.key === "Enter") makePlan(); });
 
 // ================== FAQJA E PARË: QYTETE + PLANE ==================
-const CITIES = [["Rome", "Roma", "Rome", "Rom"], ["Paris", "Paris", "Paris", "Paris"], ["Barcelona", "Barcelona", "Barcelona", "Barcelona"],
-  ["London", "Londra", "London", "London"], ["Istanbul", "Stambolli", "Istanbul", "Istanbul"], ["Vienna", "Vjena", "Vienna", "Wien"],
-  ["Amsterdam", "Amsterdami", "Amsterdam", "Amsterdam"], ["Prague", "Praga", "Prague", "Prag"], ["Tirana", "Tirana", "Tirana", "Tirana"],
-  ["Pristina", "Prishtina", "Pristina", "Pristina"], ["Athens", "Athina", "Athens", "Athen"], ["Berlin", "Berlini", "Berlin", "Berlin"]];
+const CITIES = [["Rome", "Roma", "Rome", "Rom", "Roma", "Roma", "Rome"], ["Paris", "Paris", "Paris", "Paris", "Parigi", "París", "Paris"], ["Barcelona", "Barcelona", "Barcelona", "Barcelona", "Barcellona", "Barcelona", "Barcelone"],
+  ["London", "Londra", "London", "London", "Londra", "Londres", "Londres"], ["Istanbul", "Stambolli", "Istanbul", "Istanbul", "Istanbul", "Estambul", "Istanbul"], ["Vienna", "Vjena", "Vienna", "Wien", "Vienna", "Viena", "Vienne"],
+  ["Amsterdam", "Amsterdami", "Amsterdam", "Amsterdam", "Amsterdam", "Ámsterdam", "Amsterdam"], ["Prague", "Praga", "Prague", "Prag", "Praga", "Praga", "Prague"], ["Tirana", "Tirana", "Tirana", "Tirana", "Tirana", "Tirana", "Tirana"],
+  ["Pristina", "Prishtina", "Pristina", "Pristina", "Pristina", "Pristina", "Pristina"], ["Athens", "Athina", "Athens", "Athen", "Atene", "Atenas", "Athènes"], ["Berlin", "Berlini", "Berlin", "Berlin", "Berlino", "Berlín", "Berlin"]];
 function renderQuick() {
-  const i = { sq: 1, en: 2, de: 3 }[LANG] || 2;
+  const i = { sq: 1, en: 2, de: 3, it: 4, es: 5, fr: 6 }[LANG] || 2;
   document.getElementById("quickCities").innerHTML = `<span class="ql">${esc(t("quick"))}</span>` +
     CITIES.map(c => `<button type="button" data-v="${c[0]}">${esc(c[i])}</button>`).join("");
 }
