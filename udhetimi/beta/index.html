@@ -3782,42 +3782,77 @@ async function nativeShare() {
   try { if (IS_APP && NP().Share) await NP().Share.share({ ...d, dialogTitle: plan.title }); else await navigator.share(d); } catch {}
 }
 
-// ---------- Foto për Story (1080×1920) ----------
+// ---------- Foto për Story (1080×1920): foto e qytetit lart, logo Viaro, ditët poshtë ----------
+const VIARO_LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"><rect width="160" height="160" rx="36" fill="#C8202F"/><path d="M46 52 L80 110 L114 52" fill="none" stroke="#FAF4EC" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="52" r="14" fill="#F6C945"/><circle cx="114" cy="52" r="14" fill="#EBB2B0"/><circle cx="80" cy="110" r="15" fill="#FAF4EC"/><circle cx="80" cy="110" r="6" fill="#C8202F"/></svg>';
+function storyImg(src) {
+  return new Promise(ok => {
+    if (!src) return ok(null);
+    const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer";
+    im.onload = () => ok(im); im.onerror = () => ok(null); im.src = src; setTimeout(() => ok(null), 5000);
+  });
+}
 async function makeStory() {
-  const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const W = 1080, H = 1920, PH = 900, c = document.createElement("canvas"); c.width = W; c.height = H;
   const x = c.getContext("2d");
-  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#2B6293"); g.addColorStop(1, "#173A5A");
+  const F = "Figtree,system-ui,-apple-system,'Segoe UI',sans-serif", SF = "'Young Serif',Georgia,serif";
+  try { await Promise.all([document.fonts?.load?.(`800 74px Fraunces`), document.fonts?.load?.(`120px "Young Serif"`), document.fonts?.load?.(`700 36px Figtree`), document.fonts?.load?.(`600 36px Figtree`)]); } catch {}
+  // sfondi
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#1F4E79"); g.addColorStop(1, "#0E2236");
   x.fillStyle = g; x.fillRect(0, 0, W, H);
-  x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.arc(W - 60, 160, 340, 0, 7); x.fill(); x.beginPath(); x.arc(60, H - 200, 300, 0, 7); x.fill();
-  const F = "system-ui,-apple-system,'Segoe UI',sans-serif";
-  x.fillStyle = "rgba(255,255,255,.85)"; x.font = `600 40px ${F}`; x.fillText(APP_NAME, 80, 150);
-  x.fillStyle = "#fff"; x.font = `800 112px ${F}`;
-  let y = wrap(x, plan.city?.name || plan.title, 80, 300, W - 160, 120, 2);
-  x.font = `500 46px ${F}`; x.fillStyle = "rgba(255,255,255,.85)";
-  x.fillText(t("story_days", plan.days.length, plan.city?.country), 80, y + 85);
-  y += 160;
-  const maxDays = Math.min(plan.days.length, 4), perDay = plan.days.length > 3 ? 3 : plan.days.length === 1 ? 8 : 5;
+  // foto e qytetit (postimi publik ose foto nga Wikipedia)
+  const cov = document.getElementById("rCoverImg");
+  const src = row?.photo_url && row?.is_public ? row.photo_url : (cov?.classList.contains("ok") ? cov.src : "");
+  const [photo, logo] = await Promise.all([storyImg(src), storyImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(VIARO_LOGO_SVG))]);
+  if (photo) {
+    const r = Math.max(W / photo.width, PH / photo.height), dw = photo.width * r, dh = photo.height * r;
+    x.drawImage(photo, (W - dw) / 2, (PH - dh) / 2, dw, dh);
+    const top = x.createLinearGradient(0, 0, 0, 320); top.addColorStop(0, "rgba(8,18,30,.6)"); top.addColorStop(1, "rgba(8,18,30,0)");
+    x.fillStyle = top; x.fillRect(0, 0, W, 320);
+    const bot = x.createLinearGradient(0, PH * .38, 0, PH); bot.addColorStop(0, "rgba(22,52,82,0)"); bot.addColorStop(.75, "rgba(22,52,82,.82)"); bot.addColorStop(1, "#1A4166");
+    x.fillStyle = bot; x.fillRect(0, PH * .38 - 1, W, PH * .62 + 2);
+  } else {
+    x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.arc(W - 40, 220, 360, 0, 7); x.fill();
+    x.fillStyle = "rgba(227,194,90,.85)"; x.beginPath(); x.arc(W - 170, 300, 70, 0, 7); x.fill();
+  }
+  // logo + emri lart
+  x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 18;
+  if (logo) x.drawImage(logo, 72, 76, 108, 108);
+  x.fillStyle = "#fff"; x.font = `800 74px Fraunces,Georgia,serif`; x.letterSpacing = "-3px"; x.fillText(APP_NAME.toLowerCase(), logo ? 204 : 72, 152); x.letterSpacing = "0px";
+  x.restore();
+  // qyteti dhe ditët
+  const city = plan.city?.name || plan.title || "";
+  let fs = 150; x.font = `400 ${fs}px ${SF}`;
+  while (fs > 88 && x.measureText(city).width > W - 150) { fs -= 6; x.font = `400 ${fs}px ${SF}`; }
+  const twoLines = x.measureText(city).width > W - 150;
+  x.save(); x.shadowColor = "rgba(0,0,0,.45)"; x.shadowBlur = 24; x.fillStyle = "#fff";
+  const cy = wrap(x, city, 72, twoLines ? 600 - fs * 1.02 : 600, W - 150, fs * 1.02, 2);
+  x.restore();
+  const sub = t("story_days", plan.days.length, plan.city?.country);
+  x.font = `600 38px ${F}`; const sw = x.measureText(sub).width + 56;
+  roundRect(x, 72, cy + 36, sw, 64, 32, "rgba(255,255,255,.18)");
+  x.fillStyle = "#fff"; x.fillText(sub, 100, cy + 81);
+  // kartat e ditëve
+  let y = cy + 140;
+  const maxDays = Math.min(plan.days.length, 3), perDay = plan.days.length >= 3 ? 5 : plan.days.length === 2 ? 8 : 12, LH = 48;
   for (let k = 0; k < maxDays; k++) {
     const d = plan.days[k], col = COLORS[k % COLORS.length];
-    const cnt = Math.max(1, Math.min(perDay, d.stops.filter(s => s.type !== "meal").length));
-    roundRect(x, 60, y, W - 120, 110 + cnt * 62, 36, "rgba(255,255,255,.96)");
-    x.fillStyle = col; x.font = `800 40px ${F}`; x.fillText(`${t("day").toUpperCase()} ${d.day || k + 1}`, 100, y + 64);
-    x.fillStyle = "#6b7280"; x.font = `500 34px ${F}`; clip(x, d.theme || "", 330, y + 64, W - 450);
     const sts = d.stops.filter(s => s.type !== "meal").slice(0, perDay);
+    const ch = 92 + Math.max(1, sts.length) * LH + 20;
+    if (y + ch > H - 70) break;
+    roundRect(x, 56, y, W - 112, ch, 34, "rgba(255,255,255,.97)");
+    const lab = `${t("day").toUpperCase()} ${d.day || k + 1}`; x.font = `700 30px ${F}`; const lw = x.measureText(lab).width + 40;
+    roundRect(x, 92, y + 26, lw, 50, 25, col);
+    x.fillStyle = "#fff"; x.fillText(lab, 112, y + 62);
+    x.fillStyle = "#5F6B78"; x.font = `500 32px ${F}`; clip(x, d.theme || "", 92 + lw + 22, y + 62, W - 112 - lw - 110);
     sts.forEach((s, j) => {
-      const yy = y + 130 + j * 62;
-      x.fillStyle = col; x.beginPath(); x.arc(122, yy - 12, 22, 0, 7); x.fill();
-      x.fillStyle = "#fff"; x.font = `700 26px ${F}`; x.textAlign = "center"; x.fillText(j + 1, 122, yy - 3); x.textAlign = "left";
-      x.fillStyle = "#1f2933"; x.font = `600 36px ${F}`; clip(x, s.name, 165, yy, W - 290);
+      const yy = y + 130 + j * LH;
+      x.fillStyle = col; x.beginPath(); x.arc(114, yy - 11, 18, 0, 7); x.fill();
+      x.fillStyle = "#fff"; x.font = `700 21px ${F}`; x.textAlign = "center"; x.fillText(j + 1, 114, yy - 3); x.textAlign = "left";
+      x.fillStyle = "#1A2532"; x.font = `600 33px ${F}`; clip(x, s.name, 152, yy, W - 260);
     });
-    y += 110 + cnt * 62 + 30;
-    if (y > H - 260) break;
+    y += ch + 20;
   }
-  if (plan.days.length > maxDays) { x.fillStyle = "#fff"; x.font = `600 38px ${F}`; x.fillText(t("story_more", plan.days.length - maxDays), 80, y + 20); }
-  x.fillStyle = "rgba(255,255,255,.9)"; x.font = `600 34px ${F}`; x.textAlign = "center";
-  x.fillText(t("story_free"), W / 2, H - 150);
-  x.font = `800 38px ${F}`; x.fillText(APP_URL.replace("https://", "").replace(/\/$/, ""), W / 2, H - 95);
-  x.textAlign = "left";
+  if (plan.days.length > maxDays && y < H - 80) { x.fillStyle = "rgba(255,255,255,.9)"; x.font = `600 36px ${F}`; x.textAlign = "center"; x.fillText(t("story_more", plan.days.length - maxDays), W / 2, y + 40); x.textAlign = "left"; }
 
   const blob = await new Promise(r => c.toBlob(r, "image/png"));
   const file = new File([blob], `udhetimi-${(plan.city?.name || "plan").toLowerCase().replace(/\s+/g, "-")}.png`, { type: "image/png" });
