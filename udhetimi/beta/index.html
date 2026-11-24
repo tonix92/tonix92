@@ -2436,7 +2436,7 @@ function openPlan(p, r, m) { rpNote = null; chatLog = []; chatActs = {};
 function openPlanHeader() {
   const p = plan;
   const ph = document.getElementById("rPhoto"), cap = document.getElementById("rCaption");
-  ph.style.display = row.photo_url && row.is_public ? "block" : "none"; if (row.photo_url) ph.src = row.photo_url;
+  ph.style.display = ownPhoto(row.photo_url) && row.is_public ? "block" : "none"; if (ownPhoto(row.photo_url)) ph.src = row.photo_url;
   cap.style.display = row.caption && row.is_public ? "block" : "none"; cap.textContent = row.caption || "";
   document.getElementById("rTitle").textContent = p.title || p.city?.name;
   renderCover();
@@ -2667,7 +2667,7 @@ async function fillStopPhotos(card) {
 }
 async function renderCover() {
   const box = document.getElementById("rCover"), img = document.getElementById("rCoverImg"), cr = document.getElementById("rCoverCr");
-  const c = plan.city || {}, hasPost = row.photo_url && row.is_public;
+  const c = plan.city || {}, hasPost = ownPhoto(row.photo_url) && row.is_public;
   box.style.display = hasPost ? "none" : "block";
   box.classList.add("nophoto"); img.classList.remove("ok"); img.removeAttribute("src"); cr.style.display = "none";
   document.getElementById("rCoverT").innerHTML = `${esc(c.name || plan.request?.city || "")}${c.country ? `<small>${esc(c.country)}</small>` : ""}`;
@@ -2680,7 +2680,11 @@ async function renderCover() {
     const km = (a, b, x, y) => { const R = 6371, r = Math.PI / 180, dl = (x - a) * r, dn = (y - b) * r; const h = Math.sin(dl / 2) ** 2 + Math.cos(a * r) * Math.cos(x * r) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
     const pg = Object.values(q.pages || {}).find(p => p.thumbnail?.source && p.coordinates?.[0] && km(c.lat, c.lon, p.coordinates[0].lat, p.coordinates[0].lon) < 40);
     if (!pg || plan !== want) return;
-    img.onload = () => { if (plan !== want) return; img.classList.add("ok"); box.classList.remove("nophoto"); cr.style.display = "block"; };
+    img.onload = () => { if (plan !== want) return; img.classList.add("ok"); box.classList.remove("nophoto"); cr.style.display = "block";
+      // postim i vjetër pa foto: ruaj foton e qytetit që të shfaqet edhe te lista e postimeve
+      if (sb && user && row.id && row.is_public && !row.photo_url && row.user_id === user.id)
+        sb.from("plans").update({ photo_url: img.src }).eq("id", row.id).then(({ error }) => { if (!error) row.photo_url = img.src; });
+    };
     cr.href = `https://en.wikipedia.org/wiki/${encodeURIComponent(pg.title.replace(/ /g, "_"))}`;
     img.referrerPolicy = "no-referrer"; img.src = pg.thumbnail.source;
   } catch {}
@@ -3575,8 +3579,9 @@ function openPost() {
   document.getElementById("postH").textContent = posted ? t("post_edit_h") : t("post_h");
   document.getElementById("postCap").value = row.caption || "";
   const prev = document.getElementById("postPrev");
-  prev.style.display = row.photo_url ? "block" : "none"; if (row.photo_url) prev.src = row.photo_url;
-  document.getElementById("postPickTxt").textContent = row.photo_url ? t("post_photo_change") : t("post_photo");
+  const own = ownPhoto(row.photo_url);
+  prev.style.display = own ? "block" : "none"; if (own) prev.src = row.photo_url;
+  document.getElementById("postPickTxt").textContent = own ? t("post_photo_change") : t("post_photo");
   document.getElementById("postBtn").textContent = posted ? t("post_update") : t("post_btn");
   document.getElementById("unpostBtn").style.display = posted ? "block" : "none";
   document.getElementById("postFile").value = "";
@@ -3597,6 +3602,19 @@ async function pickPhoto(file) {
     document.getElementById("postPickTxt").textContent = t("post_photo_change");
   } catch { postBlob = null; toast(t("photo_big")); }
 }
+// Foto e ngarkuar nga përdoruesi (jo foto automatike nga Wikipedia)
+function ownPhoto(u) { return !!u && !/(^|\.)wikimedia\.org\//.test(u.replace(/^https?:\/\//, "")); }
+// Foto që plani e ka tashmë: foto e qytetit, ose e vendit të parë që ka foto
+async function planPhotoUrl() {
+  const cov = document.getElementById("rCoverImg");
+  if (cov?.classList.contains("ok") && cov.src) return cov.src;
+  try {
+    const keys = [...new Set(plan.days.flatMap(d => d.stops).filter(s => s.wiki && s.type !== "meal").map(s => s.wiki))].slice(0, 12);
+    if (!keys.length) return null;
+    const got = await wikiThumbs(keys, 1000);
+    return keys.map(k => got[k]).find(Boolean) || null;
+  } catch { return null; }
+}
 async function postNow() {
   if (!document.getElementById("postRules").checked) return toast(t("rules_need"));
   try { localStorage.setItem("viaro_rules", "1"); } catch {}
@@ -3608,7 +3626,7 @@ async function postNow() {
       const up = await sb.storage.from("photos").upload(path, postBlob, { contentType: "image/jpeg", cacheControl: "31536000" });
       if (up.error) throw up.error;
       photo_url = sb.storage.from("photos").getPublicUrl(path).data.publicUrl;
-    }
+    } else if (!ownPhoto(photo_url)) photo_url = (await planPhotoUrl()) || photo_url;
     const upd = { is_public: true, author_name: displayName(user), caption: document.getElementById("postCap").value.trim().slice(0, 600) || null, photo_url };
     if (!row.is_public) upd.posted_at = new Date().toISOString();
     const { error } = await sb.from("plans").update(upd).eq("id", row.id);
