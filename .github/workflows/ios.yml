@@ -250,12 +250,7 @@ jobs:
           KEY=~/.appstoreconnect/private_keys/AuthKey_$KID.p8
           printf '%s' "$P8" > $KEY
           AUTH="-allowProvisioningUpdates -authenticationKeyPath $KEY -authenticationKeyID $KID -authenticationKeyIssuerID $ISS"
-          if [ "$PUSH" = "1" ]; then
-            # Nënshkrim lokal ("-") që entitlements (aps-environment) të ruhen në arkiv
-            SIGN=(CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- PROVISIONING_PROFILE_SPECIFIER= PROVISIONING_PROFILE=)
-          else
-            SIGN=(CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=)
-          fi
+          SIGN=(CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=)
           set -o pipefail
           xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
             -skipPackagePluginValidation -skipMacroValidation \
@@ -263,6 +258,9 @@ jobs:
             "${SIGN[@]}" archive | tail -n 40
           APP=$RUNNER_TEMP/Viaro.xcarchive/Products/Applications/App.app
           if [ "$PUSH" = "1" ]; then
+            # Vendos entitlements (aps-environment) me nënshkrim lokal; eksporti i ruan kur nënshkruan për App Store
+            for f in "$APP"/Frameworks/*; do [ -e "$f" ] && codesign --force --sign - --timestamp=none "$f"; done
+            codesign --force --sign - --timestamp=none --entitlements Viaro.entitlements "$APP"
             E=$(codesign -d --entitlements - "$APP" 2>&1 || true); echo "$E"
             echo "$E" | grep -q aps-environment || { echo "::error::Arkivi nuk ka aps-environment"; exit 1; }
             [ -f "$APP/GoogleService-Info.plist" ] || { echo "::error::Mungon GoogleService-Info.plist në app"; exit 1; }
