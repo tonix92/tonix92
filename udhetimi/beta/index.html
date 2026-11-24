@@ -3791,7 +3791,7 @@ function storyImg(src) {
     im.onload = () => ok(im); im.onerror = () => ok(null); im.src = src; setTimeout(() => ok(null), 5000);
   });
 }
-async function makeStory() {
+async function drawStoryCards() {
   const W = 1080, H = 1920, PH = 900, c = document.createElement("canvas"); c.width = W; c.height = H;
   const x = c.getContext("2d");
   const F = "Figtree,system-ui,-apple-system,'Segoe UI',sans-serif", SF = "'Young Serif',Georgia,serif";
@@ -3854,6 +3854,145 @@ async function makeStory() {
   }
   if (plan.days.length > maxDays && y < H - 80) { x.fillStyle = "rgba(255,255,255,.9)"; x.font = `600 36px ${F}`; x.textAlign = "center"; x.fillText(t("story_more", plan.days.length - maxDays), W / 2, y + 40); x.textAlign = "left"; }
 
+  return c;
+}
+function rrPath(x, X, Y, w, h, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
+// Story si hartë: rruga e çdo dite dhe rrathë me foto për vendet
+async function drawStoryMap() {
+  const days = plan.days.slice(0, 4), pts = [];
+  days.forEach((d, k) => d.stops.filter(s => s.type !== "meal" && s.lat != null && s.lon != null).slice(0, 7).forEach((s, j) => pts.push({ s, k, j })));
+  if (pts.length < 2) return null;
+  const W = 1080, H = 1920, PH = 760, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  const F = "Figtree,system-ui,-apple-system,'Segoe UI',sans-serif", SF = "'Young Serif',Georgia,serif";
+  try { await Promise.all([document.fonts?.load?.(`800 74px Fraunces`), document.fonts?.load?.(`120px "Young Serif"`), document.fonts?.load?.(`700 36px Figtree`), document.fonts?.load?.(`600 36px Figtree`)]); } catch {}
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#1F4E79"); g.addColorStop(1, "#0E2236");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // fotot: qyteti, logoja dhe fotot e vendeve (njëkohësisht)
+  const cov = document.getElementById("rCoverImg");
+  const src = row?.photo_url && row?.is_public ? row.photo_url : (cov?.classList.contains("ok") ? cov.src : "");
+  const keys = [...new Set(pts.map(p => p.s.wiki).filter(Boolean))];
+  const thumbsP = (navigator.onLine && keys.length ? wikiThumbs(keys, 240).catch(() => ({})) : Promise.resolve({}))
+    .then(got => Promise.all(pts.map(p => storyImg(got[p.s.wiki]))));
+  // projeksioni (Web Mercator)
+  const toV = lat => { const r = lat * Math.PI / 180; return (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2; };
+  pts.forEach(p => { p.u = (p.s.lon + 180) / 360; p.v = toV(p.s.lat); });
+  let u0 = Math.min(...pts.map(p => p.u)), u1 = Math.max(...pts.map(p => p.u)), v0 = Math.min(...pts.map(p => p.v)), v1 = Math.max(...pts.map(p => p.v));
+  const minSpan = 3 / 2 ** 15;
+  if (u1 - u0 < minSpan) { const m = (u0 + u1) / 2; u0 = m - minSpan / 2; u1 = m + minSpan / 2; }
+  if (v1 - v0 < minSpan) { const m = (v0 + v1) / 2; v0 = m - minSpan / 2; v1 = m + minSpan / 2; }
+  // koka: logo, qyteti, ditët
+  const [photo, logo] = await Promise.all([storyImg(src), storyImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(VIARO_LOGO_SVG))]);
+  if (photo) {
+    const r = Math.max(W / photo.width, PH / photo.height), dw = photo.width * r, dh = photo.height * r;
+    x.drawImage(photo, (W - dw) / 2, (PH - dh) / 2, dw, dh);
+    const top = x.createLinearGradient(0, 0, 0, 320); top.addColorStop(0, "rgba(8,18,30,.6)"); top.addColorStop(1, "rgba(8,18,30,0)");
+    x.fillStyle = top; x.fillRect(0, 0, W, 320);
+    const bot = x.createLinearGradient(0, PH * .3, 0, PH); bot.addColorStop(0, "rgba(22,52,82,0)"); bot.addColorStop(.7, "rgba(24,58,92,.85)"); bot.addColorStop(1, "#1C4570");
+    x.fillStyle = bot; x.fillRect(0, PH * .3 - 1, W, PH * .7 + 2);
+  } else {
+    x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.arc(W - 40, 200, 340, 0, 7); x.fill();
+    x.fillStyle = "rgba(227,194,90,.85)"; x.beginPath(); x.arc(W - 170, 250, 64, 0, 7); x.fill();
+  }
+  x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 18;
+  if (logo) x.drawImage(logo, 72, 70, 100, 100);
+  x.fillStyle = "#fff"; x.font = `800 70px Fraunces,Georgia,serif`; x.letterSpacing = "-3px"; x.fillText(APP_NAME.toLowerCase(), logo ? 194 : 72, 142); x.letterSpacing = "0px";
+  x.restore();
+  const city = plan.city?.name || plan.title || "";
+  let fs = 124; x.font = `400 ${fs}px ${SF}`;
+  while (fs > 80 && x.measureText(city).width > W - 150) { fs -= 6; x.font = `400 ${fs}px ${SF}`; }
+  const two = x.measureText(city).width > W - 150;
+  x.save(); x.shadowColor = "rgba(0,0,0,.45)"; x.shadowBlur = 24; x.fillStyle = "#fff";
+  const cy = wrap(x, city, 72, two ? 330 - fs * 1.02 : 330, W - 150, fs * 1.02, 2);
+  x.restore();
+  const sub = t("story_days", plan.days.length, plan.city?.country);
+  x.font = `600 36px ${F}`; const sw = x.measureText(sub).width + 52;
+  roundRect(x, 72, cy + 32, sw, 62, 31, "rgba(255,255,255,.18)");
+  x.fillStyle = "#fff"; x.fillText(sub, 98, cy + 75);
+  // harta
+  const MX = 48, MY = cy + 128, MW = W - 96, MH = 900, pad = 100;
+  const k = Math.min((MW - 2 * pad) / (u1 - u0), (MH - 2 * pad) / (v1 - v0));
+  const cu = (u0 + u1) / 2, cvv = (v0 + v1) / 2;
+  const z = Math.max(2, Math.min(16, Math.floor(Math.log2(k / 420)))), n = 2 ** z, TS = k / n;
+  const px = u => MX + MW / 2 + (u - cu) * k, py = v => MY + MH / 2 + (v - cvv) * k;
+  const tx0 = Math.floor((cu - MW / 2 / k) * n), tx1 = Math.floor((cu + MW / 2 / k) * n);
+  const ty0 = Math.max(0, Math.floor((cvv - MH / 2 / k) * n)), ty1 = Math.min(n - 1, Math.floor((cvv + MH / 2 / k) * n));
+  const tl = [];
+  for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) tl.push([tx, ty]);
+  const tileUrl = (lyr, tx, ty) => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${lyr}/MapServer/tile/${z}/${ty}/${((tx % n) + n) % n}`;
+  const [base, ref, thumbs] = await Promise.all([
+    Promise.all(tl.map(([a, b]) => storyImg(tileUrl("World_Light_Gray_Base", a, b)))),
+    Promise.all(tl.map(([a, b]) => storyImg(tileUrl("World_Light_Gray_Reference", a, b)))),
+    thumbsP]);
+  x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 40; x.shadowOffsetY = 12;
+  rrPath(x, MX, MY, MW, MH, 40); x.fillStyle = "#E8E6E1"; x.fill(); x.restore();
+  x.save(); rrPath(x, MX, MY, MW, MH, 40); x.clip();
+  tl.forEach(([a, b], i) => { const X = px(a / n), Y = py(b / n);
+    if (base[i]) x.drawImage(base[i], X, Y, TS + .5, TS + .5);
+    if (ref[i]) x.drawImage(ref[i], X, Y, TS + .5, TS + .5); });
+  // rrugët e ditëve
+  days.forEach((d, kk) => {
+    const ps = pts.filter(p => p.k === kk); if (ps.length < 2) return;
+    const line = () => { x.beginPath(); ps.forEach((p, i) => i ? x.lineTo(px(p.u), py(p.v)) : x.moveTo(px(p.u), py(p.v))); };
+    x.lineJoin = x.lineCap = "round";
+    line(); x.strokeStyle = "rgba(255,255,255,.95)"; x.lineWidth = 17; x.stroke();
+    line(); x.strokeStyle = COLORS[kk % COLORS.length]; x.lineWidth = 8; x.stroke();
+  });
+  // rrathët me foto
+  // madhësia e rrathëve sipas dendësisë (largësia mesatare te fqinji më i afërt)
+  const nn = pts.map(p => Math.min(...pts.filter(q => q !== p).map(q => Math.hypot(px(p.u) - px(q.u), py(p.v) - py(q.v))))).sort((a, b) => a - b);
+  const R = Math.round(Math.max(30, Math.min(52, nn[Math.floor(nn.length / 2)] * .55)));
+  pts.forEach((p, i) => {
+    const X = px(p.u), Y = py(p.v), col = COLORS[p.k % COLORS.length], im = thumbs[i];
+    x.save(); x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 14; x.shadowOffsetY = 4;
+    x.fillStyle = "#fff"; x.beginPath(); x.arc(X, Y, R + 7, 0, 7); x.fill(); x.restore();
+    x.fillStyle = col; x.beginPath(); x.arc(X, Y, R + 3, 0, 7); x.fill();
+    if (im) {
+      x.save(); x.beginPath(); x.arc(X, Y, R - 2, 0, 7); x.clip();
+      const s2 = Math.max((2 * R) / im.width, (2 * R) / im.height); x.drawImage(im, X - im.width * s2 / 2, Y - im.height * s2 / 2, im.width * s2, im.height * s2);
+      x.restore();
+      const bx = X + R * .72, by = Y + R * .72;
+      x.fillStyle = "#fff"; x.beginPath(); x.arc(bx, by, 21, 0, 7); x.fill();
+      x.fillStyle = col; x.beginPath(); x.arc(bx, by, 17, 0, 7); x.fill();
+      x.fillStyle = "#fff"; x.font = `700 20px ${F}`; x.textAlign = "center"; x.fillText(p.j + 1, bx, by + 7); x.textAlign = "left";
+    } else {
+      x.fillStyle = "#fff"; x.font = `800 ${Math.round(R * .8)}px ${F}`; x.textAlign = "center"; x.fillText(p.j + 1, X, Y + R * .28); x.textAlign = "left";
+    }
+  });
+  x.restore();
+  x.fillStyle = "rgba(60,60,60,.75)"; x.font = `500 17px ${F}`; x.textAlign = "right"; x.fillText("© Esri, HERE, Garmin, © OpenStreetMap", MX + MW - 26, MY + MH - 18); x.textAlign = "left";
+  // legjenda e ditëve
+  let y = MY + MH + 44;
+  const per = Math.min(150, Math.floor((H - 50 - y) / days.length));
+  days.forEach((d, kk) => {
+    if (y + 60 > H - 30) return;
+    const col = COLORS[kk % COLORS.length], lab = `${t("day").toUpperCase()} ${d.day || kk + 1}`;
+    x.font = `700 28px ${F}`; const lw = x.measureText(lab).width + 36;
+    roundRect(x, 60, y, lw, 46, 23, col); x.fillStyle = "#fff"; x.fillText(lab, 78, y + 33);
+    x.fillStyle = "rgba(255,255,255,.75)"; x.font = `500 30px ${F}`; clip(x, d.theme || "", 60 + lw + 20, y + 33, W - 140 - lw);
+    const names = d.stops.filter(s => s.type !== "meal").slice(0, 7).map(s => s.name).join("  ·  ");
+    x.fillStyle = "#fff"; x.font = `600 31px ${F}`;
+    if (per >= 140) wrapClip(x, names, 60, y + 86, W - 120, 40, 2); else clip(x, names, 60, y + 86, W - 120);
+    y += per;
+  });
+  if (plan.days.length > days.length && y < H - 30) { x.fillStyle = "rgba(255,255,255,.85)"; x.font = `600 30px ${F}`; x.fillText(t("story_more", plan.days.length - days.length), 60, Math.min(y + 10, H - 36)); }
+  return c;
+}
+function wrapClip(x, text, X, Y, maxW, lh, maxLines) {
+  const words = String(text).split(" "); let line = "", ln = 1;
+  for (let i = 0; i < words.length; i++) {
+    const tt = line ? line + " " + words[i] : words[i];
+    if (x.measureText(tt).width > maxW && line) {
+      if (ln >= maxLines) { clip(x, line + " " + words.slice(i).join(" "), X, Y, maxW); return; }
+      x.fillText(line, X, Y); Y += lh; ln++; line = words[i];
+    } else line = tt;
+  }
+  x.fillText(line, X, Y);
+}
+async function makeStory() {
+  let c = null;
+  try { c = await drawStoryMap(); } catch (e) { c = null; }
+  if (!c) c = await drawStoryCards();
   const blob = await new Promise(r => c.toBlob(r, "image/png"));
   const file = new File([blob], `udhetimi-${(plan.city?.name || "plan").toLowerCase().replace(/\s+/g, "-")}.png`, { type: "image/png" });
   if (isNative()) {
