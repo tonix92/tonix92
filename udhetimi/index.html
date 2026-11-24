@@ -3656,58 +3656,86 @@ async function ppDataCanvas(x, X, Y, w, h, F, SF) {
   x.fillStyle = "#13233A"; x.font = `700 23px ${M}`; x.fillText(d.mrz1, X + 34, Y + h - 58); x.fillText(d.mrz2, X + 34, Y + h - 24);
   x.restore();
 }
+Object.assign(I18N.sq, { pp_get: "Planifiko me AI. Shkarko Viaro:", pp_gp: "SHKARKO NË", pp_as: "Shkarko në" });
+Object.assign(I18N.en, { pp_get: "Plan your trip with AI. Get Viaro:", pp_gp: "GET IT ON", pp_as: "Download on the" });
+Object.assign(I18N.de, { pp_get: "Plane deine Reise mit KI. Hol dir Viaro:", pp_gp: "JETZT BEI", pp_as: "Laden im" });
+Object.assign(I18N.it, { pp_get: "Pianifica il viaggio con l’IA. Scarica Viaro:", pp_gp: "DISPONIBILE SU", pp_as: "Scarica su" });
+Object.assign(I18N.es, { pp_get: "Planifica tu viaje con IA. Descarga Viaro:", pp_gp: "DISPONIBLE EN", pp_as: "Descárgalo en" });
+Object.assign(I18N.fr, { pp_get: "Planifie ton voyage avec l’IA. Télécharge Viaro :", pp_gp: "DISPONIBLE SUR", pp_as: "Télécharger dans l’" });
 // Foto për Instagram Stories (1080×1920), me logon dhe adresën e Viaro-s
 async function sharePassport() {
   const r = ppLast; if (!r) return;
   const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H;
   const x = c.getContext("2d"), F = "system-ui,-apple-system,'Segoe UI',sans-serif", SF = "'Young Serif',Georgia,serif";
   try { await document.fonts?.load?.(`64px "Young Serif"`); } catch {}
-  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#1B3F63"); g.addColorStop(1, "#0F2740");
+  try { await document.fonts?.load?.(`800 70px Fraunces`); } catch {}
+  const GOLD = "#D4B46A";
+  // sfondi: blu e thellë si kopertina e pasaportës, me vija sigurie (guilloche) prej ari
+  const g = x.createRadialGradient(W / 2, 760, 120, W / 2, 900, 1400); g.addColorStop(0, "#21507C"); g.addColorStop(.55, "#163A5E"); g.addColorStop(1, "#0B1F35");
   x.fillStyle = g; x.fillRect(0, 0, W, H);
-  x.strokeStyle = "rgba(201,169,98,.55)"; x.lineWidth = 4; roundStroke(x, 40, 40, W - 80, H - 80, 36);
-  // logo
-  const logo = await new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = "pwa/icon-192.png"; setTimeout(() => ok(null), 2500); });
-  if (logo) { x.save(); x.beginPath(); x.arc(150, 160, 56, 0, 7); x.clip(); x.drawImage(logo, 94, 104, 112, 112); x.restore(); }
-  x.fillStyle = "#fff"; x.font = `700 64px ${SF}`; x.fillText(APP_NAME.toLowerCase(), logo ? 230 : 90, 182);
-  x.fillStyle = "#C9A962"; x.textAlign = "right"; x.font = `600 30px ${F}`; x.fillText(t("pp_title2"), W - 90, 178); x.textAlign = "left";
-  await ppDataCanvas(x, 80, 270, W - 160, 420, F, SF);
-  // statistikat
+  const waves = (y0, amp, n, a) => { x.lineWidth = 1.6; for (let k = 0; k < n; k++) { x.strokeStyle = `rgba(212,180,106,${a})`; x.beginPath();
+    for (let X = 0; X <= W; X += 8) { const Y = y0 + k * 9 + Math.sin(X / 70 + k * .45) * amp + Math.sin(X / 23 + k) * amp * .25; X ? x.lineTo(X, Y) : x.moveTo(X, Y); } x.stroke(); } };
+  waves(150, 22, 14, .09); waves(H - 360, 26, 18, .08);
+  x.strokeStyle = "rgba(212,180,106,.12)"; x.lineWidth = 2; for (let k = 0; k < 7; k++) { x.beginPath(); x.arc(W / 2, 1060, 260 + k * 46, 0, 7); x.stroke(); }
+  x.strokeStyle = GOLD; x.lineWidth = 3; roundStroke(x, 36, 36, W - 72, H - 72, 40); x.globalAlpha = .45; x.lineWidth = 1.5; roundStroke(x, 50, 50, W - 100, H - 100, 30); x.globalAlpha = 1;
+  // koka: logo e kuqe + viaro, majtas; titulli me ar, djathtas
+  const logo = await storyImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(VIARO_LOGO_SVG));
+  if (logo) x.drawImage(logo, 90, 102, 96, 96);
+  x.fillStyle = "#fff"; x.font = `800 68px Fraunces,Georgia,serif`; x.letterSpacing = "-3px"; x.fillText(APP_NAME.toLowerCase(), logo ? 206 : 90, 172); x.letterSpacing = "0px";
+  x.fillStyle = GOLD; x.textAlign = "right"; x.font = `400 34px ${SF}`; x.fillText(t("pp_title2"), W - 92, 166); x.textAlign = "left";
+  x.save(); x.shadowColor = "rgba(0,0,0,.45)"; x.shadowBlur = 40; x.shadowOffsetY = 14; x.fillStyle = "#F4EFE3"; x.beginPath(); x.roundRect ? x.roundRect(80, 250, W - 160, 420, 26) : x.rect(80, 250, W - 160, 420); x.fill(); x.restore();
+  await ppDataCanvas(x, 80, 250, W - 160, 420, F, SF);
+  // statistikat në katër kuti me kornizë ari
   const S = r.st, cols = [[S.cities, t("pp_cities")], [S.countries, t("pp_countries")], [S.stops, t("pp_stops")], [S.km, t("pp_km")]];
-  cols.forEach(([v, l], k) => { const X = 150 + k * 260; x.fillStyle = "#fff"; x.textAlign = "center"; x.font = `800 72px ${F}`; x.fillText(String(v), X, 790); x.fillStyle = "rgba(255,255,255,.7)"; x.font = `500 28px ${F}`; clip2(x, l, X, 836, 240); });
+  const bw = (W - 160 - 3 * 20) / 4;
+  cols.forEach(([v, l], k) => { const X = 80 + k * (bw + 20);
+    x.fillStyle = "rgba(255,255,255,.06)"; x.beginPath(); x.roundRect ? x.roundRect(X, 710, bw, 150, 22) : x.rect(X, 710, bw, 150); x.fill();
+    x.strokeStyle = "rgba(212,180,106,.55)"; x.lineWidth = 2; roundStroke(x, X, 710, bw, 150, 22);
+    x.textAlign = "center"; x.fillStyle = GOLD; x.font = `400 64px ${SF}`; x.fillText(String(v), X + bw / 2, 790);
+    x.fillStyle = "rgba(255,255,255,.78)"; x.font = `600 24px ${F}`; clip2(x, l, X + bw / 2, 834, bw - 24); });
   // vulat
-  const list = r.stamps.slice(0, 9), cols3 = list.length <= 4 ? 2 : 3, sw = cols3 === 2 ? 380 : 290, sh = cols3 === 2 ? 240 : 200;
+  const list = r.stamps.slice(0, 6), cols3 = list.length <= 4 ? 2 : 3, sw = cols3 === 2 ? 390 : 290, sh = cols3 === 2 ? 210 : 190, top = 905;
   list.forEach((s, k) => {
     const row = Math.floor(k / cols3), inRow = Math.min(cols3, list.length - row * cols3), col = k % cols3;
-    const cx = W / 2 + (col - (inRow - 1) / 2) * (sw + 30), cy = 1000 + row * (sh + 50), clr = stampColor(s.name + s.country);
+    const cx = W / 2 + (col - (inRow - 1) / 2) * (sw + 34), cy = top + sh / 2 + row * (sh + 36), clr = stampColor(s.name + s.country);
     x.save(); x.translate(cx, cy); x.rotate(stampRot(s.name) * Math.PI / 180);
-    x.fillStyle = "rgba(255,255,255,.96)"; x.beginPath(); x.roundRect ? x.roundRect(-sw / 2, -sh / 2, sw, sh, 22) : x.rect(-sw / 2, -sh / 2, sw, sh); x.fill();
-    x.strokeStyle = clr; x.lineWidth = 6; roundStroke(x, -sw / 2 + 10, -sh / 2 + 10, sw - 20, sh - 20, 16); x.lineWidth = 2; roundStroke(x, -sw / 2 + 22, -sh / 2 + 22, sw - 44, sh - 44, 12);
-    x.fillStyle = clr; x.textAlign = "center"; x.font = `600 24px ${F}`; clip2(x, s.country, 0, -sh / 2 + 62, sw - 70);
-    x.font = `400 ${cols3 === 2 ? 50 : 42}px ${SF}`; clip2(x, s.name, 0, 14, sw - 60);
-    x.font = `700 24px ${F}`; x.fillText((s.full ? "★ " : "") + fmtShort(s.date), 0, sh / 2 - 44);
+    x.shadowColor = "rgba(0,0,0,.35)"; x.shadowBlur = 24; x.shadowOffsetY = 8;
+    x.fillStyle = "#FBF8F1"; x.beginPath(); x.roundRect ? x.roundRect(-sw / 2, -sh / 2, sw, sh, 22) : x.rect(-sw / 2, -sh / 2, sw, sh); x.fill();
+    x.shadowColor = "transparent";
+    x.strokeStyle = clr; x.lineWidth = 6; roundStroke(x, -sw / 2 + 12, -sh / 2 + 12, sw - 24, sh - 24, 16); x.lineWidth = 2; x.setLineDash([6, 6]); roundStroke(x, -sw / 2 + 26, -sh / 2 + 26, sw - 52, sh - 52, 10); x.setLineDash([]);
+    x.fillStyle = clr; x.textAlign = "center"; x.font = `700 22px ${F}`; x.letterSpacing = "2px"; clip2(x, String(s.country || "").toUpperCase(), 0, -sh / 2 + 66, sw - 80); x.letterSpacing = "0px";
+    x.font = `400 ${cols3 === 2 ? 50 : 40}px ${SF}`; clip2(x, s.name, 0, 16, sw - 70);
+    x.font = `700 24px ${F}`; x.fillText((s.full ? "★ " : "") + fmtShort(s.date), 0, sh / 2 - 46);
     x.restore();
   });
-  const rows = Math.ceil(list.length / cols3); let y = 1000 + (rows - 1) * (sh + 50) + sh / 2 + 80;
+  const rows = Math.ceil(list.length / cols3); let y = top + rows * (sh + 36) + 30;
   x.textAlign = "center";
-  if (r.stamps.length > list.length) { x.fillStyle = "rgba(255,255,255,.8)"; x.font = `600 32px ${F}`; x.fillText(t("pp_more", r.stamps.length - list.length), W / 2, y); y += 60; }
-  // vendet ku ka qenë (të verifikuara)
-  const been = r.stamps.flatMap(c => c.places.filter(p => p.st === 2).map(p => p.name)), maxY = H - 420;
-  if (been.length && y < maxY - 120) {
-    x.fillStyle = "#C9A962"; x.font = `600 32px ${F}`; x.fillText(t("pp_been"), W / 2, y + 10); y += 70;
-    const two = been.length > 5, per = two ? Math.ceil(Math.min(been.length, 14) / 2) : been.length, lh = 54;
-    const fit = Math.max(1, Math.floor((maxY - y) / lh)), n = Math.min(per, fit), shown = two ? n * 2 : n;
-    x.font = `500 32px ${F}`; x.fillStyle = "#fff";
-    been.slice(0, shown).forEach((nm, k) => { const c2 = two ? Math.floor(k / n) : 0, rr = two ? k % n : k; const X = two ? (c2 ? W / 2 + 30 : 130) : W / 2;
-      x.textAlign = two ? "left" : "center"; clip2(x, "📍 " + nm, X, y + rr * lh, two ? W / 2 - 170 : W - 220); });
-    x.textAlign = "center"; y += n * lh + 10;
-    if (been.length > shown) { x.fillStyle = "rgba(255,255,255,.75)"; x.font = `600 28px ${F}`; x.fillText(t("pp_more", been.length - shown), W / 2, y + 10); y += 50; }
+  if (r.stamps.length > list.length) { x.fillStyle = "rgba(255,255,255,.8)"; x.font = `600 30px ${F}`; x.fillText(t("pp_more", r.stamps.length - list.length), W / 2, y); y += 56; }
+  // vendet ku ka qenë (të verifikuara), si etiketa
+  const been = r.stamps.flatMap(c => c.places.filter(p => p.st === 2).map(p => p.name)), maxY = H - 470;
+  if (been.length && y < maxY - 100) {
+    x.fillStyle = GOLD; x.font = `400 36px ${SF}`; x.fillText(t("pp_been"), W / 2, y + 14); y += 50;
+    x.font = `600 28px ${F}`; const lines = []; let line = [], lw = 0;
+    for (const nm0 of been) { const nm = nm0.length > 34 ? nm0.slice(0, 33) + "…" : nm0, w = x.measureText(nm).width + 64;
+      if (lw + w > W - 200 && line.length) { lines.push([line, lw]); line = []; lw = 0; } line.push([nm, w]); lw += w + 14; }
+    if (line.length) lines.push([line, lw]);
+    let shown = 0;
+    for (const [ln, w] of lines) { if (y + 70 > maxY) break; let X = (W - (w - 14)) / 2;
+      for (const [nm, cw] of ln) { x.fillStyle = "rgba(255,255,255,.10)"; x.beginPath(); x.roundRect ? x.roundRect(X, y, cw, 56, 28) : x.rect(X, y, cw, 56); x.fill();
+        x.fillStyle = "#E25B4F"; x.beginPath(); x.arc(X + 28, y + 28, 8, 0, 7); x.fill();
+        x.fillStyle = "#fff"; x.textAlign = "left"; x.fillText(nm, X + 46, y + 38); X += cw + 14; shown++; }
+      y += 70; }
+    x.textAlign = "center";
+    if (been.length > shown) { x.fillStyle = "rgba(255,255,255,.75)"; x.font = `600 26px ${F}`; x.fillText(t("pp_more", been.length - shown), W / 2, y + 20); y += 44; }
   }
-  const ok = r.badges.filter(b => b.ok);
-  if (ok.length) { x.font = `400 60px ${F}`; x.fillText(ok.map(b => b.e).join("  "), W / 2, Math.min(y + 60, H - 330)); }
-  // reklama
-  x.fillStyle = "#C9A962"; x.beginPath(); x.roundRect ? x.roundRect(140, H - 280, W - 280, 150, 75) : x.rect(140, H - 280, W - 280, 150); x.fill();
-  x.fillStyle = "#0F2740"; x.font = `700 38px ${F}`; x.fillText(t("pp_cta"), W / 2, H - 213);
-  x.font = `800 34px ${F}`; x.fillText(APP_URL.replace("https://", "").replace(/\/$/, ""), W / 2, H - 163);
+  const okb = r.badges.filter(b => b.ok);
+  if (okb.length) { x.font = `400 56px ${F}`; x.fillText(okb.slice(0, 8).map(b => b.e).join("  "), W / 2, Math.max(y + 50, H - 395)); }
+  // fundi: shkarko Viaro nga Google Play dhe App Store
+  x.fillStyle = "#fff"; x.font = `400 40px ${SF}`; x.textAlign = "center"; x.fillText(t("pp_get"), W / 2, H - 300);
+  const pill = (X, small, big) => { x.fillStyle = "#000"; x.beginPath(); x.roundRect ? x.roundRect(X, H - 260, 400, 124, 26) : x.rect(X, H - 260, 400, 124); x.fill();
+    x.strokeStyle = "rgba(255,255,255,.55)"; x.lineWidth = 2; roundStroke(x, X, H - 260, 400, 124, 26);
+    x.fillStyle = "#fff"; x.textAlign = "center"; x.font = `600 22px ${F}`; x.fillText(small, X + 200, H - 214); x.font = `700 46px ${F}`; x.fillText(big, X + 200, H - 164); };
+  pill(120, t("pp_gp"), "Google Play"); pill(W - 520, t("pp_as"), "App Store");
   x.textAlign = "left";
   const blob = await new Promise(ok2 => c.toBlob(ok2, "image/png")), file = new File([blob], "viaro-pasaporta.png", { type: "image/png" });
   if (isNative()) { try { if (await shareFile(file.name, blob, t("pp_title"))) return; } catch {} }
