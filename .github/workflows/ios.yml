@@ -5,6 +5,7 @@
 #   ASC_KEY_ID      – Key ID i çelësit API të App Store Connect
 #   ASC_ISSUER_ID   – Issuer ID (lart te faqja e çelësave API)
 #   ASC_KEY_P8      – përmbajtja e plotë e skedarit AuthKey_XXXX.p8
+#   GOOGLE_SERVICE_INFO_PLIST – (opsional) teksti i GoogleService-Info.plist nga Firebase → njoftimet push
 name: Viaro iOS
 
 on:
@@ -59,6 +60,8 @@ jobs:
           echo "Sekretet OK"
 
       - name: Përgatit projektin
+        env:
+          PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
         run: |
           npm install --no-audit --no-fund
           WEB_SRC=../udhetimi node scripts/prepare-www.mjs
@@ -67,8 +70,9 @@ jobs:
             if [ -f ../udhetimi/beta/privacy.html ]; then cp ../udhetimi/beta/privacy.html www/privacy.html; fi
             echo "::notice::Ky build përmban faqen BETA (vetëm për provë)."
           fi
-          # Njoftimet push në iPhone vijnë më vonë (duhet çelësi APNs në Firebase)
-          echo '{"push":false}' > www/push-cfg.json
+          # Njoftimet push ndizen vetëm kur ekziston GoogleService-Info.plist
+          if [ -n "$PLIST" ]; then echo '{"push":true}' > www/push-cfg.json; else echo '{"push":false}' > www/push-cfg.json; fi
+          cat www/push-cfg.json
           npx cap add ios
           npx capacitor-assets generate --ios --iconBackgroundColor '#C8202F' --splashBackgroundColor '#F7F2EA' --splashBackgroundColorDark '#161616'
 
@@ -142,6 +146,90 @@ jobs:
           pb CFBundleDisplayName string Viaro
           npx cap sync ios
 
+      - name: Njoftimet push (Firebase Cloud Messaging)
+        env:
+          PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+        run: |
+          if [ -z "$PLIST" ]; then echo "::notice::Pa GoogleService-Info.plist: build pa njoftime push"; exit 0; fi
+          D=ios/App/App
+          printf '%s\n' "$PLIST" > $D/GoogleService-Info.plist
+          plutil -lint $D/GoogleService-Info.plist
+          B=$(/usr/libexec/PlistBuddy -c "Print :BUNDLE_ID" $D/GoogleService-Info.plist)
+          if [ "$B" != "tips.vianto.app" ]; then echo "::error::GoogleService-Info.plist është për $B, jo tips.vianto.app"; exit 1; fi
+          cat > ios/App/Viaro.entitlements <<'XML'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>aps-environment</key><string>production</string>
+          </dict></plist>
+          XML
+          plutil -lint ios/App/Viaro.entitlements
+          # AppDelegate: Firebase + token FCM për plugin-in e njoftimeve
+          cat > $RUNNER_TEMP/patch.rb <<'RUBY'
+          f = "ios/App/App/AppDelegate.swift"
+          s = File.read(f)
+          s.sub!("import Capacitor\n", "import Capacitor\nimport FirebaseCore\nimport FirebaseMessaging\n")
+          s.sub!(/(didFinishLaunchingWithOptions[^{]*\{)/) { $1 + "\n        FirebaseApp.configure()" }
+          extra = <<~SW
+
+              func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+                  Messaging.messaging().apnsToken = deviceToken
+                  Messaging.messaging().token { token, error in
+                      if let error = error {
+                          NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+                      } else if let token = token {
+                          NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: token)
+                      }
+                  }
+              }
+
+              func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+                  NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+              }
+          SW
+          i = s.rindex("}")
+          s = s[0...i] + extra + "}\n"
+          abort("AppDelegate: patch failed") unless s.include?("FirebaseApp.configure()") && s.include?("import FirebaseMessaging")
+          File.write(f, s)
+          puts s
+          RUBY
+          ruby $RUNNER_TEMP/patch.rb
+          /usr/libexec/PlistBuddy -c "Delete :FirebaseAppDelegateProxyEnabled" $D/Info.plist 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :FirebaseAppDelegateProxyEnabled bool false" $D/Info.plist
+          # Projekti i Xcode: plist-i, entitlements dhe paketa Firebase (SPM)
+          sudo gem install xcodeproj --no-document >/dev/null
+          cat > $RUNNER_TEMP/proj.rb <<'RUBY'
+          require "xcodeproj"
+          p = Xcodeproj::Project.open("ios/App/App.xcodeproj")
+          t = p.targets.find { |x| x.name == "App" }
+          g = p.main_group.find_subpath("App", false)
+          unless t.resources_build_phase.files_references.any? { |r| r && r.path == "GoogleService-Info.plist" }
+            t.resources_build_phase.add_file_reference(g.new_reference("GoogleService-Info.plist"))
+          end
+          t.build_configurations.each { |c| c.build_settings["CODE_SIGN_ENTITLEMENTS"] = "Viaro.entitlements" }
+          pkg = p.root_object.package_references.find { |r| r.respond_to?(:repositoryURL) && r.repositoryURL.to_s.include?("firebase-ios-sdk") }
+          unless pkg
+            pkg = p.new(Xcodeproj::Project::Object::XCRemoteSwiftPackageReference)
+            pkg.repositoryURL = "https://github.com/firebase/firebase-ios-sdk"
+            pkg.requirement = { "kind" => "upToNextMajorVersion", "minimumVersion" => "12.0.0" }
+            p.root_object.package_references << pkg
+          end
+          unless t.package_product_dependencies.any? { |d| d.product_name == "FirebaseMessaging" }
+            dep = p.new(Xcodeproj::Project::Object::XCSwiftPackageProductDependency)
+            dep.package = pkg
+            dep.product_name = "FirebaseMessaging"
+            t.package_product_dependencies << dep
+            bf = p.new(Xcodeproj::Project::Object::PBXBuildFile)
+            bf.product_ref = dep
+            t.frameworks_build_phase.files << bf
+          end
+          p.save
+          puts "Firebase OK"
+          RUBY
+          ruby $RUNNER_TEMP/proj.rb
+          grep -n "firebase-ios-sdk\|FirebaseMessaging\|GoogleService-Info\|CODE_SIGN_ENTITLEMENTS" ios/App/App.xcodeproj/project.pbxproj | head -20
+          echo "PUSH=1" >> $GITHUB_ENV
+
       - name: Versioni
         working-directory: app/ios/App
         run: |
@@ -162,26 +250,54 @@ jobs:
           KEY=~/.appstoreconnect/private_keys/AuthKey_$KID.p8
           printf '%s' "$P8" > $KEY
           AUTH="-allowProvisioningUpdates -authenticationKeyPath $KEY -authenticationKeyID $KID -authenticationKeyIssuerID $ISS"
+          if [ "$PUSH" = "1" ]; then
+            # Nënshkrim lokal ("-") që entitlements (aps-environment) të ruhen në arkiv
+            SIGN=(CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- PROVISIONING_PROFILE_SPECIFIER= PROVISIONING_PROFILE=)
+          else
+            SIGN=(CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=)
+          fi
+          set -o pipefail
           xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
+            -skipPackagePluginValidation -skipMacroValidation \
             -archivePath $RUNNER_TEMP/Viaro.xcarchive DEVELOPMENT_TEAM=$TEAM PRODUCT_BUNDLE_IDENTIFIER=tips.vianto.app \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" archive | tail -n 40
+            "${SIGN[@]}" archive | tail -n 40
+          APP=$RUNNER_TEMP/Viaro.xcarchive/Products/Applications/App.app
+          if [ "$PUSH" = "1" ]; then
+            E=$(codesign -d --entitlements - "$APP" 2>&1 || true); echo "$E"
+            echo "$E" | grep -q aps-environment || { echo "::error::Arkivi nuk ka aps-environment"; exit 1; }
+            [ -f "$APP/GoogleService-Info.plist" ] || { echo "::error::Mungon GoogleService-Info.plist në app"; exit 1; }
+          fi
           # Nënshkrimi për App Store bëhet te eksporti (certifikatë dhe profil i krijuar automatikisht nga Apple)
-          DEST=export; [ "${{ inputs.upload }}" = "true" ] && DEST=upload
+          mkopts() {
           cat > $RUNNER_TEMP/export.plist <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0"><dict>
             <key>method</key><string>app-store-connect</string>
-            <key>destination</key><string>$DEST</string>
+            <key>destination</key><string>$1</string>
             <key>teamID</key><string>$TEAM</string>
             <key>signingStyle</key><string>automatic</string>
             <key>uploadSymbols</key><true/>
           </dict></plist>
           PLIST
+          }
+          mkopts export
           xcodebuild -exportArchive -archivePath $RUNNER_TEMP/Viaro.xcarchive -exportOptionsPlist $RUNNER_TEMP/export.plist \
             -exportPath $GITHUB_WORKSPACE/out $AUTH | tail -n 40
+          IPA=$(ls $GITHUB_WORKSPACE/out/*.ipa)
+          if [ "$PUSH" = "1" ]; then
+            rm -rf $RUNNER_TEMP/ipa && mkdir $RUNNER_TEMP/ipa && unzip -q "$IPA" -d $RUNNER_TEMP/ipa
+            E=$(codesign -d --entitlements - $RUNNER_TEMP/ipa/Payload/App.app 2>&1 || true); echo "$E"
+            echo "$E" | grep -q aps-environment || { echo "::error::IPA-ja e nënshkruar nuk ka aps-environment (njoftimet nuk do punonin)"; exit 1; }
+            echo "::notice::Njoftimet push janë aktive në këtë build."
+          fi
+          if [ "${{ inputs.upload }}" = "true" ]; then
+            mkopts upload
+            xcodebuild -exportArchive -archivePath $RUNNER_TEMP/Viaro.xcarchive -exportOptionsPlist $RUNNER_TEMP/export.plist \
+              -exportPath $RUNNER_TEMP/up $AUTH | tail -n 40
+            echo "::notice::U ngarkua në App Store Connect. Pas 5–30 min del te TestFlight."
+          fi
           rm -f $KEY
-          if [ "$DEST" = "upload" ]; then echo "::notice::U ngarkua në App Store Connect. Pas 5–30 min del te TestFlight."; fi
 
       - uses: actions/upload-artifact@v4
         if: always()
