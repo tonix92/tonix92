@@ -140,6 +140,7 @@ jobs:
           P=$D/Info.plist
           pb() { /usr/libexec/PlistBuddy -c "Delete :$1" $P 2>/dev/null || true; /usr/libexec/PlistBuddy -c "Add :$1 $2 $3" $P; }
           pb NSLocationWhenInUseUsageDescription string "Viaro uses your location to show places near you and to mark stops you have reached. Your location is not stored."
+          pb NSLocationAlwaysAndWhenInUseUsageDescription string "Viaro uses your location only while you use the app, to show places near you and to mark stops you have reached. Your location is not stored."
           pb NSPhotoLibraryUsageDescription string "Choose a photo for your profile or a trip post."
           pb NSCameraUsageDescription string "Take a photo for your profile or a trip post."
           pb ITSAppUsesNonExemptEncryption bool false
