@@ -2478,8 +2478,19 @@ function showLmk() {
   svg.innerHTML = `<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${L.d}</g>`;
   svg.querySelectorAll("path").forEach(p => p.setAttribute("pathLength", "1"));
   svg.classList.remove("draw"); void svg.getBoundingClientRect(); svg.classList.add("draw");
-  document.getElementById("lmkName").textContent = L.n;
+  document.getElementById("lmkName").textContent = (LMK_N[L.n] || {})[LANG] || L.n;
 }
+// emrat e qyteteve të ngarkimit sipas gjuhës (sq/en/de/it/es/fr)
+const LMK_N = {
+  Paris: { it: "Parigi", es: "París" },
+  Roma: { en: "Rome", de: "Rom", fr: "Rome" },
+  London: { sq: "Londër", it: "Londra", es: "Londres", fr: "Londres" },
+  Berlin: { it: "Berlino", es: "Berlín" },
+  "Athinë": { en: "Athens", de: "Athen", it: "Atene", es: "Atenas", fr: "Athènes" },
+  Amsterdam: { es: "Ámsterdam" },
+  Barcelona: { sq: "Barcelonë", it: "Barcellona", fr: "Barcelone" },
+  Istanbul: { sq: "Stamboll", es: "Estambul" },
+};
 function startLmk() { stopLmk(); lmkI = Math.floor(Math.random() * LMK.length); showLmk(); lmkTimer = setInterval(showLmk, 1900); }
 function stopLmk() { clearInterval(lmkTimer); lmkTimer = null; }
 
